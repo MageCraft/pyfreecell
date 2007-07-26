@@ -30,6 +30,9 @@ MAX_SEED = 32000
 MAXCOL = 8
 MAXPOS = 21
 
+TITLE_STATIC = 'pyfreecell'
+TITLE_DYNAMIC= 'pyfreecell -- %d#'
+
 def print_cards(cards):
     for row in range(7):
         for col in range(MAXCOL):
@@ -58,6 +61,52 @@ class pyFreecell:
       </menu>
     </menubar>
     </ui>'''
+
+    def __init__(self, is_testing=False):
+        self.__load_pixbuf()
+        self.rt_free = Rect(0, 0, CARD_W*4, CARD_H)
+        self.rt_flag = Rect(self.rt_free.right()+1, 0, CARD_W, CARD_H)
+        self.rt_home = Rect(self.rt_flag.right()+1, 0, CARD_W*4, CARD_H) 
+        self.rt_field = Rect(SPLIT_W, self.rt_free.bottom()+SPLIT_FREE_FEILDS, (CARD_W+SPLIT_W)*8, 0)
+        self.pixmap = None
+        self.deck = None
+        self.seed = None
+        self.field = None
+        self.free = None
+        self.home = None
+        self.selection = None
+        self.playing = False
+        self.testing = is_testing
+
+        #create widgets
+        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window.set_title(TITLE_STATIC)
+        self.window.connect("destroy", self.destroy)
+        self.window.connect("delete_event", self.delete_event)
+
+        self.vb = gtk.VBox()
+        self.create_menus();
+        self.mb = self.uimanager.get_widget('/MenuBar')
+        self.vb.pack_start(self.mb, False)
+
+        self.area = gtk.DrawingArea()
+        self.area.connect('expose_event', self.area_expose)
+        self.area.connect('configure_event', self.area_config)
+        self.area.connect('button_press_event', self.on_btn_press)
+        self.area.connect('button_release_event', self.on_btn_release)
+        self.area.set_events(gtk.gdk.BUTTON_PRESS_MASK | 
+                             gtk.gdk.BUTTON_RELEASE_MASK )
+        self.sw = gtk.ScrolledWindow()
+        self.sw.set_shadow_type(gtk.SHADOW_NONE)
+        self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        self.sw.add_with_viewport(self.area)
+        #self.sw.add(self.area)
+        self.vb.pack_start(self.sw)
+
+        self.window.add(self.vb)
+        self.window.set_default_size(640,480)
+        self.window.set_geometry_hints(self.window, min_height=480, min_width=640)
+        self.window.show_all()
 
     def create_menus(self):
         self.uimanager = gtk.UIManager()
@@ -111,7 +160,7 @@ class pyFreecell:
         self.engine = Engine(self.free, self.home, self.field, self.selection)
         self.engine.set_notify(self.area.queue_draw)
         #set title
-        self.window.set_title('pyFreecell--%d#' % (self.seed,))
+        self.window.set_title( TITLE_DYNAMIC % (self.seed,))
         #refresh
         self.area.queue_draw()
 
@@ -271,51 +320,6 @@ class pyFreecell:
         self.rt_field.height = height - self.rt_field.y
         return True
 
-    def __init__(self, is_testing=False):
-        self.__load_pixbuf()
-        self.rt_free = Rect(0, 0, CARD_W*4, CARD_H)
-        self.rt_flag = Rect(self.rt_free.right()+1, 0, CARD_W, CARD_H)
-        self.rt_home = Rect(self.rt_flag.right()+1, 0, CARD_W*4, CARD_H) 
-        self.rt_field = Rect(SPLIT_W, self.rt_free.bottom()+SPLIT_FREE_FEILDS, (CARD_W+SPLIT_W)*8, 0)
-        self.pixmap = None
-        self.deck = None
-        self.seed = None
-        self.field = None
-        self.free = None
-        self.home = None
-        self.selection = None
-        self.playing = False
-        self.testing = is_testing
-
-        #create widget
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.window.set_title("pyFreecell")
-        self.window.connect("destroy", self.destroy)
-        self.window.connect("delete_event", self.delete_event)
-
-        self.vb = gtk.VBox()
-        self.create_menus();
-        self.mb = self.uimanager.get_widget('/MenuBar')
-        self.vb.pack_start(self.mb, False)
-
-        self.area = gtk.DrawingArea()
-        self.area.connect('expose_event', self.area_expose)
-        self.area.connect('configure_event', self.area_config)
-        self.area.connect('button_press_event', self.on_btn_press)
-        self.area.connect('button_release_event', self.on_btn_release)
-        self.area.set_events(gtk.gdk.BUTTON_PRESS_MASK | 
-                             gtk.gdk.BUTTON_RELEASE_MASK )
-        self.sw = gtk.ScrolledWindow()
-        self.sw.set_shadow_type(gtk.SHADOW_NONE)
-        self.sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-        self.sw.add_with_viewport(self.area)
-        #self.sw.add(self.area)
-        self.vb.pack_start(self.sw)
-
-        self.window.add(self.vb)
-        self.window.set_default_size(640,480)
-        self.window.set_geometry_hints(self.window, min_height=480, min_width=640)
-        self.window.show_all()
 
     def on_btn_press(self, widget, event):
         print 'no_btn_press', event.type, event.button, event.x, event.y 
@@ -376,7 +380,7 @@ def main():
 if __name__ == '__main__':    
     test = False
     if len(sys.argv) == 2:
-        if sys.argv[1] == '-test':
+        if sys.argv[1] == '-test' or sys.argv[1] == '-t':
             test = True
     #test = True
     pyFreecell(test)
