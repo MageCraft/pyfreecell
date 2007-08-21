@@ -1,0 +1,34 @@
+Messageing LJ61 WAD issue
+
+What is WAD?
+WAD means "Work As Design". Testers will report some defect issues of our software. However, some of them are not real issues, they are designed like this. For example, tester always complain that they can't see new messages notification dialog during taking photo or browsing. But, it's designed like this, CXD, who design the UI and UE of our software think user should only be interrupted in idle or messaging application at this time. So here user will only hear the message alert and see small envelope icon appears in top status bar(here when user is taking photo, behavior will be little different, we'll explain it later.), and they need interuppt current task and back to idle screen to check the new messages.
+Such WAD CRs always will be terminated after get confirmation from the CR submiter, But sometimes the CR submitter will insist that it's not a good design, not user friendly, so don't agree to terminate the CR. Then we'll change the CR type to "new-work" and let New Work CCB determine what we should do next. Sometimes, the CR will be terminated by CCB, cause they think current design is good enough. Sometimes the CR will be deferred to furture products, cause it's risky or need more effort than expected to do it on current product. 
+We hope test team can read the design documents first, then write the test cases, and tester can do test by test cases. That will prevent them submitting WAD CRs. However, we got such WAD CRs almost every day. So here we list all WAD issues, which are often appeared in the CRs submitted by tester. Then we could use these information directly when we try to explain the WAD issues to the testers.
+
+UNS related WAD issues  
+
+SMS related WAD issues
+sms genernal( send, retry mechanism )
+sms settings
+sms viewer behavior( how to select a number and call it, call back)
+long sms
+email over sms
+brower messages(wap push), SI, SL
+CB
+Voice mail
+
+
+MMS related WAD issues
+mms settings( lot of CRs about failed to send/receive MMS are caused by wrong MMS profile)
+mms viewer( playback mode, static mode, one touch mute, up/down/left/right key to scroll and switch pages) 
+
+Message folder related
+
+Composer related
+composer general
+sms/mms transfer
+sms encoding, max sms limit, max length of one packet SMS
+mms size limit, free/restricted/warning mode
+
+Flex related
+lot of WAD CRs caused by wrong Flex configuired 
