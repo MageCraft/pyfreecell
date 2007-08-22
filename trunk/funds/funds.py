@@ -3,22 +3,36 @@
 
 import urllib2
 import BeautifulSoup
-import gtk
 from threading import Thread
-import gobject as go
 import sys, os
+
+EnableUI = True
+try:
+    import gtk
+    import gobject as go
+except ImportError, e:
+    print e.message
+    EnableUI = False
+    class gtk:
+        class Dialog:
+            pass
 
 if not os.environ.has_key('http_proxy'):
     os.environ['http_proxy'] = 'http://e2533c:Frank78524#@wwwgate0-ch.mot.com:1080'
 
 data_src = 'http://funds.eastmoney.com/'
-funds = [ ['400003', '‰∏úÊñπÁ≤æÈÄâ', 19417.4700],
-          ['050009', 'ÂçöÊó∂Êñ∞ÂÖ¥', 9852.4900],
-	  ['020005', 'ÈáëÈ©¨Á®≥ÂÅ•', 19753.6300] ]
+funds = [ ['400003', '∂´∑Ωæ´—°', 20000.00, 19417.4700],
+          ['050009', '≤© ±–¬–À', 10000.00, 9852.4900],
+	  ['020005', 'Ω¬ÌŒ»Ω°', 20000.00, 19753.6300], 
+	  ['040008', 'ª™∞≤”≈—°', 2603.44,  2564.9700], 
+	  ['160706', 'ºŒ µ300 ', 7000.00,     4197.5300], 
+          ]
 
-def format(e):
+#format_str = ("%s", "%s", "%8.2f", "%8.2f", "%1.3f", "%7.3f")
+
+def format(e, index):
     if type(e) == float:
-        return "%8.2f" % e
+        return "%7.3f" % (e,)
     else:
         return str(e)
 
@@ -28,6 +42,7 @@ def fetch_data_from_web():
     print 'fetch done'
     rows = soup.findAll('tr', height="20")
     total_all=0
+    base_all=0
     th, e = rows[0].findAll('td'), rows[2].findAll('td') 
     price_col, date_info = 3, th[3].nobr.string
     if e[3].string == '---':
@@ -42,9 +57,18 @@ def fetch_data_from_web():
                 total = fund[-1] * float(price)
                 funds[i].append( float(price) )
                 funds[i].append( total )
+                base_all += fund[2]
                 total_all += total
-    funds.append(['ÊÄªËÆ°:', total_all, '', '', '']) 
-    funds.append(['Êó•Êúü:', date_info, '', '', '']) 
+    gain = total_all - base_all
+    summary = "%.3f / %.3f / %.3f" % (base_all, total_all, gain )
+    funds.append(['◊‹º∆:', summary, '', '', '']) 
+    funds.append(['»’∆⁄:', date_info, '', '', '']) 
+
+def test_engine():
+    fetch_data_from_web()
+    for fund in funds:
+        indexes = range(len(fund))
+        print "\t".join([format(e, index) for e, index in zip(fund, indexes)])
 
 
 (COL_ID, COL_NAME, COL_QUANTITY, COL_PRICE, COL_SUM ) = range(5) 
@@ -110,11 +134,6 @@ class FundsInfoDlg(gtk.Dialog):
         self.fill_data()
         go.source_remove(self.sID)
 
-def test_engine():
-    fetch_data_from_web()
-    print 'Date: %s' % date_info
-    for fund in funds:
-        print "\t".join([format(i) for i in fund])
 
 def main():
     gtk.gdk.threads_init() #must call this function to use multithread
@@ -123,6 +142,8 @@ def main():
     dlg.destroy()
 
 if __name__ == '__main__':
-    test_engine()
-    #main()
+    if not EnableUI:
+        test_engine()
+    else:
+        main()
     sys.exit()
