@@ -25,16 +25,19 @@ funds = [ ['400003', '东方精选', 20000.00, 19417.4700],
           ['050009', '博时新兴', 10000.00, 9852.4900],
 	  ['020005', '金马稳健', 20000.00, 19753.6300], 
 	  ['040008', '华安优选', 2603.44,  2564.9700], 
-	  ['160706', '嘉实300 ', 7000.00,     4197.5300], 
+	  ['160706', '嘉实300 ', 5199.26,  4197.5300], 
           ]
 
-#format_str = ("%s", "%s", "%8.2f", "%8.2f", "%1.3f", "%7.3f")
+format_str = ("%s", "%s", "%8.2f", "%8.2f", "%1.3f", "%7.3f")
 
 def format(e, index):
     if type(e) == float:
         return "%7.3f" % (e,)
     else:
         return str(e)
+
+#def format(e, index):
+#    return format_str[index] % (e,)
 
 def fetch_data_from_web():
     res = urllib2.urlopen( data_src )
