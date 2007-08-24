@@ -5,6 +5,7 @@ import urllib2
 import BeautifulSoup
 from threading import Thread
 import sys, os
+from urlparse import urlparse
 
 EnableUI = True
 try:
@@ -17,10 +18,6 @@ except ImportError, e:
         class Dialog:
             pass
 
-if not os.environ.has_key('http_proxy'):
-    os.environ['http_proxy'] = 'http://e2533c:Frank78524#@wwwgate0-ch.mot.com:1080'
-
-data_src = 'http://funds.eastmoney.com/'
 funds = [ ['400003', '东方精选', 20000.00, 19417.4700],
           ['050009', '博时新兴', 10000.00, 9852.4900],
 	  ['020005', '金马稳健', 20000.00, 19753.6300], 
@@ -28,7 +25,7 @@ funds = [ ['400003', '东方精选', 20000.00, 19417.4700],
 	  ['160706', '嘉实300 ', 5199.26,  4197.5300], 
           ]
 
-format_str = ("%s", "%s", "%8.2f", "%8.2f", "%1.3f", "%7.3f")
+#format_str = ("%s", "%s", "%8.2f", "%8.2f", "%1.3f", "%7.3f")
 
 def format(e, index):
     if type(e) == float:
@@ -39,7 +36,16 @@ def format(e, index):
 #def format(e, index):
 #    return format_str[index] % (e,)
 
+def fetch_data_from_web_easymoney(fund_id_list):
+    data_src = 'http://funds.eastmoney.com/'
+    res = urllib2.urlopen( data_src )
+    soup = BeautifulSoup.BeautifulSoup(res) 
+    print 'fetch done'
+    rows = soup.findAll('tr', height="20")
+
+
 def fetch_data_from_web():
+    data_src = 'http://funds.eastmoney.com/'
     res = urllib2.urlopen( data_src )
     soup = BeautifulSoup.BeautifulSoup(res) 
     print 'fetch done'
