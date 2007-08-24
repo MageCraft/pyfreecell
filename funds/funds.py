@@ -123,7 +123,7 @@ class FundsInfoDlg(gtk.Dialog):
         self.__append_column('代码', COL_ID)
         self.__append_column('名称', COL_NAME)
         self.__append_column('数量', COL_QUANTITY)
-        self.__append_column('净值', COL_PRICE)
+        self.__append_column('净�?, COL_PRICE)
         self.__append_column('金额', COL_SUM)
         selection = self.treeview.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
