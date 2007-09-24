@@ -1,0 +1,24 @@
+<div id="songslist">
+    <table>
+	<tr><th>歌曲名</th>
+	    <th>歌词</th>
+	    <th>类型</th>
+	</tr>
+	<% @songs_info.each do |song_info| %>
+	<% song, song_url, lrc_url, type = song_info %>
+	<% if song_url %>
+	<tr>
+	    <td><a href="<%= song_url %>"> <%= song %> </a></td>
+	    <td class="td1"><a href="<%= lrc_url %>">歌词</a></td>
+	    <td class="td2"><%= type %></td>
+	</tr>
+	<% else %>
+	<tr class="fs">
+	    <td><%= song %></td>
+	    <td class="td1">歌词</td>
+	    <td class="td2">invalid</td>
+	</tr>
+	<% end %>
+	<% end %>
+    </table>
+</div>
