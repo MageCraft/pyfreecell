@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+    <head>
+	<title>豆瓣音乐助手</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<%= javascript_include_tag :defaults %>
+	<style type="text/css">
+	    table {
+		border: 1px solid #ccc;
+	    }
+	    th {
+		text-align: center;
+		background-color: #ccc;
+		padding-left: 2em;
+		padding-right: 2em;
+	    }
+	    .td1, .td2 {
+		text-align: center;
+	    }
+	    .td2 {
+		font-size: 80%;
+		color: red;
+	    }
+	    #songslist a:link {
+		text-decoration: none;
+		color: black;
+	    }
+	    #songslist a:hover, a:active {
+		color: #ccc;
+		background-color: blue;
+	    }
+            .fs {
+                color: #ccc;
+                font-style: italic;
+            }
+	    #FetchInfo a {
+		color: blue;
+		font-size: 80%;
+		text-decoration: underline;
+	    }
+	</style>
+    </head>
+    <body>
+
+	<%= yield :layout %>
+
+    </body>
+</html>

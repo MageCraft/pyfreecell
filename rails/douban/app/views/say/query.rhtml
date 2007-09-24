@@ -1,0 +1,11 @@
+<p>专辑名称:  <%= @album %> </p>
+<p>专辑封面: <img src="<%= @album_img_url %>"></p>
+<p>演唱者: <%= @player %> </p>
+<%= render(:partial => "songs_list", :object => @songs_info) %>
+
+<div id="FetchInfo"
+<%= link_to_remote "Fetch songs info",
+:url => { :action => 'get_songs_info', :address => @address }, 
+:update => 'songslist'
+%>
+</div>
