@@ -10,3 +10,28 @@
 
 
 
+search album 
+search box 
+
+if found, show album info and songs list
+else:
+    sorry, not found, do you want to add it by youself? Yes, No
+
+
+please add the album information, you can:
+1. add album, player and songs list information by yourself.
+2. just copy it from internet, for example, you can find it on DouBan, then copy that web link and tell us we can fetch the information automaticlly, prefer.
+
+submit
+
+album table
+id, name, player
+
+songs table
+id name, link, album_id
+
+
+class  table
+Album  albums
+Song   songs
+
