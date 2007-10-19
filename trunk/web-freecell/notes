@@ -1,0 +1,12 @@
+cards.bmp, downloaded as whole picutre, then place with different pos, height, width.
+or split it two separate cards?
+
+use javascript in onload function, shuffle cards, then load them one by one
+
+start new game, shuffle, show cards
+
+use jquery, add onClick function, remember current select cards, set focus on it.
+
+learn javascript and html, to know how to render cards with focus
+
+design a base auth mechanism, like register and login
