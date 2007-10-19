@@ -1,22 +1,7 @@
 <html>
     <head>
 	<script src="jquery.js"></script>
-	<script type="javascript">
-	$(function() {
-		$(".card-field-bottom").click(function() {
-		    //alert($(this).attr("id"))
-		    $(this).addClass("card-selected");
-		    });
-		/*
-		$("#btn1").click(function() {
-		    alert("click");
-		    var r = Math.random();
-		    $("#display").text("The Math.random() result is " + r );
-		    });
-		*/
-		});
-	function onBtn1Click() { alert("click"); }
-	</script>
+	<script type="custom.js"></script>
 	<style type="text/css">
 	    .field {
 		width: 600px;
@@ -43,7 +28,7 @@
 	</style>
     </head>
     <body>
-	<p id="display">hello<input type="button" id="btn1" value="click" onClick="javascript:onBtn1Click()"/></p>
+	<p id="display">hello<input type="button" id="btn1" value="click" /></p>
 	<div class="field">
 	    <div class="card" id="card_1" style="left: 0px; top: 0px; background-image: url(cards/card_1.gif);">
 	    <div class="card-field-bottom" id="card_2" style="left: 0px; top: 15px; background-image: url(cards/card_2.gif);">
