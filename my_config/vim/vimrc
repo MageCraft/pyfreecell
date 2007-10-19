@@ -30,6 +30,7 @@ set history=50		" keep 50 lines of command line history
 set ruler		" show the cursor position all the time
 set showcmd		" display incomplete commands
 set incsearch		" do incremental searching
+set encoding=utf-8
 
 " For Win32 GUI: remove 't' flag from 'guioptions': no tearoff menu entries
 " let &guioptions = substitute(&guioptions, "t", "", "g")
@@ -47,8 +48,6 @@ map Q gq
 if &t_Co > 2 || has("gui_running")
   syntax on
   set hlsearch
-  "set guifont=ProFontWindows,\ 9.5
-  "set guifont=Monospace\ 9
   set guifont=Consolas\ 10
 endif
 
@@ -96,6 +95,8 @@ if has("autocmd")
   "for ruby
   autocmd BufNewFile *.rb 0r ~/.vim/skeleton/skeleton.rb
   autocmd FileType ruby nmap <F5> :w<cr>:!ruby %<cr>
+  autocmd BufRead *.rhtml source ~/.vim/scripts/eruby.vim | setlocal encoding=utf-8
+  autocmd FileType html setlocal encoding=utf-8
 
   
 
@@ -106,3 +107,26 @@ else
   set autoindent		" always set autoindenting on
 
 endif " has("autocmd")
+
+"tags
+set tags+=/vobs/ezx_apps/code/messaging/tags
+set tags+=/vobs/ezx_apps/code/mystuff/tags
+set tags+=/vobs/ezx_apps/code/share/tags
+set tags+=/vobs/ezx_apps/code/utility/tags
+set tags+=/vobs/ezx_apps/code/utilsdk/tags
+set tags+=/vobs/ezx_apps/code/appbase/tags
+set tags+=/vobs/ezx_apps/code/appsdk/tags
+set tags+=/vobs/ezx_apps/code/setup/tags
+set tags+=/vobs/ezx_apps/code/pim/tags
+set tags+=/vobs/ezx_apps/code/am/tags
+set tags+=/vobs/ezx_apps/code/flash_svg/tags
+set tags+=/vobs/ezx_apps/code/mediaplayer/tags
+set tags+=/vobs/ezx_apps/code/drm/tags
+set tags+=/vobs/ezx_apps/code/am/tags
+set tags+=/vobs/ezx_apps/code/appbase/tags
+set tags+=/vobs/ezx_apps/code/textinput/tags
+set tags+=/vobs/jem/caf/svgsmil/tags
+set tags+=/vobs/ezx_api/code/tapi/tags
+set tags+=/vobs/wsd_tapi/tags
+set tags+=/vobs/linuxjava/messaging/messaging/tags
+set tags+=/vobs/linuxjava/ui_framework/tags
