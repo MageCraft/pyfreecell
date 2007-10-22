@@ -1,0 +1,17 @@
+<html>
+    <head>
+	<title>
+	</title>
+    </head>
+    <body>
+	{% if polls %}
+	<ul>
+	    {% for poll in polls %}
+	    <li>{{ poll.question }}</li>
+	    {% endfor %}
+	</ul>
+	{% else %}
+	<p>No polls are available.</p>
+	{% endif %}
+    </body>
+</html>
