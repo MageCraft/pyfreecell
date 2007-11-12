@@ -13,7 +13,7 @@ socket.setdefaulttimeout(socket_default_timeout)
 dump_baidu_xml = False
 
 if not os.environ.has_key('http_proxy'):
-    os.environ['http_proxy'] = 'http://e2533c:Frank78524#@wwwgate0-ch.mot.com:1080'
+    os.environ['http_proxy'] = 'http://e2533c:Frank78524$@wwwgate0-ch.mot.com:1080'
 
 (MP3, RM, WMA) = range(3)
 music_types = ('mp3', 'rm', 'wma')
