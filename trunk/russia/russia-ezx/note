@@ -1,0 +1,119 @@
+do some optimization:
+1.UnitWorld just store drop units.
+2.So ui need change paint plan:
+   1. just repaint block, here need calculate repaint area, remove previous block and paint new block
+   2. when block collide with UnitWorld, need repaint UnitWorld, then repaint block.
+   3. when block join UnitWorld, change UnitWorld's data and tell if need shake UnitWorld
+
+data struct
+UnitWorld
+QValueList<Unit*> units;
+units:(from bottom to top)
+
+2
+1
+0
+
+
+int collide(Block* block)
+{
+    return block->bottomY() < maxRow - units.count();
+}
+
+Unit* newLine()
+{
+    units.append(new Unit[maxCol]);
+    return units.last();
+}
+
+QValueList<int> fullLines
+void join(Block* block);
+int h = units.count();
+Pos* pos = block->pos();
+int v = block->getValue();
+for( int i = 0 ; i < 4 ; ++i )
+{
+    Pos& p = pos[i];
+    Unit* new_line = NULL;
+    if(p.y < maxRow - units.count())
+    {
+        new_line = newLine();
+    }
+    else 
+    {
+        new_line = units[maxRow - p.y]
+    }
+    new_line[p.x].value = v;
+}
+
+bool ifFull(int index)
+{
+    for(int i = 0; i < maxCol; ++i )
+    {
+        if( units[index].value = EMPTY )
+            return false;
+    }
+    return true;
+}
+
+int getFullLinesCount()
+{
+    int count = 0;
+    for(int i = 0; i < units.count()-1; ++i)
+    {
+        if( ifFull(i) )
+            fullLines.append(i);
+        if( fullLines.count() == 4 )
+            break;
+    }
+    return fullLines.count();
+}
+
+void flagFullLines()
+{
+    for(int i = 0; i < fullLines.count()-1; ++i)
+    {
+        setFlag(fullLines[i]);
+    }
+}
+
+int removeFullLines()
+{
+    for(int i = fullLines.count()-1; i >= 0 ; --i)
+    {
+        units.remove(fullLines[i]);
+    }
+    int count = fullLines.count();
+    fullLines.clear();
+}
+
+signal updateUnitsArea(int left, int right, int top, int right);
+View::update(int type, Block* block, int lines) //0: block, 1: block& UnitWorld 2: UnitWorld
+{
+    static QRect prevUpdateRect;
+    QRect updateRect;
+    if( type == 0 )
+    {//just update block
+        CHECK_PTR(block);
+        updateRect = prevUpdateRect | block->unitsRect();
+    }
+    if( type == 1 )
+    {
+        CHECK_PTR(block);
+        updateRect = unitWorld->unitsRect() &  block->unitsRect() | block->unitsRect();
+        updateRect = prevUpdateRect | updateRect;
+    }
+    else 
+    {//
+        ASSERT( lines > 0 );
+
+
+    }
+    
+}
+
+simple solution
+optimize UnitWorld::removeFullLines
+don't repaint the whole widget every time, calculate the area need update every time.
+maybe need remember the area of block every time, move, transform 
+
