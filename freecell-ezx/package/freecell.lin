@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+umask 002
+export QTDIR=/usr/lib/ezx
+
+#
+export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH:/usr/language/vr/english/lib:/usr/language/vr/mandarin/lib:/usr/language/vr/common/lib
+export EZX_PLUGINS_DIR=/hatcreek/plugins
+
+# font path
+export EZX_RES_FONT_PATH=$QTDIR/lib/fonts
+
+# icon path
+export EZX_RES_ICON_PATH=/usr/language/icon
+
+# string path
+export EZX_RES_STRING_PATH=/usr/language/string
+
+#
+###############################################################################
+#
+export EZX_NATIVE_APP_PATH=/usr/SYSqtapp
+
+export AM_SYS_STATE_SHM_PATH=/usr/SYSqtapp/am
+export EZX_LOCAL_PATH=/ezxlocal/
+export TRIFLASH_MOUNT_PATH=/diskb/
+export MMC_MOUNT_PATH=/mmc/mmca1/
+export EZX_LOCAL_DOWNLOAD_PATH=/ezxlocal/download/
+
+export EZX_E680_LOCAL_PATH=/diska/
+export EZX_E680_SYS_DATA_PATH=${EZX_E680_LOCAL_PATH}.system/
+export MYSTUFF_DATA_PATH=${EZX_E680_LOCAL_PATH}
+export EZX_INSTALLED_QT_PATH=${EZX_E680_SYS_DATA_PATH}/QTDownLoad/
+
+
+export EZX_APP_WRITE_PATH=${EZX_LOCAL_DOWNLOAD_PATH}appwrite/
+#export MYSTUFF_DATA_PATH=${EZX_LOCAL_DOWNLOAD_PATH}mystuff/
+#export EZX_INSTALLED_QT_PATH=${EZX_LOCAL_DOWNLOAD_PATH}/QTDownLoad/
+export EZX_INSTALLED_THEME_PATH=${EZX_LOCAL_DOWNLOAD_PATH}theme/
+export EZX_LANG=/usr/language/
+
+myfile=`basename $0`
+mypath=`echo $0 | sed -e 's/'$myfile'//g'`
+cd $mypath
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$mypath
+exec ./freecell $2 &
+

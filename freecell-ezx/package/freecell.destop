@@ -1,0 +1,9 @@
+[Desktop Entry]
+BigIcon=gba.png
+Comment=freecell by Frank
+Exec=gba.lin
+Icon=gba_sm.png
+Name=freecell
+OsVersion=1.0
+Shared=0
+Type=Application
