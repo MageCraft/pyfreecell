@@ -1,0 +1,185 @@
+1. check the UI consistent with the UI spec, like the options, prompt, resources, etc.
+LIBkk68566 check if prompt right when several fax messages incoming
+LIBll82312 cancel voice mail call should back to main menu, not msg screen.
+LIBkk89373, LIBkk58992 the prompt about memory full are not consistent for different cases.
+LIBkk52407 LSK show wrong prompt during composing
+LIBkk23748 should not have "move to simcard" option while select a sending sms in outbox.
+LIBkk13374 after delete some messages by select multiple, should return to inbox or outbox.
+LIBkk19043 should have special icon to indicate high priority or low priority messages in inbox or outbox.
+LIBkk53325 check the prompt when moving messages to simcard.
+LIBll67358 should have "Delete all" options in inbox or outbox
+LIBmm08514 the highlight item should be first one every time when open messaging
+LIBmm07644 The selected SMS profile is not highlighted correspondingly.
+LIBjj75579 the "save as template" should NOT be shown when select sending mms in outbox
+LIBnn37795 options menu show error when rename template
+LIBmm89123 Move sms which exist in sim card to sim card show msg error
+LIBmm77547 Notification make user confused when resend MMS in memory full
+LIBjj05977 check the message status to see if the number in contacts been replaced by name
+LIBnn24725 Misleading prompt shown when receiving an MMS with low memory 
+LIBnn23885 Accurate prompt on Message Detail UI. 
+LIBmm51698 if mms template name have some special chars, it can't be saved.
+LIBkk53984 special characters display abnormal in WAP push
+LIBkk31963 try to input the voice mail number with max length, and save it. and check it after phone restart.
+LIBll81040 check 3gpp icon in inbox.
+
+2.test the API messaging provided, like java programs.(maybe other components have already covered this)
+LIBii06998 LIBjj17984, LIBjj19349, LIBjj29470 
+LIBmm83589 java use MMS SDK, something wrong
+
+3.international characters. Arabic, Tai, French.(maybe some test cases have added in UI framework test plan, please make sure)
+LIBkk34572, LIBkk57180, LIBll07449 
+LIBll44963 Tai issue
+LIBmm03366 Tai issues
+LIBmm07447 Tai issues
+LIBmm26812 Tai issue
+LIBmm35611 Arabic issues
+LIBkk71945 check if date and time inverted in french SMS message status
+LIBmm60384 turn on/off UNICODE_MOSMS_AVAILABLGE, send some characters in ascii 127~255 like â‚¬
+LIBmm14952 unicode issue, UNICODE_MOSMS_AVAILABLE
+LIBmm68577 Arabic issues
+LIBmm64821 arabic issues
+LIBnn36655 Thai text nick in MMS
+
+4.turn on/off light when messages incoming. DSM
+LIBmm28806 if CB from channel 50, we should not turn on the light
+LIBll17466 check if light turn on after receive the class 0 SMS.
+LIBmm63384 phone can not go to sleep mode when receiving multiple MMS
+LIBmm47679 phone not turn on the light when service load msg incoming
+LIBmm63384 Phone cannot go to sleep, after receiving multpile mms.
+
+5.check behavior when messaging locked.
+LIBkk82429, LIBll79442  
+LIBmm65028 messaging crash during unlock the messaging
+LIBmm58490  CV:EU:MO MMS Incorrect Error report displayed when FDN is Enabled.
+
+6.DRM related
+LIBjj55695 DRM mms can be forward
+LIBkk39661 wmdrm issue
+LIBnn33476 icon for drm files have been changed
+
+7.post card related issues
+LIBkk33413 postcard issue, RSK should be "send" after input the recepient address and back to composer
+LIBkk33345 postcard issue, when composer is empty, should no "save to draft" option
+LIBjj80298 when input the information of postcard recepient, the RSK should be done after all the fields not empty.
+
+8.issues with "end" key
+LIBkk58981, LIBkk52379 press "end" key while composing sms/mms or mms template, will not store the mms content automaticlly. Please check the steps carefully
+LIBkk01709 edit mms template, press end key when composer is empty, then check it again
+LIBll95833 Incoming messages are deleted upon pressing end key 
+
+9.mms send and receive issues
+XLIBkk89625 after MT MMS during voice calling, MMS can't work anymore until reboot the phone
+LIBmm16754 MMS is failed to download after deleting files to free up memory.
+LIBmm34319 "reply to all function" not correct
+LIBmm34474 the smil part is not compatible with V3 in MMS, can test it by MT MMS from Nokia phones.
+LIBmm46401 Long MMS text format should be perfect when open MMS from 7000.
+LIBmm56819 failed to receive mms when phone in sleep mode
+LIBmm61207 Auto download mode. Power off the handset. Send 30 MMS to the handset. Then Power on the phone. Check whether 30 MMS are all received correctly and in time.
+LIBmm61635 MMS retry mechanism works or not. Check mms rety time interval is the same as what defined in flex.
+LIBnn05467 receive a empty MMS with only subject from Nokia N73, failed to download.
+LIBnn07139 manu download a mms. cancel download. message status in the Inbox is changed to failure status.
+LIBnn26983 ignore some unknown fields in mms header, or it can not download some MMS
+LIBnn56038 It should be successful to send/receive multiple mms(at lest 30) at first try.
+
+10.composer / mms viewer issues
+LIBll54067 receive a MMS with audio and video at first page, then press view in idle screen, check if audio play
+LIBjj22459 WBMP files display abnorml in composer or mms viewer
+LIBjj48274 3GPP mms can be played normally, can MT a MMS from nokia phones.
+LIBkk61817 when composing mms, input some characters, then delete them all, then send to self, check the mms in inbox.
+LIBkk44510 in sending options, set the scheduled year to 2069 will cause expected behavior.
+LIBll34599 during composing mms,  check if can add new pictures or new videoes when page is reach to max.
+LIBkk55371 when playing mms, alerm runs or incoming call, mms should be paused
+LIBjj38096 the cursor should at the end of content when sending text template and mms template.
+LIBmm84380 Transparent screen when using Plush / UNICOM Theme
+LIBmm14156 issues in composer
+LIBmm06341 MMS:Long MMS text format issue when opened it.
+LIBmm00082 MMS with several page can't switch to next page by 'right key' 
+LIBmm01515 Message type changes to MMS when clear SMS Content in Chinese input mode
+LIBjj25629 check if the mms contain text with "&" can be played normally
+LIBjj65840 .jad file in mms, but can find "java app" in save/use content
+LIBkk42305 the curor should at the end when forward a MMS with text only.
+LIBkk39760 in composer, carier key should NOT lauch browser.
+LIBnn07324 sometimes insert a space will result a newline during composing messages.
+LIBkk35836 insert the .wma or .WMA file into composer, then preview or save to draft.
+LIBll17784 go to sending options without change anything will change the mms to sms during composing. 
+LIBjj84297 during composing MMS, the first page content disappears when second page deleted. 
+LIBkk00482 input some letter with prediction mode, save to draft, check if the content consistent.
+LIBnn19715 skin issue, if theme is black background with white font color, page title disappear in composer when composing MMS.
+LIBnn21226 skin issue, font color is still black in mms player, if background is also black.
+LIBmm84469 Can't pop up "memory full"dialog while save SMS to drafts
+LIBmm86692 sometimes scrollbar jumps when switch page during viewing MMS.
+LIBmm31032 On forwarding message, in line space are removed
+LIBkk00363 can't see whole inserted picture in composer when change layout
+LIBnn35627 screen saver should not lauched when taking video. before that should playing a mms.
+LIBmm39917 The duration of audio is shorter than it is original length.
+LIBnn27820 font issue in smil player, not clear as in static mode
+LIBnn18466 nav down sometimes doesn't work in mms player
+LIBmm50275 the maximum page number should be flexed
+LIBmm27680 Screen bounce if a word wraps onto the next line
+LIBmm43574 MMS with 2 large camera photos,centre key invokes a empty prompt
+LIBmm52358 wrong behavior when inserting some file name with special chars
+LIBmm92562 Create New Contact from MMS Subject contents creates duplication
+LIBmm61194 Possible to insert animated gif when creating postcard
+LIBmm64874 MMS page displays the Number instead of Phonebook Name.
+LIBll46932 video from received MMS plays back incorrectly
+LIBkk35794 display¡±text0.txt¡±in the multimedia template
+LIBkk40038 audio play again if play after pause during preview a mms.
+LIBll07870 One of the MMS can't be opened correctly in static mode
+LIBll39564 Items in submenu does not scroll horizontally
+LIBmm46748 Wrong msg in the INBOX when the mms notification expired
+LIBmm81446 Animated GIF contained in MMS are static, not animated
+LIBmm89335 External event prevents to see the whole message.
+LIBnn26655 Font issue when playing MMS
+LIBkk67376 From filemanager send to online storage takes 2 addresses
+
+
+11.flex related issue
+LIBkk58711 "reorder" function in messaging options can be flexed off
+LIBmm54546 wap push, test flex here
+LIBll36894 check if sms over email work if the related flexbit is on
+
+
+12. airplane mode and master clear/reset
+LIBjj17965 do master clear or reset, then lauch messaging
+LIBkk70897 airplane mode
+
+13.SMS, CB, voice mail
+LIBll48574 Phone doesn't resend second SMS
+LIBll76571 Do not exit MainMenu after MO call from MainMenu->Message
+LIBmm00384 Contacts is not recognized when replying SMS.
+LIBkk58885 Class 1 message should save to SIM Card if DB is full
+LIBmm80841 SIM message's status wrong when power cycle phone
+LIBnn41920 CB related issue, channel 50
+LIBnn01900 The prompt dialog of over size limit appears when editing SMS.
+LIBmm02783 OTA need replaced
+LIBll54942 receiving voice mail in idle screen, press "call" will cause messaging crash
+LIBll03688 "Voicemail" is not displayed when calling voicemail
+
+14.memory leak and core dump
+1) create and send 100 sms without memory leak and coredump files
+2) create and send 100 mms without memory leak and coredump files
+3) receive 100 sms without memory leak and coredump files
+4) auto download 100 mms without memory leak and coredump files
+5) manu download 100 mms without memory leak and coredump files
+6) forward/reply 100 mms without memory leak and coredump files
+7) LIBjj78343 Performance is too low to check new message when calling.
+8) delete 100 sms without memory leak and coredump files
+9) delete 100 mms without memory leak and coredump files
+10) play mms 100 times in inbox and outbox without memory leak and coredump files
+11) auto send pictures from camera for 100 times without memory leak and coredump files
+12) LIBll76579 Sometimes message crash and back to idle when preview it.
+13) LIBmm19074 Phone hang during playing MMS template
+15) LIBmm67564 There is panic and core dump after charging the phone
+16) LIBnn24913 messaging has logged so much data in /tmp which will make the /tmp full, cause many abnormal issues.
+
+15. Performance
+LIBll82380 call_mo_phonebook_sim_voice>410
+LIBkk94507 Time to cleanup SMS messages is > 44 sec (Sumatra Benchmark)
+LIBmm34322 Slow key reaction when new MMS arrives
+
+16. timestamp
+LIBll85793 Incorrect SMS Timestamps
+LIBll84200 SMS time in HSA seems to be sent time instead of received time
+LIBmm01495 SMS Time Stamp are overlaping
+LIBmm37364 Incorrect SMS Timestamps
+LIBmm76932 Sent Message shows wrong time in the Message Status
