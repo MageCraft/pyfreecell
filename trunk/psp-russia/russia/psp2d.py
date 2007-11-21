@@ -26,6 +26,7 @@ from pygame.locals import *
 
 pygame.init()
 pygame.key.set_repeat(500,30)
+DEF_FONT = pygame.font.SysFont('Arial', 12)
 
 
 class Controller:
@@ -123,7 +124,7 @@ class Color:
 	In pygame, this would be:
 	(r,g,b) or (r,g,b,a)
 	"""
-	def __init__(self, r, g, b, a = 0):
+	def __init__(self, r, g, b, a = 255):
 		self.red = r
 		self.green = g
 		self.blue = b
@@ -196,6 +197,13 @@ class Image:
 		return Color(*color)	
 	width = property(lambda self: self.surface.get_width())
 	height = property(lambda self: self.surface.get_height())
+
+        def drawLine(self, x0, y0, x1, y1, color):
+            pygame.draw.line(self.surface, color.tuple(), (x0,y0), (x1,y1));
+
+        def drawText(self, x, y, text, color):
+            t = DEF_FONT.render(text, True, color.tuple())
+            self.surface.blit(t, (x, y))
 
 
 class Screen(Image):
