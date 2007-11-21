@@ -1,4 +1,6 @@
 import psp2d
+import sys
+
 font_path = 'images/font_arial_10_white.png'
 
 def main():
@@ -12,7 +14,25 @@ def main():
     while True:
         pad = psp2d.Controller()
         if pad.circle:
-            break
+            break #quit
+        elif pad.square:
+            print 'pad.squre'
+        elif pad.triangle:
+            print 'pad.triangle'
+        elif pad.circle:
+            print 'pad.circle'
+        elif pad.cross:
+            print 'pad.cross'
+        elif pad.up:
+            print 'pad.up'
+        elif pad.down:
+            print 'pad.down' 
+        elif pad.left:
+            print 'pad.left' 
+        elif pad.right:
+            print 'pad.right' 
+        else:
+            pass
 
 
 if __name__ == '__main__':
