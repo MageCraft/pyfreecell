@@ -183,7 +183,7 @@ class Image:
 		self.surface.blit(r, (dx,dy))	
 	
 	def fillRect(self, x, y, w, h, color):
-		self.surface.fill((x,y,w,h), color.tuple())
+		self.surface.fill(color.tuple(), (x,y,w,h))
 	
 	def saveToFile(self, filename, type=IMG_PNG):
 		#This isn't exactly right, fraca's implementation (is broken because it lets you pick the extension and the filetype separately) does PNG and JPEG, whereas pygame (just pulls format info direct from the filename) only does BMP and TGA
