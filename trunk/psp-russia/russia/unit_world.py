@@ -81,6 +81,8 @@ class UnitWorld:
         self.units[x][y].value = EMPTY
 
     def is_empty(self, x,y): 
+        if x < 0 or x > self.max_col or y < 0 or y > self.max_row:
+            return False
         return self.units[x][y].value == EMPTY
 
     def value(self, x,y): 
