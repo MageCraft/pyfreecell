@@ -20,6 +20,9 @@ Block_Class_Map = { I    : I_Block,
                   }
 Blocks = {} 
 
+BLOCK_KINDS = len(Block_Class_Map)
+
+
 def create_block(type, value, units):
     block = None
     if blocks.has_key(type):
@@ -31,6 +34,9 @@ def create_block(type, value, units):
         block = Class(value, units)
         Blocks[type] = block
     return block
+
+def destroy_block(block):
+    block.do_reset()
         
 class Block:
     def __init__(self, units, value, style=S1, over=False):
@@ -94,7 +100,7 @@ class Block:
     def do_reset(self):
         self._reset()
         self.over = false
-        self.s = S1
+        self.style = S1
 
 
     def _pre_move(self):
@@ -233,7 +239,7 @@ class T_Block(Block):
             pos[0] = pos[1].below()
             pos[2] = pos[1].above()
             pos[3] = pos[1].right()
-            postMove()
+            self._post_move()
             self.style = S2
             return True
     elif self.style == S2: 
@@ -290,14 +296,68 @@ class L_Block(Block):
     def _reset(self):
         #style1
         pos = self.pos
-        pos[0].x = self.units.max_col/2 - 2; 
-        pos[0].y = 1;
-        pos[1] = pos[0].right();
-        pos[2] = pos[1].right();
-        pos[3] = pos[2].below();
+        pos[0].x = self.units.max_col/2 - 2 
+        pos[0].y = 1
+        pos[1] = pos[0].right()
+        pos[2] = pos[1].right()
+        pos[3] = pos[2].below()
 
     def transform(self):
-
+        log("L_Block::transform()");
+        pos = self.pos
+        if self.style == S1: 
+            #style1 -> style2
+            #     x x     2 3
+            #   0 1 2     1
+            #   x x 3     0
+            if self.is_empty(pos[0].below(), pos[1].above(), pos[2].above(), pos[3].left()): 
+                self._pre_move();
+                pos[0] = pos[1].below();
+                pos[2] = pos[1].above();
+                pos[3] = pos[2].right();
+                self._post_move();
+                self.style = S2;
+                return True
+        elif self.style == S2: 
+            #/*style2 -> style3
+            #   x 2 3   3
+            #   x 1 x   2 1 0
+            #     0 x 
+            if self.is_empty(pos[0].right(), pos[1].right(), pos[1].left(), pos[2].left()): 
+                self._pre_move();
+                pos[0] = pos[1].right();
+                pos[2] = pos[1].left();
+                pos[3] = pos[2].above();
+                self._post_move();
+                self.style = style3;
+                return True
+        elif self.style == S3: 
+            # style3 -> style4
+            #   3 x x     0
+            #   2 1 0     1  
+            #   x x     3 2
+            if self.is_empty(pos[0].above(), pos[1].above(), pos[1].below(), pos[2].below()): 
+                self._pre_move();
+                pos[0] = pos[1].above();
+                pos[2] = pos[1].below();
+                pos[3] = pos[2].left();
+                self._post_move();
+                self.style = S4;
+                return True
+        else:
+            # style3 -> style4
+            #     x 0       
+            #     x 1 x    0 1 2
+            #     3 2 x        3
+            if self.is_empty(pos[0].left(), pos[1].left(), pos[1].right(), pos[2].right()): 
+                self._pre_move();
+                pos[0] = pos[1].left();
+                pos[2] = pos[1].right();
+                pos[3] = pos[2].below();
+                self._post_move();
+                self.style = S1;
+                return True
+        return False
 
 #
 # 1 2 3
@@ -312,16 +372,68 @@ class L2_Block(Block):
     def _reset(self):
         #style1
         pos = self.pos
-        pos[0].x = self.units.max_col/2-2; 
-        pos[0].y = 2;
-        pos[1] = pos[0].above();
-        pos[2] = pos[1].right();
-        pos[3] = pos[2].right();
+        pos[0].x = self.units.max_col/2-2 
+        pos[0].y = 2
+        pos[1] = pos[0].above()
+        pos[2] = pos[1].right()
+        pos[3] = pos[2].right()
 
     def transform(self):
-        pass
-
-
+        log("L2_Block::transform()")
+        pos = self.pos
+        if self.style == S1: 
+            #style1 -> style2
+            #     x x     3 
+            #   1 2 3     2 
+            #   0 x x     1 0 
+            if self.is_empty(pos[0].right(), pos[2].above(), pos[3].above(), pos[3].below()): 
+                self._pre_move()
+                pos[1] = pos[2].below()
+                pos[0] = pos[1].right()
+                pos[3] = pos[2].above()
+                self._post_move()
+                self.style = S2
+                return True
+        elif self.style == S2: 
+            #style2 -> style3
+            #   x 3 x       0
+            #   x 2 x   3 2 1
+            #     1 0 
+            if self.is_empty(pos[2].left(), pos[2].right(), pos[3].left(), pos[3].right()): 
+                self._pre_move()
+                pos[1] = pos[2].right()
+                pos[0] = pos[1].above()
+                pos[3] = pos[2].left()
+                self._post_move()
+                self.style = S3
+                return True
+        elif self.style == S3: 
+            # style3 -> style4
+            #   x x 0   0 1
+            #   3 2 1     2  
+            #   x x       3
+            if self.is_empty(pos[2].above(), pos[3].above(), pos[2].below(), pos[3].below()): 
+                self._pre_move()
+                pos[1] = pos[2].above()
+                pos[0] = pos[1].left()
+                pos[3] = pos[2].below()
+                self._post_move()
+                self.style = S4
+                return True
+        else: 
+            # style3 -> style4
+            #     0 1       
+            #     x 2 x    1 2 3
+            #     x 3 x    0    
+            if self.is_empty(pos[2].left(), pos[3].left(), pos[2].right(), pos[3].right()): 
+                self._pre_move()
+                pos[1] = pos[2].left()
+                pos[0] = pos[1].below()
+                pos[3] = pos[2].right()
+                self._post_move()
+                self.style = S1
+                return True
+        return False
 
 # 0 1
 #   2 3
@@ -335,14 +447,42 @@ class Z_Block(Block):
     def _reset(self):
         #style1
         pos = self.pos
-        pos[0].x = self.units.max_col/2-1; 
-        pos[0].y = 0;
-        pos[1] = pos[0].right();
-        pos[2] = pos[1].below();
-        pos[3] = pos[2].right();
+        pos[0].x = self.units.max_col/2-1 
+        pos[0].y = 0
+        pos[1] = pos[0].right()
+        pos[2] = pos[1].below()
+        pos[3] = pos[2].right()
 
     def transform(self):
-        pass
+        log("Z_Block::transform()")
+        pos = self.pos
+        if self.style == S1: 
+            #style1 -> style2
+            #   0 1 x      3
+            #   x 2 3    1 2
+            #   x        0
+            if self.is_empty(pos[0].below(), pos[0].below(2), pos[3].above()): 
+                self._pre_move()
+                pos[1] = pos[2].left()
+                pos[0] = pos[1].below()
+                pos[3] = pos[2].above()
+                self._post_move()
+                self.style = S2
+                return True
+        else: 
+            #style2 -> style1
+            #  x 3 x  0 1
+            #  1 2 x    2 3
+            #  0  
+            if self.is_empty(pos[3].right(), pos[2].right(), pos[3].left()): 
+                self._pre_move()
+                pos[1] = pos[2].above()
+                pos[0] = pos[1].left()
+                pos[3] = pos[2].right()
+                self._post_move()
+                self.style = S1
+                return True
+        return False
 
 #   2 3
 # 0 1
@@ -356,39 +496,39 @@ class Z2_Block(Block):
     def _reset(self):
         #style1
         pos = self.pos
-        pos[0].x = self.units.max_col/2-1; 
-        pos[0].y = 1;
-        pos[1] = pos[0].right();
-        pos[2] = pos[1].above();
-        pos[3] = pos[2].right();
+        pos[0].x = self.units.max_col/2-1 
+        pos[0].y = 1
+        pos[1] = pos[0].right()
+        pos[2] = pos[1].above()
+        pos[3] = pos[2].right()
 
     def transform(self):
-    log("Z2_Block::transform()");
-    pos = self.pos
-    if self.style == S1: 
-        #style1 -> style2
-        #   x 2 3    3  
-        #   0 1      2 1
-        #   x x        0
-        if self.is_empty(pos[0].below(), pos[1].below(), pos[0].above()): 
-            self._pre_move();
-            pos[0] = pos[1].below();
-            pos[2] = pos[1].left();
-            pos[3] = pos[2].above();
-            self._post_move();
-            self.style = S2;
-            return True;
-    else:
-        #style2 -> style1
-        #      3 x x   2 3
-        #      2 1 x 0 1  
-        #        0 
-        if self.is_empty(pos[1].right(), pos[3].right(), pos[3].right(2)): 
-            self._pre_move();
-            pos[0] = pos[1].left();
-            pos[2] = pos[1].above();
-            pos[3] = pos[2].right();
-            self._post_move();
-            self.style = S1;
-            return True;
-    return False;
+        log("Z2_Block::transform()")
+        pos = self.pos
+        if self.style == S1: 
+            #style1 -> style2
+            #   x 2 3    3  
+            #   0 1      2 1
+            #   x x        0
+            if self.is_empty(pos[0].below(), pos[1].below(), pos[0].above()): 
+                self._pre_move()
+                pos[0] = pos[1].below()
+                pos[2] = pos[1].left()
+                pos[3] = pos[2].above()
+                self._post_move()
+                self.style = S2
+                return True
+        else:
+            #style2 -> style1
+            #      3 x x    2 3
+            #      2 1    0 1  
+            #      x 0 
+            if self.is_empty(pos[0].left(), pos[3].right(), pos[3].right(2)): 
+                self._pre_move()
+                pos[0] = pos[1].left()
+                pos[2] = pos[1].above()
+                pos[3] = pos[2].right()
+                self._post_move()
+                self.style = S1
+                return True
+        return False
