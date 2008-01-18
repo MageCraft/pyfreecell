@@ -1,21 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<Module>
-    <ModulePrefs title="沪深股市行情"
-	author="Frank Zheng"
-	author_email="hustzxq524@gmail.com"
-	description="显示沪深股市行情，可定制"
-	height="240"
-	width="320"
-	thumbnail="http://pyfreecell.googlecode.com/svn/trunk/google-gadgets/stock_thumbnail.png"
-	/>
-    <Content type="html">
-	<![CDATA[
-	<div id="stock_info">
-    Loading...
-</div>
-
-	<script>
-	DEBUG = true;
+DEBUG = true;
 var trace = ( DEBUG && typeof console != "undefined" ) ? console.log : function() {};
 var stock_list = [['sh000001'], ['sz399001'], ['sh000300'],['sh600898']];
 var cur_fetch_stock_id = -1;
@@ -85,8 +68,3 @@ function init() {
 }
 
 _IG_RegisterOnloadHandler(init);
-
-        </script>
-	]]>
-    </Content>
-</Module>
