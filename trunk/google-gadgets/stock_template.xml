@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="沪深股市行情"
+	author="Frank Zheng"
+	author_email="hustzxq524@gmail.com"
+	description="显示沪深股市行情，可定制"
+	height="240"
+	width="320"
+	thumbnail="http://pyfreecell.googlecode.com/svn/trunk/google-gadgets/stock_thumbnail.png"
+	/>
+    <Content type="html">
+	<![CDATA[
+	%(html_content)s
+	<script>
+	%(js_content)s
+        </script>
+	]]>
+    </Content>
+</Module>
