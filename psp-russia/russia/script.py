@@ -1,43 +1,49 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from psp2d import Color, Image, Screen, Font, Controller
-
-font_path = 'images/font_arial_10_white.png'
-BLOCK_NORMAL_CLR_TABLES = (
-    Color(191,0,0),
-    Color(0,191,0),
-    Color(0,0,191),
-    Color(191,191,0),
-    Color(191,0,191),
-    Color(0,191,191)
-)
-
-lighter = lambda c: (255,0)[not c>0]
-darker = lambda c: (128,0)[not c>0]
-
-def get_block_colors(unit_value):
-    clr = BLOCK_NORMAL_CLR_TABLES[unit_value]
-    l = [clr.red, clr.green, clr.blue]
-    return clr, Color(*map(lighter, l)), Color(*map(darker,l))
+from psp2d import Color, Image, Screen, Font, Controller, Timer
 
 
-class Rect:
-    def __init__(self, left, top, width, height):
-        self.left = left
-        self.top = top
-        self.width = width
-        self.height = height
-    def x(self): return self.left
-    def y(self): return self.top
-    def right(self): return self.left + self.width-1
-    def bottom(self): return self.top + self.height-1
-        
-    
+class Main(Timer):
+    def __init__(self, fps=50):
+        Timer.__init__(self, 1000/fps)
+        self.fps = fps
+        self.scr = Screen()
+        self.img = Image(480, 272)
+        self.img.clear(Color(0, 0, 0))
+        draw_background(self.img, Color(127,127,127))
 
-class Size:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
+    def fire(self):
+        pad = Controller()
+        if pad.circle:
+            return Fasle #quit
+        elif pad.square:
+            log('pad.squre')
+        elif pad.triangle:
+            log('pad.triangle')
+        elif pad.circle:
+            log('pad.circle')
+        elif pad.cross:
+            log('pad.cross')
+        elif pad.up:
+            log('pad.up')
+        elif pad.down:
+            log('pad.down')
+        elif pad.left:
+            log('pad.left')
+        elif pad.right:
+            log('pad.right') 
+        else:
+            pass
+        self.scr.blit(self.img)
+        self.scr.swap()
+        return True
+
+
+
+#font_path = 'images/font_arial_10_white.png'
+
+
+
 
 SCREEN_SIZE = Size(480, 272)
 
@@ -47,7 +53,7 @@ BLOCK_H = SCREEN_SIZE.height / MAX_ROW
 BLOCK_W = BLOCK_H
 
 #draw horizontal or vertical line with width >= 1
-def draw_line_x(surface, x0, y0, x1, y1, color, width=1):
+def draw_line(surface, x0, y0, x1, y1, color, width=1):
     if width == 1: 
         surface.drawLine(x0,y0,x1,y1,color)
     else:
@@ -82,37 +88,7 @@ def drawBlock(surface, rect, bkClr, clr1, clr2):
     draw3dRect(surface, rect, clr1, clr2)
 
 def main():
-    scr = Screen()
-    fnt = Font(font_path)
-    img = Image(480, 272)
-    img.clear(Color(0, 0, 0))
-    draw_background(img, Color(127,127,127))
-    unit_value = 3
-    drawBlock(img, Rect(10, 10, BLOCK_W, BLOCK_H), *get_block_colors(unit_value))
-    scr.blit(img)
-    scr.swap()
-    while True:
-        pad = Controller()
-        if pad.circle:
-            break #quit
-        elif pad.square:
-            print 'pad.squre'
-        elif pad.triangle:
-            print 'pad.triangle'
-        elif pad.circle:
-            print 'pad.circle'
-        elif pad.cross:
-            print 'pad.cross'
-        elif pad.up:
-            print 'pad.up'
-        elif pad.down:
-            print 'pad.down' 
-        elif pad.left:
-            print 'pad.left' 
-        elif pad.right:
-            print 'pad.right' 
-        else:
-            pass
+    Main().run()
 
 if __name__ == '__main__':
     main()
