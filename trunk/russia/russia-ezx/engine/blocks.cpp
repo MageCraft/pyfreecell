@@ -453,6 +453,8 @@ int L_Block::transform()
 
 }
 
+//[0,3], [0,1,2], [2,3], [0,1,3]
+
 int L_Block::left()   
 {
     qDebug("L_Block::left()");
@@ -482,6 +484,8 @@ int L_Block::left()
     return 0;
 }
 
+//[2,3], [0,1,3], [0,3], [0,1,2]
+
 int L_Block::right() 
 {
     qDebug("L_Block::right()");
@@ -510,6 +514,7 @@ int L_Block::right()
     return 0;
 }
 
+//[0,1,3], [0,3], [0,1,2], [2,3]
 int L_Block::down() 
 {
     qDebug("L_Block::down()");
@@ -652,7 +657,7 @@ int L2_Block::transform()
     return 0;
 
 }
-
+//[0,1], [1,2,3], [0,3], [0,2,3]
 int L2_Block::left()   
 {
     qDebug("L2_Block::left()");
@@ -682,6 +687,7 @@ int L2_Block::left()
     return 0;
 }
 
+//[0,3], [0,2,3], [0,1], [1,2,3]
 int L2_Block::right() 
 {
     qDebug("L2_Block::right()");
@@ -710,6 +716,7 @@ int L2_Block::right()
     return 0;
 }
 
+//[0,2,3], [0,1], [1,2,3], [0,3]
 int L2_Block::down() 
 {
     qDebug("L2_Block::down()");
@@ -1031,6 +1038,7 @@ int Z_Block::transform()
 
     return 0;
 }
+//[0,2], [0,1,3]
 int Z_Block::left()   
 {
     qDebug("Z_Block::left()");
@@ -1049,7 +1057,7 @@ int Z_Block::left()
     moveLeft();
     return 0;
 }
-
+//[1,3],[0,2,3]
 int Z_Block::right() 
 {
     qDebug("Z_Block::right()");
@@ -1068,7 +1076,7 @@ int Z_Block::right()
     moveRight();
     return 0;
 }
-
+//[0,2,3],[0,2]
 int Z_Block::down() 
 {
     qDebug("Z_Block::down()");
@@ -1166,6 +1174,7 @@ int Z2_Block::transform()
 
     return 0;
 }
+//[0,2],[0,2,3]
 int Z2_Block::left()   
 {
     qDebug("Z2_Block::left()");
@@ -1185,6 +1194,7 @@ int Z2_Block::left()
     return 0;
 }
 
+//[1,3],[0,1,3]
 int Z2_Block::right() 
 {
     qDebug("Z2_Block::right()");
@@ -1204,6 +1214,7 @@ int Z2_Block::right()
     return 0;
 }
 
+//[0,1,3],[]
 int Z2_Block::down() 
 {
     qDebug("Z2_Block::down()");

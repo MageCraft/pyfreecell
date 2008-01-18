@@ -28,6 +28,8 @@ pygame.init()
 pygame.key.set_repeat(500,30)
 DEF_FONT = pygame.font.SysFont('Arial', 12)
 
+import threading
+
 
 class Controller:
 	"""This class gives access to the state of the pad and buttons. The state is read upon instantiation and is accessible through read-only properties.
@@ -262,15 +264,12 @@ class Transform:
 		pass
 
 class Timer:
-	"""Fraca says: 'A timer class that doesn\u2019t run in its own thread (unlike the standard threading.Timer class).'
-	Since I really really really don't know how to manage that I'm just going to use threading.Timer
-	This timer dies after one run, if you want it to go again you should, as the last thing in fire(), make a new one
-	and start it. I think. Hopefully that will still allow the old thread to die.
-	"""
 	def __init__(self, timeout): #timeout is in milliseconds
-		self.t=threading.Timer(timeout/1000, self.fire)
+                self.timeout = timeout
 	
 	def fire(self): raise NotImplementedError("Timer.fire() must be overridden to be any use, idiot")
 	
 	def run(self):
-		self.t.start()
+		pygame.time.delay(self.timeout)
+                while self.fire():
+                    pygame.time.delay(self.timeout)
