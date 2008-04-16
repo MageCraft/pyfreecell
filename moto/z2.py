@@ -10,6 +10,13 @@ import smtplib
 import getopt
 import time
 import calendar
+import os.path
+
+from email import Encoders
+from email.MIMEBase import MIMEBase
+from email.MIMEText import MIMEText
+from email.MIMEMultipart import MIMEMultipart
+import email
 
 CR_SEPARATOR = "YYY\n"
 FIELD_SEPARATOR = "ZZZ"
@@ -37,6 +44,9 @@ fields = 'Identifier, Analysis_de, Project, Description, Status_full_name, CR_ty
 
 DEBUG = False
 SEND_NOTIFY_EMAIL = False
+EMAIL_SENDER_ADDR = 'Zheng Xiaoqiang <e2533c@motorola.com>'
+EMAIL_SUBJECT = 'Please check CR validity'
+
 
 def log(msg):
     if DEBUG:
@@ -175,6 +185,16 @@ def check_cr_caacomments(projects, programs, analysis_de, check_date=Pre_work_da
             send_email('e2533c@motorola.com', '%s@motorola.com' % (i[1],), mail)
         print '\n'
 
+def is_due_date_outdated(due_date, compare_to=time.localtime()):
+    #due date is like '18-APR-08', need to be '18-APR-2008'
+    dd = due_date.split('-')
+    dd[-1] = '20' + dd[-1]
+    tt = time.strptime('-'.join(dd), '%d-%b-%Y')
+    #log(tt)
+    #log(compare_to)
+    ct = time.strptime('%d-%d-%d' % compare_to[:3], '%Y-%m-%d')
+    #return  tt < ct
+    return False
 
 def check_cr_due_date(projects, programs, analysis_de):
     query_string = query_string_fmt % ( make_query_str(projects), make_query_str(programs), make_query_str(EMAIL_CRR_TEAM + ',' + MESSAGING_CRR_TEAM), ) 
@@ -185,9 +205,11 @@ def check_cr_due_date(projects, programs, analysis_de):
     for info in info_list:
         #log(info)
         state, a_due_date, due_date = info[2:]
-        if a_due_date in ('','NULL'):
+        #log(a_due_date)
+        #log(due_date)
+        if a_due_date in ('','NULL') or is_due_date_outdated(a_due_date):
             a_due_error_l.append(info)
-        if state in ('Working', 'Resloved') and due_date in ('','NULL'):
+        if state in ('Working', 'Resloved') and (due_date in ('','NULL') or is_due_date_outdated(due_date)):
             due_error_l.append(info)
     return a_due_error_l, due_error_l
 
@@ -202,12 +224,12 @@ def check_cr_validity():
 
         
     if a_due_error_l:
-        print 'Following are the CRs without analysis_due_date filled'
+        print 'Following are the CRs without analysis_due_date filled or analysis_due_date is outdated'
         show_info(a_due_error_l)
         if SEND_NOTIFY_EMAIL or get_user_input():
             d = count_cr_by_analysis_de(a_due_error_l)
             for key in d.keys():
-                mail = 'hi,\nPlease fill the "Analysis Due Date" for following CR:\n%s\nThanks' % ('\n'.join(d[key]), )
+                mail = 'hi,\nPlease check the "Analysis Due Date" for following CR, they are missed or outdated.\n%s\nThanks' % ('\n'.join(d[key]), )
                 send_email('e2533c@motorola.com', '%s@motorola.com' % (key,), mail)
         
     if due_error_l:
@@ -217,28 +239,55 @@ def check_cr_validity():
         if SEND_NOTIFY_EMAIL or get_user_input():
             d = count_cr_by_analysis_de(due_error_l)
             for key in d.keys():
-                mail = 'hi,\nPlease fill the "Due Date" for following CR:\n%s\nThanks' % ('\n'.join(d[key]), )
+                mail = 'hi,\nPlease check the "Due Date" for following CR, they are missed or outdated\n%s\nThanks' % ('\n'.join(d[key]), )
                 send_email('e2533c@motorola.com', '%s@motorola.com' % (key,), mail)
 
 
 
-def send_email(fromaddr, toaddrs, mail):
-    #toaddrs += ', e2533c@motorola.com'
-    msg = ("From: %s\r\nTo: %s\r\n\r\n"
-       % (fromaddr, toaddrs))
-    msg = msg + mail
+def send_email(toaddrs, mail, fromaddr=EMAIL_SENDER_ADDR, subject=EMAIL_SUBJECT, cc=None):
+    msg = MIMEText(mail)
+    msg['From'] = fromaddr
+    msg['To'] = toaddrs
+    msg['Subject'] = subject
     #log(toaddrs)
-    log(msg)
+    log(msg.as_string())
 
     server = smtplib.SMTP('remotesmtp.mot.com')
     server.set_debuglevel(1)
-    server.sendmail(fromaddr, toaddrs, msg)
+    server.sendmail(fromaddr, toaddrs, msg.as_string())
     server.quit()
+
+def send_email_csv_attach(toaddrs, mail, csv_fn, fromaddr=EMAIL_SENDER_ADDR):
+    msg = MIMEMultipart()
+    msg['From'] = fromaddr
+    msg['To'] = toaddrs
+    msg['Subject'] = 'please check attached csv file for cr status'
+    msg.preamble = 'You will not see this in a MIME-aware mail reader.\n'
+    # To guarantee the message ends with a newline
+    msg.epilogue = ''
+
+    #body
+    text = MIMEText(mail)
+    msg.attach(text)
+
+    #attachment
+    csv = MIMEBase('text', 'x-comma-separated-values')
+    fp = open(csv_fn, 'rb')
+    csv.set_payload(fp.read())
+    Encoders.encode_base64(csv)
+    csv.add_header('Content-Disposition', 'attachment', filename=os.path.basename(csv_fn))
+    msg.attach(csv)
+
+    server = smtplib.SMTP('remotesmtp.mot.com')
+    server.set_debuglevel(1)
+    server.sendmail(fromaddr, toaddrs, msg.as_string())
+    server.quit()
+
     
 
 def output_to_csv(cr_info_list, out_fn='cr_status.csv'):
     content = ''
-    header = enc_list.split(',') + fields.split(', ')
+    header = ENC_LIST.split(',') + fields.split(', ')
     def quote(e):
         if e == 'NULL': e=''
         str = re.sub('\n+','\n',e)
@@ -251,8 +300,9 @@ def output_to_csv(cr_info_list, out_fn='cr_status.csv'):
         content += ",".join( map(quote, info) )
         content += '\n'
     open(out_fn, 'w').write(content)
+    return out_fn
 
-def report_cr_status():
+def report_cr_status(email_recepient=None):
     query_string = query_string_fmt % ( make_query_str(projects), make_query_str(programs), make_query_str(EMAIL_CRR_TEAM + ',' + MESSAGING_CRR_TEAM), ) 
     info_list, cr_list = query_cr_fields(query_string, fields)
     enc_info_map = query_cr_enc(cr_list)
@@ -263,20 +313,27 @@ def report_cr_status():
         if enc_info_map.has_key(cr):
             info_list[index] = enc_info_map[cr] + info
         else:
-            info_list[index] = [''] * len(enc_list.split(',')) + info
-    output_to_csv(info_list)
+            info_list[index] = [''] * len(ENC_LIST.split(',')) + info
+    out_fn = output_to_csv(info_list)
+    if email_recepient:
+        if email_recepient.find('@') == -1:
+            email_recepient += '@motorola.com'
+        print email_recepient
+        send_email_csv_attach(email_recepient, 'Please check attached csv file', out_fn)
+
 
 
 
 def usage():
     print '''Usage: 
-    %(me)s report [-d] 
+    %(me)s report [-e recepient] [-d]
     %(me)s checkcr [-e] [-d] 
     %(me)s checkcaa [-n] [-e] [-d] 
     %(me)s ut 
 
     report      generate the CR status report
         -d -- enable the debug log
+        -e recepient -- send the status report to recepient, can be core id or full email address
 
     checkcr     check the CR "Analysis Due Date", "Due Date"
         -e -- send the notify email
@@ -297,16 +354,18 @@ def test():
     #log(query_string)
     #log(make_query_str(EMAIL_CRR_TEAM + ',' + MESSAGING_CRR_TEAM))
     global DEBUG
-    year, month, day = get_previous_work_day()
-    print year, month, day
-    possible_date = get_possible_caa_date_fmt(year,month,day)
-    print possible_date
-    caa = '''
-    '''
-    re = is_caa_updated(caa, Pre_work_day)
-    print re
+    #year, month, day = get_previous_work_day()
+    #print year, month, day
+    #possible_date = get_possible_caa_date_fmt(year,month,day)
+    #print possible_date
+    #caa = '''
+    #'''
+    #re = is_caa_updated(caa, Pre_work_day)
+    #print re
     DEBUG = True
-    check_cr_caacomments(projects, programs, EMAIL_CRR_TEAM + ',' + MESSAGING_CRR_TEAM)
+    #check_cr_caacomments(projects, programs, EMAIL_CRR_TEAM + ',' + MESSAGING_CRR_TEAM)
+    #send_email('e2533c@motorola.com', 'test')
+    send_email_csv_attach('e6322c@motorola.com', 'please check attached csv file', 'cr_status.csv')
 
 if __name__ == '__main__':
     if len(sys.argv) == 1 or not sys.argv[1] in ('report', 'checkcr', 'ut', 'checkcaa'):
@@ -317,22 +376,26 @@ if __name__ == '__main__':
     
     if cmd == 'report':
         try:
-            opt_list, args = getopt.getopt(cmd_params, 'd')
+            opt_list, args = getopt.getopt(cmd_params, 'e:d')
         except getopt.GetoptError, msg:
             print msg
             usage()
             sys.exit(1)
+        recepient = ''
         if not opt_list:
             DEBUG = False
         else:
             for opt, value in opt_list:
                 if opt == '-d':
                     DEBUG = True
+                elif opt == '-e':
+                    recepient = value
         print 'generating CR status report...'
-        report_cr_status()
+        #print recepient
+        report_cr_status(recepient)
     elif cmd == 'checkcr':
         try:
-            opt_list, args = getopt.getopt(cmd_params, 'de')
+            opt_list, args = getopt.getopt(cmd_params, 'd')
         except getopt.GetoptError, msg:
             print msg
             usage()
