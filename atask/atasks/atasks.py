@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import os
 import cgi
 
@@ -37,7 +36,7 @@ class List(webapp.RequestHandler):
        doc.appendChild(tasks_node)
        for task in tasks:
            task_node = doc.createElement('task')
-           task_node.setAttribute('id', str(task.key().id()))
+           task_node.setAttribute('key', str(task.key()))
            task_node.setAttribute('content', task.content)
            tasks_node.appendChild(task_node)
        trace(doc.toxml())
@@ -49,7 +48,7 @@ class Add(webapp.RequestHandler):
         task = Task()
         task.content = self.request.get('content');
         task.put()
-        self.response.out.write('id=%s'%(task.key()))
+        self.response.out.write('key=%s' % (str(task.key())) )
 
 
 class Delete(webapp.RequestHandler):
@@ -89,4 +88,5 @@ def main():
 
 if __name__ == "__main__":
   main()
+
 
