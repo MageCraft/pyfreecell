@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundAlpha="0"
-	 showFlexChrome="false" width="1280" height="1024">
-	<mx:Canvas width="100%" height="100%" backgroundColor="0x000000" backgroundAlpha="0.5">
-		<mx:Canvas id="c1" width="300" height="400" x="100" y="200" backgroundColor="0xFF0000"/>
-	</mx:Canvas>
-	
-</mx:WindowedApplication>
