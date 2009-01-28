@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" dataChange="onDataChange()">
+	<mx:CheckBox id="checkBox" click="onClick()" label="{itemLabel}"/>
+	<mx:Script>
+		<![CDATA[
+			[Bindable]
+			public var itemLabel:String;			
+			private function onClick():void {
+				
+			}
+			private function onDataChange():void {
+				itemLabel=data.content;
+			}
+		]]>
+	</mx:Script>
+</mx:HBox>

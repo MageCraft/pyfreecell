@@ -3,14 +3,19 @@
 	xmlns:local="*" initialize="init()">	
 	<mx:Script>
 		<![CDATA[
-			import mx.core.UIComponent;
 			private var _test:Boolean = false;
 			private function init():void {
 				if( _test ) {
-					var test:UIComponent = new Test;
+					var test:Test = new Test;
 					test.percentWidth = 100;
 					test.percentHeight = 100;
 					addChild(test);
+				}
+				else {
+					var view:View = new View;
+					view.percentHeight = 100;
+					view.percentWidth = 100;
+					addChild(view);
 				}
 			}
 		]]>

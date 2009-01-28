@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="complete()">
+	<mx:List id="listTasks" itemRenderer="ItemTask" width="100%" height="100%"/>
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			include 'engine.as'
+			private function complete():void {
+				var url:String = 'http://localhost:8080/list';
+				var resultHandler:Function = function(event:Event):void {
+					var xml:String = URLLoader(event.target).data;
+					var xmlDoc:XML = new XML(xml);
+					var tasks:XMLList = xmlDoc.task;
+					var dp:ArrayCollection = new ArrayCollection;					
+					for each(var task:XML in tasks) {
+						var t:Task = new Task;
+						t.key = task.@key;
+						t.content = task.@content;
+						dp.addItem(t);
+					}
+					listTasks.dataProvider = dp;
+				}
+				send(url, resultHandler);
+			}
+		]]>
+	</mx:Script>	
+</mx:Canvas>
