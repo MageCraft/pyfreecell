@@ -53,11 +53,23 @@ class Add(webapp.RequestHandler):
 
 class Delete(webapp.RequestHandler):
     def post(self):
-        pass
-
+        key = self.request.get('key');
+        trace(key);
+        task = db.get(db.Key(key));
+        trace(task.content);
+        task.delete()
+        self.response.out.write('deleted')
+        
 class Update(webapp.RequestHandler):
     def post(self):
-        pass
+        key = self.request.get('key');
+        content = self.request.get('content')
+        trace(key, content);
+        task = db.get(db.Key(key));
+        trace(task.content);
+        task.content = content
+        task.put()
+        self.response.out.write('updated')
         
 
 
@@ -80,6 +92,8 @@ application = webapp.WSGIApplication(
                                       ('/login', Login),
                                       ('/list', List),
                                       ('/add', Add),
+                                      ('/delete', Delete),
+                                      ('/update', Update),
                                      ],
                                      debug=True)
 
