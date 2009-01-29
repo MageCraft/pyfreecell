@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="complete()">
-	<mx:List id="listTasks" itemRenderer="ItemTask" width="100%" height="100%"/>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="complete()"
+	xmlns:local="*">
+	<local:MyList id="listTasks" itemRenderer="ItemTask" width="100%" height="100%" change="onChanged()"/>	
+	<!--
+	<mx:Canvas width="100%" height="100%">
+		<mx:Button label="Add new task..."/>
+	</mx:Canvas>
+	-->
 	<mx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
@@ -17,11 +23,20 @@
 						t.key = task.@key;
 						t.content = task.@content;
 						dp.addItem(t);
-					}
+					}	
+					dp.addItem(null);				
 					listTasks.dataProvider = dp;
 				}
 				send(url, resultHandler);
 			}
+			
+			private function onChanged():void {
+				trace('onChanged');
+				var task:Task = listTasks.selectedItem as Task;
+				if( task.key == null ) {
+					trace('selected task is a empty task');		
+				}
+			}
 		]]>
 	</mx:Script>	
-</mx:Canvas>
+</mx:VBox>

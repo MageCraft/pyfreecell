@@ -1,16 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" dataChange="onDataChange()">
-	<mx:CheckBox id="checkBox" click="onClick()" label="{itemLabel}"/>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" dataChange="onDataChange()" 
+	borderSides="bottom" borderColor="0xcccccc" borderStyle="solid"
+	borderThickness="1">	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Label;
+			import mx.controls.TextInput;
+			import mx.controls.CheckBox;
+			import mx.events.FlexEvent;
 			[Bindable]
-			public var itemLabel:String;			
-			private function onClick():void {
+			
+			private var _checkBox:CheckBox;
+			private var _input:TextInput;
+			private var _addLabel:Label;		
+						
+			private function onClick(event:MouseEvent):void {
 				
 			}
 			private function onDataChange():void {
-				itemLabel=data.content;
+				if( data == null ) {
+					if( _addLabel == null ) {
+						_addLabel = new Label;
+						_addLabel.percentWidth=100;
+						_addLabel.text = 'Add new task...';
+						addChild(_addLabel);
+					}
+				}
+				else {
+					if( _checkBox == null ) {
+						_checkBox = new CheckBox;
+						_checkBox.label = '';
+						_checkBox.addEventListener(MouseEvent.CLICK, onClick);
+						addChild(_checkBox);
+					}
+					if( _input == null ) {
+						_input = new TextInput;
+						_input.text = data.content;
+						_input.percentWidth = 100;
+						_input.editable = false;
+						_input.setStyle('borderStyle', 'none');
+						_input.addEventListener(MouseEvent.CLICK, onClick1);
+						_input.addEventListener(FlexEvent.ENTER, onEnter);
+						_input.addEventListener(FocusEvent.FOCUS_IN, onFocusIn);
+						_input.addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
+						addChild(_input);
+					}
+				}			 
+				
 			}
+			
+			private function onClick1(event:MouseEvent):void {
+				trace('click1');
+				_input.editable = true;
+				_input.setStyle('borderStyle', "solid");
+				_input.setStyle('borderColor', 0x0000ff);
+				_input.setStyle('borderThickness', 2);
+			}
+			
+			private function onEnter(event:Event):void {
+				trace('enter',event.target.text);
+				_input.editable = false;
+				_input.setStyle('borderStyle', 'none');
+			}
+			
+			private function onFocusIn(event:FocusEvent):void {
+				trace('focusIn', event.target.text);
+			}
+			
+			private function onFocusOut(event:FocusEvent):void {
+				trace('focusOut', event.target.text);
+				_input.editable = false;
+				_input.setStyle('borderStyle', 'none');
+			}
+			
 		]]>
 	</mx:Script>
 </mx:HBox>
