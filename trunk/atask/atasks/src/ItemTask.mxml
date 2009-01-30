@@ -4,15 +4,18 @@
 	borderThickness="1">	
 	<mx:Script>
 		<![CDATA[
+			include 'engine.as'
+			import mx.controls.Button;
 			import mx.controls.Label;
 			import mx.controls.TextInput;
 			import mx.controls.CheckBox;
-			import mx.events.FlexEvent;
-			[Bindable]
+			import mx.events.FlexEvent;			
 			
 			private var _checkBox:CheckBox;
 			private var _input:TextInput;
-			private var _addLabel:Label;		
+			private var _addLabel:Label;
+			private var _btnDelete:Button;
+			private var _btnImportant:Button;		
 						
 			private function onClick(event:MouseEvent):void {
 				
@@ -35,7 +38,7 @@
 					}
 					if( _input == null ) {
 						_input = new TextInput;
-						_input.text = data.content;
+						_input.text = data.task.content;
 						_input.percentWidth = 100;
 						_input.editable = false;
 						_input.setStyle('borderStyle', 'none');
@@ -45,8 +48,26 @@
 						_input.addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
 						addChild(_input);
 					}
+					
+					if( _btnImportant == null ) {
+						_btnImportant = new Button;
+						_btnImportant.label = '!';
+						addChild(_btnImportant);
+					}
+					if( _btnDelete == null ) {
+						_btnDelete = new Button;
+						_btnDelete.label = 'X';
+						addChild(_btnDelete);
+						_btnDelete.addEventListener(MouseEvent.CLICK, onBtnDelete);						
+					}
+					
 				}			 
 				
+			}
+			
+			private function onBtnDelete(event:MouseEvent):void {
+				trace('onBtnDelete');
+				data.fnDeleteTask(data);			 	
 			}
 			
 			private function onClick1(event:MouseEvent):void {
@@ -61,6 +82,8 @@
 				trace('enter',event.target.text);
 				_input.editable = false;
 				_input.setStyle('borderStyle', 'none');
+				data.task.content = _input.text;
+				data.fnUpdateTask(data.task);
 			}
 			
 			private function onFocusIn(event:FocusEvent):void {

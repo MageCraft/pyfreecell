@@ -1,5 +1,6 @@
 // ActionScript file
 private function send(url:String, resultHandler:Function, method:String=URLRequestMethod.GET, vars:URLVariables=null, dataFormat:String=URLLoaderDataFormat.TEXT):void {
+	trace('send', url);
 	var loader:URLLoader = new URLLoader();
 	var req:URLRequest = new URLRequest(url);
 	req.method = method;
@@ -13,13 +14,14 @@ private function send(url:String, resultHandler:Function, method:String=URLReque
 }
 
 private function onHttpResponseStatus(event:HTTPStatusEvent):void {
-	trace(event.status);
+	trace('onHttpResponseStatus', event.status);	
 	//txtResults.text += 'http status code is ' + event.status + '\n';
 }
 
 private function onIOError(event:IOErrorEvent):void {
-	trace(event.errorID, event.text);
+	trace('onIOError',event.errorID, event.text);
 	//txtResults.text += 'IO Error, id: ' + event.errorID + ', message: ' + event.text + '\n';
 	
 }
+
 
