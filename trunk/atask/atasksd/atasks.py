@@ -75,15 +75,7 @@ class Update(webapp.RequestHandler):
 
 class MainPage(webapp.RequestHandler):
   def get(self):
-      
-      if user:
-          path = os.path.join(os.path.dirname(__file__), 'html/index.html')
-          template_values = {
-                  'current_user': user.nickname(),
-          }
-          self.response.out.write(template.render(path, template_values))
-      else:
-          self.redirect(users.create_login_url(self.request.uri))
+      self.response.out.write('Happy Chinese New Year!')
           
       
 application = webapp.WSGIApplication(

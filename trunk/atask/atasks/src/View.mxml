@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="complete()"
 	xmlns:local="*">
 	
 	<mx:HBox width="100%">		
-		<mx:Button label="*" click="complete()"/>
+		<mx:Button label="*" click="list()"/>
 		<mx:Button label="+" click="onBtnAdd()"/>
 	</mx:HBox>
+	
 	<mx:Canvas width="100%" height="100%">
 		<local:MyList id="listTasks" itemRenderer="ItemTask" width="100%" height="100%" change="onChanged()"/>	
-	</mx:Canvas>		
+	</mx:Canvas>	
+		
 	<mx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
 			include 'engine.as'
-			private function complete():void {
-				var url:String = 'http://localhost:8080/list';
+			
+			private var siteURL:String = 'http://xatasks.appspot.com/';
+			
+			private function list():void {
+				var url:String = siteURL + 'list';
 				var resultHandler:Function = function(event:Event):void {
 					var xml:String = URLLoader(event.target).data;
 					trace(xml);
@@ -32,6 +37,14 @@
 				send(url, resultHandler);
 			}
 			
+			private function complete():void {
+				var t:Timer = new Timer(1000,1);
+				t.addEventListener(TimerEvent.TIMER_COMPLETE, function(event:TimerEvent):void {
+					list();
+				},false,0,true);
+				t.start();
+			}
+			
 			private function onChanged():void {
 				trace('onChanged');				
 			}
@@ -46,7 +59,7 @@
 			
 			private function onBtnAdd():void {
 				trace('onBtnAdd');							
-				var url:String = 'http://localhost:8080/add';
+				var url:String = siteURL + 'add';
 				var vars:URLVariables = new URLVariables;
 				vars.content = '';
 				var resultHandler:Function = function(event:Event):void {
@@ -63,7 +76,7 @@
 			
 			private function deleteTask(item:Object):void {
 				var task:Task = item.task;				
-				var url:String = 'http://localhost:8080/delete';
+				var url:String = siteURL + 'delete';
 				var vars:URLVariables = new URLVariables;
 				vars.key = task.key;
 				var resultHandler:Function = function(event:Event):void {
@@ -76,7 +89,7 @@
 			}
 			
 			private function updateTask(task:Task):void {
-				var url:String = 'http://localhost:8080/update'
+				var url:String = siteURL + 'update'
 				var vars:URLVariables = new URLVariables;
 				vars.key = task.key;
 				vars.content = task.content;
