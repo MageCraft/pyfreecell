@@ -19,6 +19,7 @@
 				var url:String = 'http://localhost:8080/list';
 				var resultHandler:Function = function(event:Event):void {
 					var xml:String = URLLoader(event.target).data;
+					trace(xml);
 					var xmlDoc:XML = new XML(xml);
 					var tasks:XMLList = xmlDoc.task;
 					_tasks = new Array;					
@@ -32,9 +33,7 @@
 					txtResults.text += URLLoader(event.target).data + '\n';
 					
 				}
-				send(url, resultHandler);
-				
-				
+				send(url, resultHandler);				
 			}
 			
 			
