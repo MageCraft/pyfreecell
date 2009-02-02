@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
-	xmlns:local="*" initialize="init()">
-	<mx:Style source="assert/css/main.css"/>	
+	xmlns:local="*" initialize="init()" width="250">
+	<mx:Style source="assets/css/main.css"/>	
 	<mx:Script>
 		<![CDATA[
 			private var _test:Boolean = false;

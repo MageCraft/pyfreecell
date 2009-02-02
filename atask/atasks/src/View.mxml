@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="complete()"
-	xmlns:local="*">
-	
+	xmlns:local="*" verticalGap="0">
+	<!--
 	<mx:HBox width="100%">		
 		<mx:Button label="*" click="list()"/>
 		<mx:Button label="+" click="onBtnAdd()"/>
 	</mx:HBox>
-	
+	-->
+	<mx:VBox width="100%" backgroundColor="0xFFFFFF">
+		<mx:Label fontFamily="Consolas" fontSize="16" text="My Tasks List"/>	
+	</mx:VBox>			
+	<mx:HRule width="100%" strokeColor="0xcccccc"/>
 	<mx:Canvas width="100%" height="100%">
-		<local:MyList id="listTasks" itemRenderer="ItemTask" width="100%" height="100%" change="onChanged()"/>	
+		<local:MyList id="listTasks" itemRenderer="ItemTask" width="100%" height="100%" change="onChanged()"
+			 verticalAlign="middle" paddingTop="0" paddingBottom="0" borderStyle="none"/>	
 	</mx:Canvas>	
 		
 	<mx:Script>
@@ -31,7 +36,8 @@
 						t.key = task.@key;
 						t.content = task.@content;
 						addItem(t,dp);
-					}									
+					}
+					addItem(null,dp);									
 					listTasks.dataProvider = dp;
 				}
 				send(url, resultHandler);
@@ -49,15 +55,21 @@
 				trace('onChanged');				
 			}
 			
-			private function addItem(task:Task, dp:ArrayCollection):void {				
+			private function addItem(task:Task, dp:ArrayCollection, beforeLast:Boolean=false):void {				
 				var item:Object = new Object;
 				item.task = task;
 				item.fnDeleteTask = deleteTask;
 				item.fnUpdateTask = updateTask;
-				dp.addItem(item);
+				item.fnAddTask = addTask;
+				if( !beforeLast ) {
+					dp.addItem(item);
+				} else {
+					var last:int = dp.length - 1;
+					dp.addItemAt(item, last);
+				}
 			}
 			
-			private function onBtnAdd():void {
+			private function addTask():void {				
 				trace('onBtnAdd');							
 				var url:String = siteURL + 'add';
 				var vars:URLVariables = new URLVariables;
@@ -67,11 +79,10 @@
 					var t:Task = new Task;
 					t.key = key;
 					var dp:ArrayCollection = listTasks.dataProvider as ArrayCollection;	
-					addItem(t,dp);					
+					addItem(t,dp,true);					
 				}
-				send(url,resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);				
-			}
-			
+				send(url,resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);
+			}						
 			
 			
 			private function deleteTask(item:Object):void {

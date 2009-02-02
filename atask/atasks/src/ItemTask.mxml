@@ -21,11 +21,24 @@
 				
 			}
 			private function onDataChange():void {
-				if( data == null ) {
+				var item:Object = data as Object;
+				if( item.task == null ) {
+					if( _checkBox == null ) {
+						_checkBox = new CheckBox;
+						_checkBox.label = '';
+						_checkBox.addEventListener(MouseEvent.CLICK, onClick);
+						_checkBox.visible = false;
+						addChild(_checkBox);
+					}
 					if( _addLabel == null ) {
 						_addLabel = new Label;
 						_addLabel.percentWidth=100;
-						_addLabel.text = 'Add new task...';
+						_addLabel.setStyle('fontFamily', 'Consolas');
+						_addLabel.setStyle('fontSize', 12);						
+						_addLabel.text = 'Add new task...';	
+						_addLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+							item.fnAddTask();
+						}, false, 0, true);					
 						addChild(_addLabel);
 					}
 				}
@@ -43,7 +56,7 @@
 						_input.editable = false;
 						_input.setStyle('borderStyle', 'none');
 						_input.setStyle('fontFamily', 'Consolas');
-						_input.setStyle('fontSize', 12);						
+						_input.setStyle('fontSize', 12);										
 						_input.addEventListener(MouseEvent.CLICK, onClick1);
 						_input.addEventListener(FlexEvent.ENTER, onEnter);
 						_input.addEventListener(FocusEvent.FOCUS_IN, onFocusIn);
@@ -78,7 +91,8 @@
 				_input.editable = true;
 				_input.setStyle('borderStyle', "solid");
 				_input.setStyle('borderColor', 0x0000ff);
-				_input.setStyle('borderThickness', 2);
+				_input.setStyle('borderThickness', 1);
+				_input.setStyle('cornerRadius', 3);
 			}
 			
 			private function onEnter(event:Event):void {
