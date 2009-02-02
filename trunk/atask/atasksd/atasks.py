@@ -18,7 +18,9 @@ trace=logging.debug
 
 
 class Task(db.Model):
+    done = db.BooleanProperty(default=False)
     content = db.StringProperty(multiline=True)
+    date = db.DateTimeProperty(auto_now_add=True)
 
 
 
@@ -38,6 +40,7 @@ class List(webapp.RequestHandler):
            task_node = doc.createElement('task')
            task_node.setAttribute('key', str(task.key()))
            task_node.setAttribute('content', task.content)
+           task_node.setAttribute('done', str(task.done).lower())
            tasks_node.appendChild(task_node)
        trace(doc.toxml())
        self.response.headers['Content-Type'] = 'text/xml'
@@ -64,10 +67,15 @@ class Update(webapp.RequestHandler):
     def post(self):
         key = self.request.get('key');
         content = self.request.get('content')
-        trace(key, content);
+        doneStr = self.request.get('done')
+        trace(key, content, doneStr);
+        done = True
+        if doneStr == 'false':
+            done = False
         task = db.get(db.Key(key));
         trace(task.content);
         task.content = content
+        task.done = done
         task.put()
         self.response.out.write('updated')
         

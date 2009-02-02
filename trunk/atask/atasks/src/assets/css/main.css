@@ -4,3 +4,7 @@
    src:url("../font/Consolas.ttf");
    fontFamily: Consolas;
 }
+
+Button.btnDelete {
+	skin: Embed("../img/delete.gif");
+}

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" dataChange="onDataChange()" 
 	borderSides="bottom" borderColor="0xcccccc" borderStyle="solid"
-	borderThickness="1">		
+	borderThickness="1" mouseOut="onMouseOut()" mouseOver="onMouseOver()">
+	<mx:Fade id='fade' duration="500"/>		
 	<mx:Script>
 		<![CDATA[
 			include 'engine.as'
@@ -15,18 +16,39 @@
 			private var _input:TextInput;
 			private var _addLabel:Label;
 			private var _btnDelete:Button;
-			private var _btnImportant:Button;		
-						
-			private function onClick(event:MouseEvent):void {
-				
+			private var _btnImportant:Button;	
+			
+			
+			private function onMouseOut():void {
+				if( _btnDelete ) {
+					_btnDelete.visible = false;
+				}
 			}
+			
+			private function onMouseOver():void {
+				if( _btnDelete ) {
+					_btnDelete.visible = true;
+				}
+			} 	
+						
+			private function onCheckBoxClick(event:MouseEvent):void {
+				var item:Object = data as Object;
+				item.task.done = _checkBox.selected;
+				item.fnUpdateTask(item.task);
+			}
+			
+			private function onAddLabelClick(event:MouseEvent):void {
+				trace('click add new task');
+				var item:Object = data as Object;
+				item.fnAddTask();	
+			}
+			
 			private function onDataChange():void {
 				var item:Object = data as Object;
 				if( item.task == null ) {
 					if( _checkBox == null ) {
 						_checkBox = new CheckBox;
-						_checkBox.label = '';
-						_checkBox.addEventListener(MouseEvent.CLICK, onClick);
+						_checkBox.label = '';						
 						_checkBox.visible = false;
 						addChild(_checkBox);
 					}
@@ -36,9 +58,7 @@
 						_addLabel.setStyle('fontFamily', 'Consolas');
 						_addLabel.setStyle('fontSize', 12);						
 						_addLabel.text = 'Add new task...';	
-						_addLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
-							item.fnAddTask();
-						}, false, 0, true);					
+						_addLabel.addEventListener(MouseEvent.CLICK, onAddLabelClick, false, 0, true);					
 						addChild(_addLabel);
 					}
 				}
@@ -46,7 +66,8 @@
 					if( _checkBox == null ) {
 						_checkBox = new CheckBox;
 						_checkBox.label = '';
-						_checkBox.addEventListener(MouseEvent.CLICK, onClick);
+						_checkBox.addEventListener(MouseEvent.CLICK, onCheckBoxClick);
+						_checkBox.selected = item.task.done;
 						addChild(_checkBox);
 					}
 					if( _input == null ) {
@@ -57,7 +78,7 @@
 						_input.setStyle('borderStyle', 'none');
 						_input.setStyle('fontFamily', 'Consolas');
 						_input.setStyle('fontSize', 12);										
-						_input.addEventListener(MouseEvent.CLICK, onClick1);
+						_input.addEventListener(MouseEvent.CLICK, onTextInputClick);
 						_input.addEventListener(FlexEvent.ENTER, onEnter);
 						_input.addEventListener(FocusEvent.FOCUS_IN, onFocusIn);
 						_input.addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
@@ -69,13 +90,17 @@
 						_btnImportant.label = '!';
 						addChild(_btnImportant);
 					}
+					*/
 					if( _btnDelete == null ) {
 						_btnDelete = new Button;
-						_btnDelete.label = 'X';
+						_btnDelete.styleName = 'btnDelete';
 						addChild(_btnDelete);
+						_btnDelete.visible = false;
+						_btnDelete.setStyle('showEffect', fade);
+						_btnDelete.setStyle('hideEffect', fade);
 						_btnDelete.addEventListener(MouseEvent.CLICK, onBtnDelete);						
 					}
-					*/
+					
 					
 				}			 
 				
@@ -86,7 +111,7 @@
 				data.fnDeleteTask(data);			 	
 			}
 			
-			private function onClick1(event:MouseEvent):void {
+			private function onTextInputClick(event:MouseEvent):void {
 				trace('click1');
 				_input.editable = true;
 				_input.setStyle('borderStyle', "solid");
