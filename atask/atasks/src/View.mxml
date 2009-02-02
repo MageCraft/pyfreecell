@@ -13,8 +13,7 @@
 	<mx:HRule width="100%" strokeColor="0xcccccc"/>
 	<mx:Canvas width="100%" height="100%">
 		<local:MyList id="listTasks" itemRenderer="ItemTask" width="100%" height="100%" change="onChanged()"
-			 verticalAlign="middle" paddingTop="0" paddingBottom="0" borderStyle="none"
-			 itemRollOut="itemRollOut(event)" itemRollOver="itemRollOver(event)"/>	
+			 verticalAlign="middle" paddingTop="0" paddingBottom="0" borderStyle="none"/>	
 	</mx:Canvas>	
 		
 	<mx:Script>
@@ -23,17 +22,8 @@
 			import mx.collections.ArrayCollection;
 			include 'engine.as'
 			
-			//private var siteURL:String = 'http://xatasks.appspot.com/';
-			private var siteURL:String = 'http://localhost:8080/';
-			
-			
-			private function itemRollOver(event:ListEvent):void {
-				trace('itemRollOver', event.rowIndex, event.itemRenderer);
-			}
-			
-			private function itemRollOut(event:ListEvent):void {
-				trace('itemRollOut', event.rowIndex, event.itemRenderer);
-			}
+			private var siteURL:String = 'http://xatasks.appspot.com/';
+			//private var siteURL:String = 'http://localhost:8080/';			
 			
 			private function list():void {
 				var url:String = siteURL + 'list';
