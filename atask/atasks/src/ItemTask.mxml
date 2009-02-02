@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" dataChange="onDataChange()" 
 	borderSides="bottom" borderColor="0xcccccc" borderStyle="solid"
-	borderThickness="1">	
+	borderThickness="1">		
 	<mx:Script>
 		<![CDATA[
 			include 'engine.as'
@@ -42,13 +42,15 @@
 						_input.percentWidth = 100;
 						_input.editable = false;
 						_input.setStyle('borderStyle', 'none');
+						_input.setStyle('fontFamily', 'Consolas');
+						_input.setStyle('fontSize', 12);						
 						_input.addEventListener(MouseEvent.CLICK, onClick1);
 						_input.addEventListener(FlexEvent.ENTER, onEnter);
 						_input.addEventListener(FocusEvent.FOCUS_IN, onFocusIn);
 						_input.addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
 						addChild(_input);
 					}
-					
+					/*
 					if( _btnImportant == null ) {
 						_btnImportant = new Button;
 						_btnImportant.label = '!';
@@ -60,6 +62,7 @@
 						addChild(_btnDelete);
 						_btnDelete.addEventListener(MouseEvent.CLICK, onBtnDelete);						
 					}
+					*/
 					
 				}			 
 				
