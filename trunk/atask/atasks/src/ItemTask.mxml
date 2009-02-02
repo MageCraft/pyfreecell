@@ -2,7 +2,8 @@
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" dataChange="onDataChange()" 
 	borderSides="bottom" borderColor="0xcccccc" borderStyle="solid"
 	borderThickness="1" mouseOut="onMouseOut()" mouseOver="onMouseOver()">
-	<mx:Fade id='fade' duration="500"/>		
+	<mx:Fade id='fadeShow' duration="100" alphaFrom="0" alphaTo="1"/>
+	<mx:Fade id='fadeHide' duration="100" alphaFrom="1" alphaTo="0"/>		
 	<mx:Script>
 		<![CDATA[
 			include 'engine.as'
@@ -20,13 +21,16 @@
 			
 			
 			private function onMouseOut():void {
+				
 				if( _btnDelete ) {
+					trace('mouseOut', data.task.content);
 					_btnDelete.visible = false;
 				}
 			}
 			
 			private function onMouseOver():void {
 				if( _btnDelete ) {
+					trace('mouseOver', data.task.content);
 					_btnDelete.visible = true;
 				}
 			} 	
@@ -96,8 +100,8 @@
 						_btnDelete.styleName = 'btnDelete';
 						addChild(_btnDelete);
 						_btnDelete.visible = false;
-						_btnDelete.setStyle('showEffect', fade);
-						_btnDelete.setStyle('hideEffect', fade);
+						_btnDelete.setStyle('showEffect', fadeShow);
+						_btnDelete.setStyle('hideEffect', fadeHide);
 						_btnDelete.addEventListener(MouseEvent.CLICK, onBtnDelete);						
 					}
 					
