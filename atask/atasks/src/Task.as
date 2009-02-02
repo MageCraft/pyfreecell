@@ -7,9 +7,14 @@ package
 		
 		public var content:String;
 		
+		public var done:Boolean=false;
+		
 		public function Task()
 		{
 		}
+		
+		
+		
 
 	}
 }

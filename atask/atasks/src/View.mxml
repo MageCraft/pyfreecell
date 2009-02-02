@@ -13,15 +13,27 @@
 	<mx:HRule width="100%" strokeColor="0xcccccc"/>
 	<mx:Canvas width="100%" height="100%">
 		<local:MyList id="listTasks" itemRenderer="ItemTask" width="100%" height="100%" change="onChanged()"
-			 verticalAlign="middle" paddingTop="0" paddingBottom="0" borderStyle="none"/>	
+			 verticalAlign="middle" paddingTop="0" paddingBottom="0" borderStyle="none"
+			 itemRollOut="itemRollOut(event)" itemRollOver="itemRollOver(event)"/>	
 	</mx:Canvas>	
 		
 	<mx:Script>
 		<![CDATA[
+			import mx.events.ListEvent;
 			import mx.collections.ArrayCollection;
 			include 'engine.as'
 			
-			private var siteURL:String = 'http://xatasks.appspot.com/';
+			//private var siteURL:String = 'http://xatasks.appspot.com/';
+			private var siteURL:String = 'http://localhost:8080/';
+			
+			
+			private function itemRollOver(event:ListEvent):void {
+				trace('itemRollOver', event.rowIndex, event.itemRenderer);
+			}
+			
+			private function itemRollOut(event:ListEvent):void {
+				trace('itemRollOut', event.rowIndex, event.itemRenderer);
+			}
 			
 			private function list():void {
 				var url:String = siteURL + 'list';
@@ -35,6 +47,7 @@
 						var t:Task = new Task;
 						t.key = task.@key;
 						t.content = task.@content;
+						t.done = task.@done == 'false' ? false:true;
 						addItem(t,dp);
 					}
 					addItem(null,dp);									
@@ -104,6 +117,8 @@
 				var vars:URLVariables = new URLVariables;
 				vars.key = task.key;
 				vars.content = task.content;
+				vars.done = task.done;
+				trace(vars.toString());
 				var resultHandler:Function = function(event:Event):void {
 					trace(URLLoader(event.target).data);
 				}
