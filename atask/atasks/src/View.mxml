@@ -47,10 +47,11 @@
 			}
 			
 			private function complete():void {
+				trace('complete');
 				var t:Timer = new Timer(1000,1);
 				t.addEventListener(TimerEvent.TIMER_COMPLETE, function(event:TimerEvent):void {
 					list();
-				},false,0,true);
+				});
 				t.start();
 			}
 			

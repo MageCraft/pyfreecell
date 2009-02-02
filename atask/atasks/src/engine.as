@@ -7,9 +7,9 @@ private function send(url:String, resultHandler:Function, method:String=URLReque
 	if( vars )
 		req.data = vars;				 
 	loader.dataFormat = dataFormat;				
-	loader.addEventListener(Event.COMPLETE, resultHandler,false,0,true);
-	loader.addEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, onHttpResponseStatus,false,0,true);
-	loader.addEventListener(IOErrorEvent.IO_ERROR, onIOError, false, 0, true);
+	loader.addEventListener(Event.COMPLETE, resultHandler);
+	loader.addEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, onHttpResponseStatus);
+	loader.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
 	loader.load(req);			
 }
 
