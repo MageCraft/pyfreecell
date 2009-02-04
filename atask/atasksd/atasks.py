@@ -21,19 +21,15 @@ class Task(db.Model):
     done = db.BooleanProperty(default=False)
     content = db.StringProperty(multiline=True)
     date = db.DateTimeProperty(auto_now_add=True)
+    email=db.StringProperty()
 
-
-
-class Login(webapp.RequestHandler):
-    def post(self):
-        user = self.request.get('user');
-        passwd = self.request.get('password');
-        self.response.out.write('user=%s, password=%s'%(user, passwd))
 
 class List(webapp.RequestHandler):
     def get(self):
+       email = self.request.get('email').lower()       
+       trace(email)
+       tasks = Task.gql("WHERE email = :1", email)
        doc = minidom.Document()
-       tasks = Task.all()
        tasks_node = doc.createElement('tasks')
        doc.appendChild(tasks_node)
        for task in tasks:
@@ -50,6 +46,7 @@ class Add(webapp.RequestHandler):
     def post(self):
         task = Task()
         task.content = self.request.get('content');
+        task.email = self.request.get('email');
         task.put()
         self.response.out.write('key=%s' % (str(task.key())) )
 
@@ -68,7 +65,9 @@ class Update(webapp.RequestHandler):
         key = self.request.get('key');
         content = self.request.get('content')
         doneStr = self.request.get('done')
-        trace(key, content, doneStr);
+        trace(key) 
+        trace(content)
+        trace(doneStr)
         done = True
         if doneStr == 'false':
             done = False
@@ -89,7 +88,6 @@ class MainPage(webapp.RequestHandler):
 application = webapp.WSGIApplication(
                                      [
                                       ('/', MainPage),
-                                      ('/login', Login),
                                       ('/list', List),
                                       ('/add', Add),
                                       ('/delete', Delete),

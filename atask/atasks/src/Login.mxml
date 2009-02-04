@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" fontFamily="Consolas" fontSize="11" backgroundColor="0xffffff"
+	 creationComplete="complete()" paddingLeft="3">
+	<mx:Label text="Login in with your google account" fontSize="13"/>
+	<mx:Spacer height="5"/>
+	<mx:HBox>
+		<mx:Label text="Email:" width="{labelPasswd.width}"/>
+		<mx:TextInput id="email"/>		
+	</mx:HBox>
+	<mx:HBox>
+		<mx:Label id="labelPasswd" text="Password:"/>
+		<mx:TextInput id='passwd' displayAsPassword="true"/>
+	</mx:HBox>	
+	<mx:CheckBox label="Remember my password"/>
+	<mx:CheckBox label="Sign in automaticlly"/>	
+	<mx:Spacer height="10"/>
+	
+	<mx:Canvas width="100%">	
+	<mx:Button label="Sign In" horizontalCenter="0" click="SignIn()"/>	
+	</mx:Canvas>
+	<mx:Script>
+		<![CDATA[
+			include 'engine.as'
+			
+			private function complete():void {
+				email.text = 'hustzxq524@gmail.com';
+			}
+			
+			private function SignIn():void {
+				var url:String = 'https://www.google.com/accounts/ClientLogin';
+				var vars:URLVariables = new URLVariables;
+				vars.accountType = 'GOOGLE';
+				vars.Email = email.text;
+				vars.Passwd = passwd.text;
+				vars.service = 'xapi';
+				vars.source = 'Frank-xtasks-0.01';
+				
+				var resultHandler:Function = function(event:Event):void {
+					var loader:URLLoader = event.target as URLLoader;
+					trace(loader.data);
+				}
+				
+				var httpResponseHandler:Function = function(event:HTTPStatusEvent):void {
+					var statusCode:int = event.status;
+					if( statusCode == 200 ) {
+						trace('login sucessfully');
+						var account:Account = new Account;
+						account.email = vars.Email;
+						data.onLogin(account);
+					}
+					else {
+						trace('login failed, status code is', event.status);
+					}					
+				}
+				send1(url, resultHandler, httpResponseHandler, URLRequestMethod.POST, vars);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	
+</mx:VBox>
