@@ -13,10 +13,17 @@
 					addChild(test);
 				}
 				else {
+					/*
+					var login:Login = new Login;
+					login.percentHeight = 100;
+					login.percentWidth = 100;
+					addChild(login);
+					*/
 					var view:View = new View;
 					view.percentHeight = 100;
 					view.percentWidth = 100;
 					addChild(view);
+					
 				}
 			}
 		]]>
