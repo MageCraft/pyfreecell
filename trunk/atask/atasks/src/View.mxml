@@ -99,16 +99,17 @@
 				}
 			}
 			
-			private function addTask():void {				
+			private function addTask(task:Task):void {				
 				trace('onBtnAdd');							
 				var url:String = siteURL + 'add';
 				var vars:URLVariables = new URLVariables;
-				vars.content = '';
+				vars.content = task ? task.content : '';
 				vars.email = currentUser.email;
 				var resultHandler:Function = function(event:Event):void {
 					var key:String = URLLoader(event.target).data.key;					
 					var t:Task = new Task;
 					t.key = key;
+					t.content = task.content;
 					var dp:ArrayCollection = listTasks.dataProvider as ArrayCollection;	
 					addItem(t,dp,true);					
 				}
