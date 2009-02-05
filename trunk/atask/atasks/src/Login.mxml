@@ -5,14 +5,14 @@
 	<mx:Spacer height="5"/>
 	<mx:HBox>
 		<mx:Label text="Email:" width="{labelPasswd.width}"/>
-		<mx:TextInput id="email"/>		
+		<mx:ComboBox id="email" editable="true" cornerRadius="0" paddingLeft="0" paddingRight="0" fontWeight="normal"/>		
 	</mx:HBox>
 	<mx:HBox>
 		<mx:Label id="labelPasswd" text="Password:"/>
 		<mx:TextInput id='passwd' displayAsPassword="true"/>
 	</mx:HBox>	
-	<mx:CheckBox label="Remember my password"/>
-	<mx:CheckBox label="Sign in automaticlly"/>	
+	<mx:CheckBox label="Remember my password" id="rememberPasswd"/>
+	<mx:CheckBox label="Sign in automaticlly" id="autoSignIn"/>	
 	<mx:Spacer height="10"/>
 	
 	<mx:Canvas width="100%">	
@@ -20,10 +20,81 @@
 	</mx:Canvas>
 	<mx:Script>
 		<![CDATA[
+			import mx.collections.ArrayCollection;
 			include 'engine.as'
 			
+			private var _configDoc:XML;
+			
+			private static const CONFIG_FILE_NAME:String = 'config.xml';
+			
+			private var configFile:File;
+			
+			private function loadConfig():void {				
+				var fs:FileStream = new FileStream;				
+				if(!configFile.exists) {
+					_configDoc = <config></config>;
+					fs.open(configFile, FileMode.WRITE);
+					fs.writeUTFBytes(_configDoc.toXMLString());
+				} else {
+					fs.open(configFile, FileMode.READ);
+					_configDoc = new XML(fs.readUTFBytes(fs.bytesAvailable));
+				}
+				fs.close();
+			}
+			
+			private function putConfig():void {
+				var fs:FileStream = new FileStream;
+				fs.open(configFile, FileMode.WRITE);
+				fs.writeUTFBytes(_configDoc.toXMLString());
+				fs.close();
+			}
+			
 			private function complete():void {
-				email.text = 'hustzxq524@gmail.com';
+				//configFile = File.applicationDirectory.resolvePath(CONFIG_FILE_NAME);
+				configFile = new File(File.applicationDirectory.resolvePath(CONFIG_FILE_NAME).nativePath);
+				trace(configFile.nativePath);
+				loadConfig();
+				var dp:ArrayCollection = new ArrayCollection;
+				var users:XMLList = _configDoc.user;
+				var lastSignInUser:XML;
+				var selectedItem:Object;
+				for each(var user:XML in users) {
+					var d:Object = {label:user.email};					
+					dp.addItem(d);
+					if( user.lastSignIn == 'true' ) {
+						lastSignInUser = user;
+						selectedItem = d;
+					}
+				}
+				email.dataProvider = dp;				
+				if( lastSignInUser ) {
+					email.selectedItem = selectedItem;
+					passwd.text = lastSignInUser.password;
+					rememberPasswd.selected = passwd.text == '' ? false:true;
+				}
+			}
+			
+			private function storeCurrentUserInfo(currentUser:Account):void {
+				var users:XMLList = _configDoc.user;
+				var newUser:Boolean = true;
+				for each( var user:XML in users) {
+					if( user.email == currentUser.email ) {
+						newUser = false;
+						user.password = currentUser.passwd;
+						user.lastSignIn = 'true';
+						
+					} else {
+						user.lastSignIn = 'false';
+					}
+				}
+				if( newUser ) {
+					var userNode:XML = <user></user>;
+					userNode.email = currentUser.email;
+					userNode.password = currentUser.passwd;
+					userNode.lastSignIn = 'true';
+					_configDoc.appendChild(userNode);
+				}
+				putConfig(); 
 			}
 			
 			private function SignIn():void {
@@ -46,10 +117,15 @@
 						trace('login sucessfully');
 						var account:Account = new Account;
 						account.email = vars.Email;
+						if( rememberPasswd.selected ) {
+							account.passwd = vars.Passwd;
+						}
+						storeCurrentUserInfo(account);
 						data.onLogin(account);
 					}
 					else {
 						trace('login failed, status code is', event.status);
+						
 					}					
 				}
 				send1(url, resultHandler, httpResponseHandler, URLRequestMethod.POST, vars);
