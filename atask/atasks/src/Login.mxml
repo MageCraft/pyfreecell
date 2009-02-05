@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" fontFamily="Consolas" fontSize="11" backgroundColor="0xffffff"
-	 creationComplete="complete()" paddingLeft="3">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="0xffffff"
+	 creationComplete="complete()" paddingLeft="3"
+	 styleName="MyFont" fontSize="11">
 	<mx:Label text="Login in with your google account" fontSize="13"/>
 	<mx:Spacer height="5"/>
 	<mx:HBox>

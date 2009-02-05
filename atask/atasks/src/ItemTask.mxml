@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" dataChange="onDataChange()" 
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" dataChange="onDataChange()" 
 	borderSides="bottom" borderColor="0xcccccc" borderStyle="solid"
-	borderThickness="1" mouseOut="onMouseOut()" mouseOver="onMouseOver()">
-	<mx:Fade id='fadeShow' duration="100" alphaFrom="0" alphaTo="1"/>
-	<mx:Fade id='fadeHide' duration="100" alphaFrom="1" alphaTo="0"/>		
+	borderThickness="1" horizontalScrollPolicy="off">
+	<mx:CheckBox id="cbDone" change="onCbDoneChange()"/>
+	<mx:Label id="lbTaskContent" left="{cbDone.width}" styleName="MyFont" fontSize="12"
+	    truncateToFit="true" width="{width-cbDone.width}" verticalCenter="2" paddingLeft="2"
+	     mouseOut="onMouseOut()" mouseOver="onMouseOver()" click="onLbTaskContentClick()"/>
+	<mx:Button styleName="btnDelete" id="btnDelete" right="5" alpha="0" click="onBtnDelete(event)"/>
+	<mx:Fade id="fadeShow" alphaFrom="0" alphaTo="1" duration="300" target="{btnDelete}"/>
+	<mx:Fade id="fadeHide" alphaFrom="1" alphaTo="0" duration="300" target="{btnDelete}"/>
+	<mx:TextInput id="tiTaskContent" visible="false" left="{cbDone.width}" width="{lbTaskContent.width}"
+	    styleName="MyFont" fontSize="12" borderColor="0x0000ff" borderStyle="solid" borderThickness="1"
+	    cornerRadius="3" paddingLeft="2" verticalCenter="0" 
+	    enter="onTiTaskContentEnter(event)" focusOut="onTiTaskContentFocusOut(event)"/>		
 	<mx:Script>
 		<![CDATA[
 			include 'engine.as'
@@ -21,23 +30,28 @@
 			
 			
 			private function onMouseOut():void {
-				
-				if( _btnDelete ) {
+				if( data.task ) {
 					trace('mouseOut', data.task.content);
-					_btnDelete.visible = false;
+					if( fadeShow.isPlaying) {
+						fadeShow.stop();
+					}
+					fadeHide.play();
 				}
 			}
 			
 			private function onMouseOver():void {
-				if( _btnDelete ) {
+				if( data.task ) {
 					trace('mouseOver', data.task.content);
-					_btnDelete.visible = true;
-				}
+					if( fadeHide.isPlaying ) {
+						fadeHide.stop();
+					}
+					fadeShow.play();
+				}			
 			} 	
 						
-			private function onCheckBoxClick(event:MouseEvent):void {
+			private function onCbDoneChange():void {
 				var item:Object = data as Object;
-				item.task.done = _checkBox.selected;
+				item.task.done = cbDone.selected;
 				item.fnUpdateTask(item.task);
 			}
 			
@@ -47,67 +61,15 @@
 				item.fnAddTask();	
 			}
 			
-			private function onDataChange():void {
-				var item:Object = data as Object;
-				if( item.task == null ) {
-					if( _checkBox == null ) {
-						_checkBox = new CheckBox;
-						_checkBox.label = '';						
-						_checkBox.visible = false;
-						addChild(_checkBox);
-					}
-					if( _addLabel == null ) {
-						_addLabel = new Label;
-						_addLabel.percentWidth=100;
-						_addLabel.setStyle('fontFamily', 'Consolas');
-						_addLabel.setStyle('fontSize', 12);						
-						_addLabel.text = 'Add new task...';	
-						_addLabel.addEventListener(MouseEvent.CLICK, onAddLabelClick, false, 0, true);					
-						addChild(_addLabel);
-					}
-				}
-				else {
-					if( _checkBox == null ) {
-						_checkBox = new CheckBox;
-						_checkBox.label = '';
-						_checkBox.addEventListener(MouseEvent.CLICK, onCheckBoxClick);
-						_checkBox.selected = item.task.done;
-						addChild(_checkBox);
-					}
-					if( _input == null ) {
-						_input = new TextInput;
-						_input.text = data.task.content;
-						_input.percentWidth = 100;
-						_input.editable = false;
-						_input.setStyle('borderStyle', 'none');
-						_input.setStyle('fontFamily', 'Consolas');
-						_input.setStyle('fontSize', 12);										
-						_input.addEventListener(MouseEvent.CLICK, onTextInputClick);
-						_input.addEventListener(FlexEvent.ENTER, onEnter);
-						_input.addEventListener(FocusEvent.FOCUS_IN, onFocusIn);
-						_input.addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
-						addChild(_input);
-					}
-					/*
-					if( _btnImportant == null ) {
-						_btnImportant = new Button;
-						_btnImportant.label = '!';
-						addChild(_btnImportant);
-					}
-					*/
-					if( _btnDelete == null ) {
-						_btnDelete = new Button;
-						_btnDelete.styleName = 'btnDelete';
-						addChild(_btnDelete);
-						_btnDelete.visible = false;
-						_btnDelete.setStyle('showEffect', fadeShow);
-						_btnDelete.setStyle('hideEffect', fadeHide);
-						_btnDelete.addEventListener(MouseEvent.CLICK, onBtnDelete);						
-					}
-					
-					
-				}			 
-				
+			private function onDataChange():void {				
+				var task:Task = data.task;
+				if( task ) {
+					lbTaskContent.text = task.content;
+					cbDone.selected = task.done;
+				} else {
+					lbTaskContent.text = "Add new task...";
+					cbDone.visible = false;
+				}				
 			}
 			
 			private function onBtnDelete(event:MouseEvent):void {
@@ -115,20 +77,30 @@
 				data.fnDeleteTask(data);			 	
 			}
 			
-			private function onTextInputClick(event:MouseEvent):void {
-				trace('click1');
-				_input.editable = true;
-				_input.setStyle('borderStyle', "solid");
-				_input.setStyle('borderColor', 0x0000ff);
-				_input.setStyle('borderThickness', 1);
-				_input.setStyle('cornerRadius', 3);
+			private function onLbTaskContentClick():void {
+				if( data.task ) {
+					tiTaskContent.visible = true;
+					tiTaskContent.text = lbTaskContent.text;
+					tiTaskContent.setFocus();					
+				} else {
+					tiTaskContent.visible = true;
+					tiTaskContent.setFocus();
+				}
 			}
 			
-			private function onEnter(event:Event):void {
+			
+			
+			
+			private function onTiTaskContentEnter(event:Event):void {
 				trace('enter',event.target.text);
-				_input.editable = false;
-				_input.setStyle('borderStyle', 'none');
-				data.task.content = _input.text;
+				updateTaskContent();
+			}
+			
+			private function updateTaskContent():void {
+				data.task.content = tiTaskContent.text;
+				lbTaskContent.text = tiTaskContent.text;
+				tiTaskContent.visible = false;
+				tiTaskContent.text = '';
 				data.fnUpdateTask(data.task);
 			}
 			
@@ -136,12 +108,11 @@
 				trace('focusIn', event.target.text);
 			}
 			
-			private function onFocusOut(event:FocusEvent):void {
+			private function onTiTaskContentFocusOut(event:FocusEvent):void {
 				trace('focusOut', event.target.text);
-				_input.editable = false;
-				_input.setStyle('borderStyle', 'none');
+				updateTaskContent();
 			}
 			
 		]]>
 	</mx:Script>
-</mx:HBox>
+</mx:Canvas>
