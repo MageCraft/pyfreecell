@@ -4,7 +4,7 @@
 	
 	<local:Login id="loginView" width="100%" height="100%" creationComplete="loginViewComplete()"/>
 	
-	<mx:VBox id="taskView" creationComplete="complete()" verticalGap="0">	
+	<mx:VBox id="taskView" creationComplete="taskViewComplete()" verticalGap="0">	
 		<mx:VBox width="100%" backgroundColor="0xFFFFFF">
 			<mx:Label fontFamily="Consolas" fontSize="16" text="My Tasks List"/>	
 		</mx:VBox>			
@@ -19,6 +19,9 @@
 		<![CDATA[
 			import mx.events.ListEvent;
 			import mx.collections.ArrayCollection;
+			
+			private var isTaskViewComplete:Boolean = false;
+			
 			include 'engine.as'
 			
 			private var currentUser:Account;
@@ -27,6 +30,7 @@
 			//private var siteURL:String = 'http://localhost:8080/';		
 					
 			private function loginViewComplete():void {
+				
 				loginView.data = new Object;
 				loginView.data.onLogin = onLogin;
 			}
@@ -34,6 +38,9 @@
 			private function onLogin(account:Account):void {
 				currentUser = account;
 				selectedChild = taskView;
+				if( isTaskViewComplete ) {
+					taskViewComplete();
+				}
 			}
 			
 			private function list():void {
@@ -59,8 +66,14 @@
 				send(url, resultHandler, URLRequestMethod.GET, vars);
 			}
 			
-			private function complete():void {
-				trace('complete');
+			private function taskViewComplete():void {
+				trace('task view complete');				
+				if( currentUser == null ) {
+					isTaskViewComplete = true;
+					trace('not login yet');
+					return;
+				}
+				
 				var t:Timer = new Timer(1000,1);
 				t.addEventListener(TimerEvent.TIMER_COMPLETE, function(event:TimerEvent):void {
 					list();					
