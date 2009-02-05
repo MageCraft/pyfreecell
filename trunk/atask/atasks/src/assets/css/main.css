@@ -1,10 +1,16 @@
 /* CSS file */
 
+/*
 @font-face {
    src:url("../font/Consolas.ttf");
    fontFamily: Consolas;
 }
-
+*/
 Button.btnDelete {
 	skin: Embed("../img/delete.gif");
+}
+
+
+.MyFont {
+	fontFamily: Consolas, Arial, Helvetica, "_sans";
 }

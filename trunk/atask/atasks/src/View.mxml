@@ -6,12 +6,12 @@
 	
 	<mx:VBox id="taskView" creationComplete="taskViewComplete()" verticalGap="0">	
 		<mx:VBox width="100%" backgroundColor="0xFFFFFF">
-			<mx:Label fontFamily="Consolas" fontSize="16" text="My Tasks List"/>	
+			<mx:Label styleName="MyFont" fontSize="16" text="My Tasks List"/>	
 		</mx:VBox>			
 		<mx:HRule width="100%" strokeColor="0xcccccc"/>
 		<mx:Canvas width="100%" height="100%">
 			<local:MyList id="listTasks" itemRenderer="ItemTask" width="100%" height="100%" change="onChanged()"
-				 verticalAlign="middle" paddingTop="0" paddingBottom="0" borderStyle="none"/>	
+				 verticalAlign="middle" paddingTop="0" paddingBottom="0" borderStyle="none" horizontalScrollPolicy="off"/>	
 		</mx:Canvas>
 	</mx:VBox>	
 		
