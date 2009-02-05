@@ -86,22 +86,25 @@
 					tiTaskContent.visible = true;
 					tiTaskContent.setFocus();
 				}
-			}
-			
-			
-			
+			}			
 			
 			private function onTiTaskContentEnter(event:Event):void {
 				trace('enter',event.target.text);
-				updateTaskContent();
+				if( data.task ) {
+					updateTaskContent();
+				} else {
+					var task:Task = new Task;
+					task.content = tiTaskContent.text;					
+					tiTaskContent.text = '';
+					data.fnAddTask(task);				}
 			}
 			
-			private function updateTaskContent():void {
+			private function updateTaskContent():void {				
 				data.task.content = tiTaskContent.text;
 				lbTaskContent.text = tiTaskContent.text;
 				tiTaskContent.visible = false;
 				tiTaskContent.text = '';
-				data.fnUpdateTask(data.task);
+				data.fnUpdateTask(data.task);			
 			}
 			
 			private function onFocusIn(event:FocusEvent):void {
@@ -110,7 +113,15 @@
 			
 			private function onTiTaskContentFocusOut(event:FocusEvent):void {
 				trace('focusOut', event.target.text);
-				updateTaskContent();
+				if( data.task ) {
+					updateTaskContent();
+				} else {
+					var task:Task = new Task;
+					task.content = tiTaskContent.text;
+					tiTaskContent.visible = false;
+					tiTaskContent.text = '';
+					data.fnAddTask(task);
+				}
 			}
 			
 		]]>
