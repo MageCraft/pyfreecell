@@ -5,7 +5,8 @@
 	<mx:Spacer height="5"/>
 	<mx:HBox>
 		<mx:Label text="Email:" width="{labelPasswd.width}"/>
-		<mx:ComboBox id="email" editable="true" cornerRadius="0" paddingLeft="0" paddingRight="0" fontWeight="normal"/>		
+		<mx:ComboBox id="email" editable="true" cornerRadius="0" paddingLeft="0" paddingRight="0" fontWeight="normal"
+			 change="onEmailChanged()"/>		
 	</mx:HBox>
 	<mx:HBox>
 		<mx:Label id="labelPasswd" text="Password:"/>
@@ -49,6 +50,14 @@
 				fs.close();
 			}
 			
+			private function onEmailChanged():void {
+				if( rememberPasswd.selected ) {
+					passwd.text = email.selectedItem.passwd;
+				} else {
+					passwd.text = '';
+				}
+			}
+			
 			private function complete():void {
 				//configFile = File.applicationDirectory.resolvePath(CONFIG_FILE_NAME);
 				configFile = new File(File.applicationDirectory.resolvePath(CONFIG_FILE_NAME).nativePath);
@@ -59,7 +68,7 @@
 				var lastSignInUser:XML;
 				var selectedItem:Object;
 				for each(var user:XML in users) {
-					var d:Object = {label:user.email};					
+					var d:Object = {label:user.email, passwd:user.password};					
 					dp.addItem(d);
 					if( user.lastSignIn == 'true' ) {
 						lastSignInUser = user;
