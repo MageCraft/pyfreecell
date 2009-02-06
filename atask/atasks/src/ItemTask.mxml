@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" dataChange="onDataChange()" 
 	borderSides="bottom" borderColor="0xcccccc" borderStyle="solid"
-	borderThickness="1" horizontalScrollPolicy="off">
+	borderThickness="1" horizontalScrollPolicy="off" creationComplete="complete()"
+	rollOver="onRollOver(event)" rollOut="onRollOut(event)">
 	<mx:CheckBox id="cbDone" change="onCbDoneChange()"/>
 	<mx:Label id="lbTaskContent" left="{cbDone.width}" styleName="MyFont" fontSize="12"
-	    truncateToFit="true" width="{width-cbDone.width}" verticalCenter="2" paddingLeft="2"
-	     mouseOut="onMouseOut()" mouseOver="onMouseOver()" click="onLbTaskContentClick()"/>
-	<mx:Button styleName="btnDelete" id="btnDelete" right="5" alpha="0" click="onBtnDelete(event)"/>
-	<mx:Fade id="fadeShow" alphaFrom="0" alphaTo="1" duration="300" target="{btnDelete}"/>
-	<mx:Fade id="fadeHide" alphaFrom="1" alphaTo="0" duration="300" target="{btnDelete}"/>
+	    truncateToFit="true" width="{width-cbDone.width}" verticalCenter="2" paddingLeft="2"	     
+	    click="onLbTaskContentClick()"/>
+	<mx:Button styleName="btnDelete" id="btnDelete" right="5" alpha="0" click="onBtnDelete(event)"
+		verticalCenter="0"/>
 	<mx:TextInput id="tiTaskContent" visible="false" left="{cbDone.width}" width="{lbTaskContent.width}"
 	    styleName="MyFont" fontSize="12" borderColor="0x0000ff" borderStyle="solid" borderThickness="1"
 	    cornerRadius="3" paddingLeft="2" verticalCenter="0" 
-	    enter="onTiTaskContentEnter(event)" focusOut="onTiTaskContentFocusOut(event)"/>		
+	    enter="onTiTaskContentEnter(event)" focusOut="onTiTaskContentFocusOut(event)"/>
+	    
+	<mx:Fade id="fadeShow"/>
+	<mx:Fade id="fadeHide"/>
+			
 	<mx:Script>
 		<![CDATA[
 			include 'engine.as'
@@ -20,55 +24,72 @@
 			import mx.controls.Label;
 			import mx.controls.TextInput;
 			import mx.controls.CheckBox;
-			import mx.events.FlexEvent;			
+			import mx.events.FlexEvent;				
 			
-			private var _checkBox:CheckBox;
-			private var _input:TextInput;
-			private var _addLabel:Label;
-			private var _btnDelete:Button;
-			private var _btnImportant:Button;	
+			private var _showBtnDeleteTimer:Timer = new Timer(200,1);	
 			
-			
-			private function onMouseOut():void {
-				if( data.task ) {
-					trace('mouseOut', data.task.content);
-					if( fadeShow.isPlaying) {
-						fadeShow.stop();
-					}
-					fadeHide.play();
-				}
+			private function complete():void {
+				_showBtnDeleteTimer.addEventListener(TimerEvent.TIMER_COMPLETE, function(event:TimerEvent):void {
+					fadeShow.alphaFrom = btnDelete.alpha;
+					fadeShow.alphaTo = 1;
+					fadeShow.target = btnDelete;
+					fadeShow.duration = 300;
+					fadeShow.play();
+				});
 			}
 			
-			private function onMouseOver():void {
+			private function onRollOver(event:MouseEvent):void {					
 				if( data.task ) {
-					trace('mouseOver', data.task.content);
-					if( fadeHide.isPlaying ) {
-						fadeHide.stop();
+					//trace('onRollOver', data.task.content);					
+					_showBtnDeleteTimer.start();
+				}	
+			}
+			
+			private function onRollOut(event:MouseEvent):void {				
+				if( data.task ) {
+					//trace('onRollOut', data.task.content);					
+					if( _showBtnDeleteTimer.running ) {
+						_showBtnDeleteTimer.stop();
 					}
-					fadeShow.play();
-				}			
-			} 	
+					if( fadeShow.isPlaying ) {
+						fadeShow.stop();
+					}
+					fadeHide.alphaFrom = btnDelete.alpha;
+					fadeHide.alphaTo = 0;
+					fadeHide.target = btnDelete;
+					fadeHide.duration = 300;
+					fadeHide.play();										
+				}	
+			}		 	
 						
 			private function onCbDoneChange():void {
 				var item:Object = data as Object;
 				item.task.done = cbDone.selected;
 				item.fnUpdateTask(item.task);
-			}
+			}			
 			
-			private function onAddLabelClick(event:MouseEvent):void {
-				trace('click add new task');
-				var item:Object = data as Object;
-				item.fnAddTask();	
-			}
 			
-			private function onDataChange():void {				
+			private function onDataChange():void {
+				trace('onDataChange');				
 				var task:Task = data.task;
 				if( task ) {
+					//trace(task.content);
 					lbTaskContent.text = task.content;
-					cbDone.selected = task.done;
+					cbDone.selected = task.done;					
+					cbDone.visible = true;					
+					btnDelete.alpha = 0;
 				} else {
+					trace('task.content is null');
 					lbTaskContent.text = "Add new task...";
 					cbDone.visible = false;
+					btnDelete.alpha = 0;
+				}
+				trace(data.editableAtFirst);
+				if( data.editableAtFirst ) {					
+					tiTaskContent.visible = true;
+					data.editableAtFirst = false;
+				} else {
+					tiTaskContent.visible = false;
 				}				
 			}
 			
@@ -81,7 +102,7 @@
 				if( data.task ) {
 					tiTaskContent.visible = true;
 					tiTaskContent.text = lbTaskContent.text;
-					tiTaskContent.setFocus();					
+					tiTaskContent.setFocus();										
 				} else {
 					tiTaskContent.visible = true;
 					tiTaskContent.setFocus();
@@ -89,22 +110,29 @@
 			}			
 			
 			private function onTiTaskContentEnter(event:Event):void {
-				trace('enter',event.target.text);
-				if( data.task ) {
-					updateTaskContent();
-				} else {
-					var task:Task = new Task;
-					task.content = tiTaskContent.text;					
-					tiTaskContent.text = '';
-					data.fnAddTask(task);				}
+				trace('enter', event.target.text);				
+				updateTaskContent();				
 			}
 			
-			private function updateTaskContent():void {				
-				data.task.content = tiTaskContent.text;
-				lbTaskContent.text = tiTaskContent.text;
+			private function updateTaskContent():void {
+				if( data.task ) {
+					if( tiTaskContent.text != data.task.content ) {
+						data.task.content = tiTaskContent.text;
+						lbTaskContent.text = tiTaskContent.text;
+						data.fnUpdateTask(data.task);
+					}
+				}
+				else {
+					if( tiTaskContent.text != '' ) {
+						var task:Task = new Task;
+						task.content = tiTaskContent.text;
+						data.task = task;
+						data.fnAddTask(task);					
+						onDataChange();	
+					}			
+				}			
 				tiTaskContent.visible = false;
-				tiTaskContent.text = '';
-				data.fnUpdateTask(data.task);			
+				tiTaskContent.text = '';							
 			}
 			
 			private function onFocusIn(event:FocusEvent):void {
@@ -112,16 +140,8 @@
 			}
 			
 			private function onTiTaskContentFocusOut(event:FocusEvent):void {
-				trace('focusOut', event.target.text);
-				if( data.task ) {
-					updateTaskContent();
-				} else {
-					var task:Task = new Task;
-					task.content = tiTaskContent.text;
-					tiTaskContent.visible = false;
-					tiTaskContent.text = '';
-					data.fnAddTask(task);
-				}
+				trace('focusOut', event.target.text);				
+				updateTaskContent();				
 			}
 			
 		]]>
