@@ -28,7 +28,7 @@ class List(webapp.RequestHandler):
     def get(self):
        email = self.request.get('email').lower()       
        trace(email)
-       tasks = Task.gql("WHERE email = :1", email)
+       tasks = Task.gql("WHERE email = :1 ORDER BY date", email)
        doc = minidom.Document()
        tasks_node = doc.createElement('tasks')
        doc.appendChild(tasks_node)
