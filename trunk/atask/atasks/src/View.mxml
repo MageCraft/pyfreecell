@@ -99,12 +99,13 @@
 				trace('onChanged');				
 			}
 			
-			private function addItem(task:Task, dp:ArrayCollection, newTask:Boolean=false):void {				
+			private function addItem(task:Task, dp:ArrayCollection, newTask:Boolean=false, continueAdd:Boolean=false):void {				
 				var item:Object = new Object;
 				item.task = task;
 				item.fnDeleteTask = deleteTask;
 				item.fnUpdateTask = updateTask;
-				item.fnAddTask = addTask;				
+				item.fnAddTask = addTask;
+				item.editableAtFirst = continueAdd;				
 				
 				dp.addItem(item);
 				
@@ -114,8 +115,8 @@
 				
 			}
 			
-			private function addTask(task:Task):void {				
-				trace('onBtnAdd');							
+			private function addTask(task:Task, continueAdd:Boolean=false):void {				
+				trace('addTask');							
 				var url:String = siteURL + 'add';
 				var vars:URLVariables = new URLVariables;
 				vars.content = task ? task.content : '';
@@ -124,7 +125,7 @@
 					var key:String = URLLoader(event.target).data.key;					
 					task.key = key;
 					var dp:ArrayCollection = listTasks.dataProvider as ArrayCollection;	
-					addItem(null,dp,true);					
+					addItem(null,dp,true, continueAdd);					
 				}
 				send(url,resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);
 			}						
