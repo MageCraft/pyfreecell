@@ -14,3 +14,17 @@ Button.btnDelete {
 .MyFont {
 	fontFamily: Consolas, Arial, Helvetica, "_sans";
 }
+
+.AlertMessage {
+	padding:0;
+	fontFamily: Consolas, Arial;
+	fontSize:11;
+}
+.AlertTitle {
+	fontFamily: Consolas, Arial;
+	fontSize:12;
+}
+Alert {
+	messageStyleName: 'AlertMessage';
+	titleStyleName: 'AlertTitle';
+}
