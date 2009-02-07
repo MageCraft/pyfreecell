@@ -18,10 +18,12 @@
 	<mx:Spacer height="10"/>
 	
 	<mx:Canvas width="100%">	
-	<mx:Button label="Sign In" horizontalCenter="0" click="SignIn()"/>	
-	</mx:Canvas>
+	<mx:Button id="btnSignIn" label="Sign In" horizontalCenter="0" click="SignIn()"/>	
+	</mx:Canvas>	
+	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
 			import mx.collections.ArrayCollection;
 			include 'engine.as'
 			
@@ -59,6 +61,14 @@
 				}
 			}
 			
+			private function doAutoSignIn():void {
+				var t:Timer = new Timer(1000,1);
+				t.addEventListener(TimerEvent.TIMER_COMPLETE, function(event:TimerEvent):void {
+					SignIn();
+				});
+				t.start();
+			}
+			
 			private function complete():void {
 				//configFile = File.applicationDirectory.resolvePath(CONFIG_FILE_NAME);
 				configFile = new File(File.applicationDirectory.resolvePath(CONFIG_FILE_NAME).nativePath);
@@ -80,7 +90,13 @@
 				if( lastSignInUser ) {
 					email.selectedItem = selectedItem;
 					passwd.text = lastSignInUser.password;
-					rememberPasswd.selected = passwd.text == '' ? false:true;
+					rememberPasswd.selected = lastSignInUser.rememberPasswd == 'true' ? true : false;
+					autoSignIn.selected = lastSignInUser.autoSignIn == 'true' ? true : false;
+					if( autoSignIn.selected) {
+						passwd.enabled = false;
+						btnSignIn.enabled = false;						
+						doAutoSignIn();
+					}
 				}
 			}
 			
@@ -92,6 +108,8 @@
 						newUser = false;
 						user.password = currentUser.passwd;
 						user.lastSignIn = 'true';
+						user.rememberPasswd= rememberPasswd.selected?'true':'false';
+						user.autoSignIn = autoSignIn.selected ? 'true' : 'false';
 						
 					} else {
 						user.lastSignIn = 'false';
@@ -102,6 +120,8 @@
 					userNode.email = currentUser.email;
 					userNode.password = currentUser.passwd;
 					userNode.lastSignIn = 'true';
+					user.rememberPasswd= rememberPasswd.selected?'true':'false';
+					user.autoSignIn = autoSignIn.selected ? 'true' : 'false';
 					_configDoc.appendChild(userNode);
 				}
 				putConfig(); 
@@ -134,8 +154,8 @@
 						data.onLogin(account);
 					}
 					else {
-						trace('login failed, status code is', event.status);
-						
+						trace('login failed, status code is', event.status);						
+						Alert.show('Please try again!', 'Login error');						
 					}					
 				}
 				send1(url, resultHandler, httpResponseHandler, URLRequestMethod.POST, vars);
