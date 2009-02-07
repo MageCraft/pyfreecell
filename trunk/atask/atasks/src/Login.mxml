@@ -120,8 +120,8 @@
 					userNode.email = currentUser.email;
 					userNode.password = currentUser.passwd;
 					userNode.lastSignIn = 'true';
-					user.rememberPasswd= rememberPasswd.selected?'true':'false';
-					user.autoSignIn = autoSignIn.selected ? 'true' : 'false';
+					userNode.rememberPasswd= rememberPasswd.selected?'true':'false';
+					userNode.autoSignIn = autoSignIn.selected ? 'true' : 'false';
 					_configDoc.appendChild(userNode);
 				}
 				putConfig(); 

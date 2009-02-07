@@ -82,7 +82,14 @@ class Update(webapp.RequestHandler):
 
 class MainPage(webapp.RequestHandler):
   def get(self):
-      self.response.out.write('Happy Chinese New Year!')
+      html = '''<html>
+      <body>
+      <p>Happy Chinese New Year!</p>
+      <p><a href="/media/xatasks.air">xatasks</a></p>
+      </body>
+      </html>
+      '''
+      self.response.out.write(html)
           
       
 application = webapp.WSGIApplication(
