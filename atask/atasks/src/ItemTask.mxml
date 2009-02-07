@@ -24,7 +24,9 @@
 			import mx.controls.Label;
 			import mx.controls.TextInput;
 			import mx.controls.CheckBox;
-			import mx.events.FlexEvent;				
+			import mx.events.FlexEvent;	
+			
+			private var inEditing:Boolean = false;			
 			
 			private var _showBtnDeleteTimer:Timer = new Timer(200,1);	
 			
@@ -73,24 +75,25 @@
 				trace('onDataChange');				
 				var task:Task = data.task;
 				if( task ) {
-					//trace(task.content);
+					trace(task.content);
 					lbTaskContent.text = task.content;
 					cbDone.selected = task.done;					
 					cbDone.visible = true;					
 					btnDelete.alpha = 0;
 				} else {
-					trace('task.content is null');
+					trace('task is null');
 					lbTaskContent.text = "Add new task...";
 					cbDone.visible = false;
 					btnDelete.alpha = 0;
 				}
-				trace(data.editableAtFirst);
+				
 				if( data.editableAtFirst ) {					
-					tiTaskContent.visible = true;
-					data.editableAtFirst = false;
+					onLbTaskContentClick();
+					//data.editableAtFirst = false;
 				} else {
 					tiTaskContent.visible = false;
-				}				
+				}
+								
 			}
 			
 			private function onBtnDelete(event:MouseEvent):void {
@@ -107,14 +110,16 @@
 					tiTaskContent.visible = true;
 					tiTaskContent.setFocus();
 				}
+				inEditing = true;
 			}			
 			
 			private function onTiTaskContentEnter(event:Event):void {
 				trace('enter', event.target.text);				
-				updateTaskContent();				
+				updateTaskContent(true);
+								
 			}
 			
-			private function updateTaskContent():void {
+			private function updateTaskContent(onEnter:Boolean=false):void {
 				if( data.task ) {
 					if( tiTaskContent.text != data.task.content ) {
 						data.task.content = tiTaskContent.text;
@@ -127,12 +132,13 @@
 						var task:Task = new Task;
 						task.content = tiTaskContent.text;
 						data.task = task;
-						data.fnAddTask(task);					
+						data.fnAddTask(task, onEnter);					
 						onDataChange();	
 					}			
 				}			
 				tiTaskContent.visible = false;
-				tiTaskContent.text = '';							
+				tiTaskContent.text = '';
+				inEditing = false;							
 			}
 			
 			private function onFocusIn(event:FocusEvent):void {
@@ -140,8 +146,13 @@
 			}
 			
 			private function onTiTaskContentFocusOut(event:FocusEvent):void {
-				trace('focusOut', event.target.text);				
-				updateTaskContent();				
+				trace('focusOut', event.target.text);
+				if( inEditing ) {				
+					updateTaskContent();
+					if( data.editableAtFirst ) {
+						data.ediableAtFirst = false;
+					}					
+				}
 			}
 			
 		]]>
