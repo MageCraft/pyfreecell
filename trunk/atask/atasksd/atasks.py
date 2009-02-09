@@ -82,13 +82,32 @@ class Update(webapp.RequestHandler):
 
 class MainPage(webapp.RequestHandler):
   def get(self):
+      user = users.get_current_user()
+      html1=''
+      if user:
+          tasks = None
+          if users.is_current_user_admin():
+              tasks = Task.gql("ORDER BY date")
+          else:
+              tasks = Task.gql("WHERE email = :1 ORDER BY date", user.email())
+          html1 = '''<table border>
+          <tr><th>task</th><th>date</th><th>done</th><th>email</th></tr>
+          '''
+          for task in tasks:
+              html1 += '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (task.content, task.date.isoformat(), str(task.done), task.email)
+          html1 += '</table>'    
+          html1 += '''<p><a href=%s>Logout</a></p>''' % (users.create_logout_url('/'))
+      else:
+          html1 = '''<p><a href="%s">Sign In</a></p>''' % (users.create_login_url('/'))
+
       html = '''<html>
       <body>
       <p>Happy Chinese New Year!</p>
       <p><a href="/media/xatasks.air">xatasks</a></p>
+      %s
       </body>
       </html>
-      '''
+      ''' % (html1) 
       self.response.out.write(html)
           
       
