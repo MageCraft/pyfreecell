@@ -1,4 +1,16 @@
-sdk_path="C:/Program Files/Adobe/Flex Builder 3/sdks/3.1.0"
+os=$(uname)
+
+echo os is $os
+
+if [ "$os" = "Darwin" ]
+then
+    sdk_path="/Applications/Adobe Flex Builder 3/sdks/3.2.0"
+else
+    sdk_path="C:/Program Files/Adobe/Flex Builder 3/sdks/3.1.0"
+fi
+
+echo sdk path is $sdk_path
+
 storetype=pkcs12
 keystore=xatasks.p12
 storepass=780524
