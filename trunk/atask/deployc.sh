@@ -14,7 +14,7 @@ echo sdk path is $sdk_path
 storetype=pkcs12
 keystore=xatasks.p12
 storepass=780524
-app_path=atasks/bin-debug/
+app_path=atasks/bin-debug
 app_descriptor=${app_path}/atasks-app.xml
 swf=atasks.swf
 
