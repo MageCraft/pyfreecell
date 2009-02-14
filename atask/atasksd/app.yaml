@@ -6,6 +6,8 @@ api_version: 1
 handlers:
 - url: /media
   static_dir: media
+- url: /releases
+  static_dir: releases
 - url: /.*
   script: atasks.py
 

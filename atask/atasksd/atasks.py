@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+import os.path
 import cgi
 
 from google.appengine.api import users
@@ -11,11 +12,29 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 
 from xml.dom import minidom
+from xml.dom.minidom import parse
 
 import logging
 
 trace=logging.debug
 
+client_name='xatasks'
+client_versions_file='version.xml'
+client_releases_dir='releases'
+
+
+def current_client():
+    f=open(client_versions_file)
+    dom=parse(f)
+    root = dom.documentElement
+    cvNode=root.getElementsByTagName('current_version')[0]
+    cv = cvNode.firstChild.data
+    client_package_name=client_name+'-'+cv
+    release_dir=client_releases_dir + '/' + client_package_name 
+    client_package_url=release_dir + '/' + client_package_name+'.air'
+    client_package_release_note=release_dir + '/' + 'release_note.txt'
+    return client_package_name, client_package_url, client_package_release_note
+    
 
 class Task(db.Model):
     done = db.BooleanProperty(default=False)
@@ -100,14 +119,16 @@ class MainPage(webapp.RequestHandler):
       else:
           html1 = '''<p><a href="%s">Sign In</a></p>''' % (users.create_login_url('/'))
 
+      cname,curl,crelnote=current_client()
       html = '''<html>
       <body>
       <p>Happy Chinese New Year!</p>
-      <p><a href="/media/xatasks.air">xatasks</a></p>
+      <p><a href="%s">%s</a></p>
+      <p><a href="%s">release note</a></p>
       %s
       </body>
       </html>
-      ''' % (html1) 
+      ''' % (curl, cname, crelnote, html1) 
       self.response.out.write(html)
           
       
