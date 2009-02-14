@@ -48,7 +48,7 @@
 			
 			private function checkUpdateViewComplete():void {
 				
-				var appVersion:String = getCurrentVersion();
+				var appVersion:String = getCurrentVersion();				
 				trace(appVersion);				
 				var url:String = data.siteURL + 'checkupdate';
 				var vars:URLVariables = new URLVariables;
