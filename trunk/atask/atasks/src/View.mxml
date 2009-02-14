@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:ViewStack xmlns:mx="http://www.adobe.com/2006/mxml"
-	xmlns:local="*">
-	
-	<local:Login id="loginView" width="100%" height="100%" creationComplete="loginViewComplete()"/>
+	xmlns:local="*">	
+		
+	<local:Login id="loginView" width="100%" height="100%" initialize="loginViewComplete()"/>
 	
 	<mx:VBox id="taskView" creationComplete="taskViewComplete()" verticalGap="0">	
 		<mx:VBox width="100%" backgroundColor="0xFFFFFF">
@@ -31,8 +31,10 @@
 			
 			private var currentUser:Account;
 			
-			private var siteURL:String = 'http://xatasks.appspot.com/';
-			//private var siteURL:String = 'http://localhost:8080/';		
+			//private var siteURL:String = 'http://xatasks.appspot.com/';
+			private var siteURL:String = 'http://localhost:8080/';
+			
+					
 			
 			private function onListUpdateComplete(event:FlexEvent):void {
 				trace(listTasks.verticalScrollPosition, listTasks.maxVerticalScrollPosition);
@@ -47,6 +49,7 @@
 				
 				loginView.data = new Object;
 				loginView.data.onLogin = onLogin;
+				loginView.data.siteURL = siteURL;
 			}
 			
 			private function onLogin(account:Account):void {

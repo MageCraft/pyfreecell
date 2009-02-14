@@ -1,28 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="0xffffff"
-	 creationComplete="complete()" paddingLeft="3"
-	 styleName="MyFont" fontSize="11">
-	<mx:Label text="Login in with your google account" fontSize="13"/>
-	<mx:Spacer height="5"/>
-	<mx:HBox>
-		<mx:Label text="Email:" width="{labelPasswd.width}"/>
-		<mx:ComboBox id="email" editable="true" cornerRadius="0" paddingLeft="0" paddingRight="0" fontWeight="normal"
-			 change="onEmailChanged()"/>		
-	</mx:HBox>
-	<mx:HBox>
-		<mx:Label id="labelPasswd" text="Password:"/>
-		<mx:TextInput id='passwd' displayAsPassword="true"/>
-	</mx:HBox>	
-	<mx:CheckBox label="Remember my password" id="rememberPasswd"/>
-	<mx:CheckBox label="Sign in automaticlly" id="autoSignIn"/>	
-	<mx:Spacer height="10"/>
-	
-	<mx:Canvas width="100%">	
-	<mx:Button id="btnSignIn" label="Sign In" horizontalCenter="0" click="SignIn()"/>	
-	</mx:Canvas>	
-	
+<mx:ViewStack xmlns:mx="http://www.adobe.com/2006/mxml"
+	backgroundColor="0xffffff" width="100%" height="100%" >
+	<mx:Canvas id="checkUpdateView" creationComplete="checkUpdateViewComplete()">		
+		<mx:Label id="lbUpdateStatus" text="checking update..." styleName="MyFont" fontSize="12"/>
+	</mx:Canvas>
+	<mx:VBox id="loginView"
+		 creationComplete="complete()" paddingLeft="3"
+		 styleName="MyFont" fontSize="11">
+		<mx:Label text="Login in with your google account" fontSize="13"/>
+		<mx:Spacer height="5"/>
+		<mx:HBox>
+			<mx:Label text="Email:" width="{labelPasswd.width}"/>
+			<mx:ComboBox id="email" editable="true" cornerRadius="0" paddingLeft="0" paddingRight="0" fontWeight="normal"
+				 change="onEmailChanged()"/>		
+		</mx:HBox>
+		<mx:HBox>
+			<mx:Label id="labelPasswd" text="Password:"/>
+			<mx:TextInput id='passwd' displayAsPassword="true" width="{email.width}"/>
+		</mx:HBox>	
+		<mx:CheckBox label="Remember my password" id="rememberPasswd"/>
+		<mx:CheckBox label="Sign in automaticlly" id="autoSignIn"/>	
+		<mx:Spacer height="10"/>
+		
+		<mx:Canvas width="100%">	
+		<mx:Button id="btnSignIn" label="Sign In" horizontalCenter="0" click="SignIn()"/>	
+		</mx:Canvas>	
+	</mx:VBox>
 	<mx:Script>
 		<![CDATA[
+			import mx.events.CloseEvent;
 			import mx.controls.Alert;
 			import mx.collections.ArrayCollection;
 			include 'engine.as'
@@ -31,19 +37,82 @@
 			
 			private static const CONFIG_FILE_NAME:String = 'config.xml';
 			
-			private var configFile:File;
+			private var configFile:File;			
 			
-			private function loadConfig():void {				
-				var fs:FileStream = new FileStream;				
-				if(!configFile.exists) {
-					_configDoc = <config></config>;
-					fs.open(configFile, FileMode.WRITE);
-					fs.writeUTFBytes(_configDoc.toXMLString());
-				} else {
-					fs.open(configFile, FileMode.READ);
-					_configDoc = new XML(fs.readUTFBytes(fs.bytesAvailable));
+			private function getCurrentVersion():String {
+				var appXML:XML = NativeApplication.nativeApplication.applicationDescriptor;
+				var ns:Namespace = appXML.namespace();
+				var appVersion:String = appXML.ns::version[0];
+				return appVersion;
+			}
+			
+			private function checkUpdateViewComplete():void {
+				
+				var appVersion:String = getCurrentVersion();
+				trace(appVersion);				
+				var url:String = data.siteURL + 'checkupdate';
+				var vars:URLVariables = new URLVariables;
+				vars.currentVersion = appVersion;
+				var resultHandler:Function = function(event:Event):void {
+					var resVars:URLVariables = URLLoader(event.target).data;
+					trace(resVars.needUpdate);
+					trace(resVars.updateURL);
+					trace(resVars.updateRelNote);
+					trace(resVars.latestVersion);
+					if( resVars.needUpdate == 'true' ) {
+						update(data.siteURL + resVars.updateURL, resVars.latestVersion);
+					} else {
+						lbUpdateStatus.text = 'no update available';
+						selectedChild = loginView;
+					}
 				}
-				fs.close();
+				send(url,resultHandler,URLRequestMethod.GET,vars,URLLoaderDataFormat.VARIABLES);				
+			}			
+			
+			
+			private function update(updateURL:String, latestVersion:String):void {
+				var alertClickHandler:Function = function(event:CloseEvent):void{
+					if(event.detail == Alert.YES) {
+						lbUpdateStatus.text = 'downloading new version';
+						var resultHandler:Function = function(event:Event):void {
+							var bytes:ByteArray = URLLoader(event.target).data;
+							trace(bytes.length);
+							lbUpdateStatus.text = 'download complete';
+							var fs:FileStream = new FileStream;
+							var update_package:File = new File(File.applicationDirectory.resolvePath('update_package.air').nativePath);
+							fs.open(update_package,FileMode.WRITE);
+							fs.writeBytes(bytes);
+							fs.close();
+							var updater:Updater = new Updater;
+							var version:String = latestVersion;
+							updater.update(update_package, version);														
+						}
+						send(updateURL, resultHandler, URLRequestMethod.GET, null, URLLoaderDataFormat.BINARY);
+						
+					}
+					else {
+						selectedChild = loginView;
+					}	
+				}
+				Alert.show('New version is available,\ninstall it?', 'Check Update', 3, this, alertClickHandler);
+			}		
+			
+			
+			private function loadConfig():void {
+				if( configFile == null ) {
+					configFile = new File(File.applicationDirectory.resolvePath(CONFIG_FILE_NAME).nativePath);
+					trace(configFile.nativePath);								
+					var fs:FileStream = new FileStream;				
+					if(!configFile.exists) {
+						_configDoc = <config></config>;
+						fs.open(configFile, FileMode.WRITE);
+						fs.writeUTFBytes(_configDoc.toXMLString());
+					} else {
+						fs.open(configFile, FileMode.READ);
+						_configDoc = new XML(fs.readUTFBytes(fs.bytesAvailable));
+					}
+					fs.close();
+				}
 			}
 			
 			private function putConfig():void {
@@ -70,10 +139,7 @@
 			}
 			
 			private function complete():void {
-				//configFile = File.applicationDirectory.resolvePath(CONFIG_FILE_NAME);
-				configFile = new File(File.applicationDirectory.resolvePath(CONFIG_FILE_NAME).nativePath);
-				trace(configFile.nativePath);
-				loadConfig();
+				loadConfig();				
 				var dp:ArrayCollection = new ArrayCollection;
 				var users:XMLList = _configDoc.user;
 				var lastSignInUser:XML;
@@ -165,4 +231,6 @@
 	</mx:Script>
 	
 	
-</mx:VBox>
+
+</mx:ViewStack>
+

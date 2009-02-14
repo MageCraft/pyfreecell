@@ -22,19 +22,38 @@ client_name='xatasks'
 client_versions_file='version.xml'
 client_releases_dir='releases'
 
-
-def current_client():
+def current_client_versions():
     f=open(client_versions_file)
     dom=parse(f)
     root = dom.documentElement
+    bvNode=root.getElementsByTagName('base_version')[0]
     cvNode=root.getElementsByTagName('current_version')[0]
-    cv = cvNode.firstChild.data
+    return bvNode.firstChild.data, cvNode.firstChild.data
+
+
+def current_client():
+    bv, cv = current_client_versions()
     client_package_name=client_name+'-'+cv
     release_dir=client_releases_dir + '/' + client_package_name 
     client_package_url=release_dir + '/' + client_package_name+'.air'
     client_package_release_note=release_dir + '/' + 'release_note.txt'
     return client_package_name, client_package_url, client_package_release_note
-    
+
+
+
+class CheckUpdate(webapp.RequestHandler):
+    def get(self):
+        cv = self.request.get('currentVersion')
+        needUpdate = False
+        update_url = None
+        cnote = None
+        if cv:
+            bv, lv = current_client_versions()
+            if lv != cv:
+                needUpdate = True
+                cn, update_url, cnote = current_client()
+        self.response.out.write('needUpdate=%s&updateURL=%s&updateRelNote=%s&latestVersion=%s' % 
+                (str(needUpdate).lower(), update_url, cnote, lv) )
 
 class Task(db.Model):
     done = db.BooleanProperty(default=False)
@@ -139,6 +158,7 @@ application = webapp.WSGIApplication(
                                       ('/add', Add),
                                       ('/delete', Delete),
                                       ('/update', Update),
+                                      ('/checkupdate', CheckUpdate),
                                      ],
                                      debug=True)
 
