@@ -58,6 +58,9 @@ fi
 
 air_package=xatasks-${air_version}.air
 
+sed "s/\(<version>\).*\(<\/version>\)/\1${air_version}\2/g" $app_descriptor > temp
+mv -f temp $app_descriptor
+
 echo "generating $air_package"
 java -jar -Xmx512m "${sdk_path}/lib/adt.jar" -package -storetype $storetype -keystore $keystore -storepass $storepass $air_package $app_descriptor -C $app_path $swf
 echo 'done'
