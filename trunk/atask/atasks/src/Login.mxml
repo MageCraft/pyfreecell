@@ -31,6 +31,7 @@
 			import mx.events.CloseEvent;
 			import mx.controls.Alert;
 			import mx.collections.ArrayCollection;
+			import Utils;
 			include 'engine.as'
 			
 			private var _configDoc:XML;
@@ -39,16 +40,11 @@
 			
 			private var configFile:File;			
 			
-			private function getCurrentVersion():String {
-				var appXML:XML = NativeApplication.nativeApplication.applicationDescriptor;
-				var ns:Namespace = appXML.namespace();
-				var appVersion:String = appXML.ns::version[0];
-				return appVersion;
-			}
+			
 			
 			private function checkUpdateViewComplete():void {
 				
-				var appVersion:String = getCurrentVersion();				
+				var appVersion:String = Utils.getAppVersion();				
 				trace(appVersion);				
 				var url:String = data.siteURL + 'checkupdate';
 				var vars:URLVariables = new URLVariables;
