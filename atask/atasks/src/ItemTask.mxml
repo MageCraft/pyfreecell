@@ -71,7 +71,7 @@
 			}
 			
 			private function setFontStyle():void {
-				if( cbDone.selected ) {
+				if( cbDone.selected) {
 					lbTaskContent.setStyle('fontStyle', FontStyle.ITALIC);					
 				} else {
 					lbTaskContent.setStyle('fontStyle', FontStyle.REGULAR);
@@ -85,16 +85,18 @@
 				if( task ) {
 					trace(task.content);
 					lbTaskContent.text = task.content;
-					cbDone.selected = task.done;
-					setFontStyle();										
+					cbDone.selected = task.done;														
 					cbDone.visible = true;					
 					btnDelete.alpha = 0;
 				} else {
 					trace('task is null');
 					lbTaskContent.text = "Add new task...";
 					cbDone.visible = false;
+					cbDone.selected = false;
 					btnDelete.alpha = 0;
 				}
+				
+				setFontStyle();	
 				
 				if( data.editableAtFirst ) {					
 					onLbTaskContentClick();
