@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<WeeklyReport title="Weekly Report">
+    <item title="Highlight" default="N/A">
+    </item>
+    <item title="Issues/Risks/Dependence" default="N/A"> 
+    </item> 
+    <item title="Accomplishments During this Week">
+	modify makefiles to support build install
+	enable module optimization against initmodule.swf
+	setup software update server in Beijing
+    </item>
+    <item title="Plan for next Week">  
+	support Christophe to implement software updater
+	follow issues during platform integration
+    </item>  
+    <item title="LeavePlan" default="N/A">
+    </item> 
+    <item title="Other" default="N/A">
+    </item>
+</WeeklyReport>
+
+
