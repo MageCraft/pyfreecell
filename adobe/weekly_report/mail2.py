@@ -9,6 +9,7 @@ from email.MIMEText import MIMEText
 
 from datetime import date, timedelta
 import calendar
+from string import Template
 
 
 
@@ -42,20 +43,21 @@ def createhtmlmail1(html, text, subject, sender, recipient):
 
 def load_mail():
     mail_file='weekly_report.xml'
+    html_temp_file='weekly_report_template.html'
+    html_temp = Template(open(html_temp_file).read())
     f = open(mail_file)
     xml = parse(mail_file)
     root = xml.documentElement
     root_title = root.getAttribute('title')
     items = root.getElementsByTagName('item')
     print len(items)
-    html = '<html><head><title>Weekly Report</title></head><body>' 
-    html += '<h2>%s</h2>' % (root_title+getWeek())
+    html_body = '<h2>%s</h2>' % (root_title+getWeek())
     text = root_title + '\n\n\n'
     indent = '  '
     for item in items:
         item_title = item.getAttribute('title')
         print item.nodeName, item_title
-        html += '<h3>%s</h3>' % item_title
+        html_body += '<h3>%s</h3>' % item_title
         text += item_title + '\n'
         default = None
         if item.hasAttribute('default'):
@@ -64,9 +66,11 @@ def load_mail():
             content = item.firstChild.data.strip()
             if content:
                 l = content.split('\n')
+                html_body += '<ol>'
                 for li in l:
-                    html += '<li>%s</li>' % li.strip()
+                    html_body += '<li>%s</li>' % li.strip()
                     text += indent + li.strip() + '\n'
+                html_body += '</ol>'
             else:
                 if not default:
                     print 'Error!'
@@ -74,13 +78,14 @@ def load_mail():
                     sys.exit(1)
                 else:
                     content = default
-                    html += '<li>%s</li>' % content
+                    html_body += '<ul>'
+                    html_body += '<li>%s</li>' % content
                     text += indent + content + '\n'
+                    html_body += '</ul>'
         text += '\n'
-    html += '</body></html>'
-    print html
+    print html_body
     print text
-    return html, text
+    return html_temp.substitute(title=root_title, body=html_body), text
 
 
 def getWeek():
@@ -115,6 +120,8 @@ def main():
 
 if __name__ == '__main__':
     #print getWeek()
+    #html,txt = load_mail()
+    #print html
     main()
 
 
