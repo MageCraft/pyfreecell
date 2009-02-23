@@ -41,7 +41,7 @@ def createhtmlmail1(html, text, subject, sender, recipient):
 
     return msgRoot.as_string()
 
-def load_mail():
+def load_mail(this_week=True):
     mail_file='weekly_report.xml'
     html_temp_file='weekly_report_template.html'
     html_temp = Template(open(html_temp_file).read())
@@ -51,7 +51,11 @@ def load_mail():
     root_title = root.getAttribute('title')
     items = root.getElementsByTagName('item')
     print len(items)
-    html_body = '<h2>%s</h2>' % (root_title+getWeek())
+    if this_week:
+        html_body = '<h2>%s</h2>' % (root_title+get_this_week())
+    else:
+        html_body = '<h2>%s</h2>' % (root_title+get_last_week())
+
     text = root_title + '\n\n\n'
     indent = '  '
     for item in items:
@@ -87,8 +91,20 @@ def load_mail():
     print text
     return html_temp.substitute(title=root_title, body=html_body), text
 
+def get_last_week():
+    today = date.today()
+    calendar.setfirstweekday(calendar.MONDAY)
+    weekday = today.weekday()
+    print weekday
+    delta = timedelta(weekday)
+    this_monday = today - delta
+    last_monday = this_monday - timedelta(7)
+    last_friday = last_monday + timedelta(4)
+    return '(%s --- %s)' % (str(last_monday), str(last_friday))
 
-def getWeek():
+
+
+def get_this_week():
     today = date.today()
     calendar.setfirstweekday(calendar.MONDAY)
     weekday = today.weekday()
@@ -101,11 +117,14 @@ def getWeek():
 
 
 
-def main():
+def main(this_week=True):
     server = smtplib.SMTP('inner-relay-1.corp.adobe.com')
 
-    html, text = load_mail()
-    subject = 'Weekly Report' + getWeek()
+    html, text = load_mail(this_week)
+    if this_week:
+        subject = 'Weekly Report' + get_this_week()
+    else:
+        subject = 'Weekly Report' + get_last_week()
 
     html1='''<html><body><h1>Hello</h1></body></html>'''
 
@@ -119,11 +138,15 @@ def main():
 
 
 if __name__ == '__main__':
+    #print get_this_week()
+    #print get_last_week()
     #print getWeek()
     #html,txt = load_mail()
     #print html
-    main()
+    this_week = True
+    if len(sys.argv) == 2 and sys.argv[1] == '-l':
+        this_week = False
 
-
+    main(this_week)
 
 

@@ -8,10 +8,13 @@
 	modify makefiles to support build install
 	enable module optimization against initmodule.swf
 	setup software update server in Beijing
+	generate the standlone install package for QE to test
     </item>
     <item title="Plan for next Week">  
 	support Christophe to implement software updater
+	support team members to work on latest real platform
 	follow issues during platform integration
+	prepare for A12 release
     </item>  
     <item title="LeavePlan" default="N/A">
     </item> 
