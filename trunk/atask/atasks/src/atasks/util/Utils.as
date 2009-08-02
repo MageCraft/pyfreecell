@@ -1,4 +1,4 @@
-package
+package atasks.util
 {
 	import flash.desktop.NativeApplication;
 	
@@ -13,6 +13,8 @@ package
 			var ns:Namespace = appXML.namespace();
 			var appVersion:String = appXML.ns::version[0];
 			return appVersion;
+			
+			
 		}
 
 	}

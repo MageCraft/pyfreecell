@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:local="*" initialize="init()" creationComplete="complete()"
-	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
-    >
-	<!--<local:View width="100%" height="100%"/>-->
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">	
 	<mx:Style source="assets/css/main.css"/>	
 	<mx:Script>
 		<![CDATA[
-			import Utils;			
+			import atasks.ui.TestView;
+			import atasks.ui.TaskView;			
+			import atasks.util.Utils;		
 			
 			private function complete():void {
 				width = 250;
@@ -17,10 +17,10 @@
 			private var _test:Boolean = false;
 			private function init():void {
 				if( _test ) {
-					var test:Test = new Test;
-					test.percentWidth = 100;
-					test.percentHeight = 100;
-					addChild(test);
+					var testView:TestView = new TestView;
+					testView.percentWidth = 100;
+					testView.percentHeight = 100;
+					addChild(testView);
 				}
 				else {
 					/*
@@ -29,7 +29,7 @@
 					login.percentWidth = 100;
 					addChild(login);
 					*/
-					var view:View = new View;
+					var view:TaskView = new TaskView;
 					view.percentHeight = 100;
 					view.percentWidth = 100;
 					addChild(view);

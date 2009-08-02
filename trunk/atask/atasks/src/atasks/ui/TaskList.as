@@ -1,13 +1,13 @@
-package
+package atasks.ui
 {
 	import flash.display.Sprite;
 	
 	import mx.controls.List;
 	import mx.controls.listClasses.IListItemRenderer;
 
-	public class MyList extends List
+	public class TaskList extends List
 	{
-		public function MyList()
+		public function TaskList()
 		{
 			super();
 		}
