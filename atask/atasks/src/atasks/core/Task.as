@@ -1,4 +1,4 @@
-package
+package atasks.core
 {
 	public class Task
 	{

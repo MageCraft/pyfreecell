@@ -28,10 +28,12 @@
 	</mx:VBox>
 	<mx:Script>
 		<![CDATA[
+			import atasks.core.Task;
+			import atasks.core.Account;
 			import mx.events.CloseEvent;
 			import mx.controls.Alert;
-			import mx.collections.ArrayCollection;
-			import Utils;
+			import mx.collections.ArrayCollection;			
+			import atasks.util.Utils;
 			include 'engine.as'
 			
 			private var _configDoc:XML;
