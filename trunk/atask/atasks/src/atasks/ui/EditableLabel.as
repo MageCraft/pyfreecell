@@ -1,16 +1,16 @@
 package  atasks.ui
 {
+	import atasks.events.EditableLabelEvent;
+	
 	import flash.display.DisplayObject;
 	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
-
-	import atasks.events.EditableLabelEvent;
-	import mx.core.mx_internal;
-
+	
 	import mx.containers.Canvas;
 	import mx.controls.Label;
 	import mx.controls.TextInput;
 	import mx.core.IUITextField;
+	import mx.core.mx_internal;
 	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
 
@@ -27,15 +27,16 @@ package  atasks.ui
 		private var _input:TextInput;
 
 		private var editing:Boolean = false;
+		
+		public var editExist:Boolean = true;
 
 		public function EditableLabel()
 		{
 			percentWidth = 100;
-			percentHeight = 100;
-			doubleClickEnabled = true;
+			percentHeight = 100;			
 
 			addEventListener(ResizeEvent.RESIZE,this_onResize);
-			addEventListener(MouseEvent.DOUBLE_CLICK,this_onDoubleClick);
+			addEventListener(MouseEvent.CLICK,this_onClick);
 		}
 
 		public function set text(text:String):void {
@@ -82,7 +83,7 @@ package  atasks.ui
 			}
 		}
 
-		private function this_onDoubleClick(event:MouseEvent):void {
+		private function this_onClick(event:MouseEvent):void {
 			if(!editing) {
 				startEditing();
 			}
@@ -96,10 +97,11 @@ package  atasks.ui
 			_label.visible = false;
 			_input = new TextInput();
 			_input.width = width;
-			_input.setStyle("verticalCenter",0);
-			_input.setStyle("focusAlpha",0);
-			_input.text = text;
-			_input.setStyle("color",0x000000);
+			if(editExist) {			
+				_input.text = text;
+			}			
+			_input.setStyle("borderStyle","solid");
+			_input.setStyle("cornerRadius",3);
 			_input.addEventListener(FlexEvent.ENTER,input_onEnter);
 			_input.addEventListener(FocusEvent.FOCUS_OUT,input_onFocusOut);
 			stage.addEventListener(MouseEvent.MOUSE_DOWN,stage_onMouseDown);
@@ -110,9 +112,9 @@ package  atasks.ui
 		}
 
 		private function inputSetSelection():void {
-			var textField:IUITextField = _input.mx_internal::getTextField();
-			textField.alwaysShowSelection = true;
-			_input.setSelection(0,_input.text.length);
+			var textField:IUITextField = _input.mx_internal::getTextField();			
+			textField.alwaysShowSelection = false;			
+			_input.setSelection(0,0);			
 			textField.setFocus();
 		}
 
@@ -132,11 +134,11 @@ package  atasks.ui
 		}
 
 
-		private function finishEditing():void {
+		private function finishEditing(enter:Boolean=false):void {
 			if(!editing) {
 				return;
 			}
-
+			
 			var changed:Boolean = text != _input.text;
 			text = _input.text;
 			_input.removeEventListener(FlexEvent.ENTER,input_onEnter);
@@ -146,9 +148,13 @@ package  atasks.ui
 			_input = null;
 			_label.visible = true;
 			editing = false;
-			dispatchEvent(new EditableLabelEvent(EditableLabelEvent.TEXT_EDITING_FINISHED));
+			var e1:EditableLabelEvent = new EditableLabelEvent(EditableLabelEvent.TEXT_EDITING_FINISHED)
+			if(enter) e1.finishedReason = "enter";
+			dispatchEvent(e1);
 			if(changed) {
-				dispatchEvent(new EditableLabelEvent(EditableLabelEvent.TEXT_CHANGED));
+				var e2:EditableLabelEvent = new EditableLabelEvent(EditableLabelEvent.TEXT_CHANGED);
+				if(enter) e2.finishedReason = "enter";
+				dispatchEvent(e2);
 			}
 		}
 
