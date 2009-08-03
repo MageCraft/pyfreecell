@@ -3,10 +3,8 @@ package atasks.ui
 	import atasks.core.Task;
 	import atasks.events.EditableLabelEvent;
 	
-	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	import flash.geom.Rectangle;
 	import flash.text.FontStyle;
 	
 	import mx.containers.Canvas;
@@ -21,7 +19,7 @@ package atasks.ui
 		private var checkBoxDone:CheckBox;
 		private var labelTask:EditableLabel;
 		private var buttonDelete:Button;
-		private var labelAddTask:Label;
+		private var labelAddTask:Label;		
 		
 		
 		[Embed(source="/../assets/img/delete.gif")]
@@ -37,28 +35,43 @@ package atasks.ui
 			setStyle('borderColor',0xcccccc);
 		}
 		
-		private function createTaskItem():void {
+		private function createLabel():void {
+			labelTask = new EditableLabel;
+			labelTask.editable = true;			
+			labelTask.setStyle('fontSize',13);			
+			labelTask.addEventListener(EditableLabelEvent.TEXT_CHANGED, labelTask_onTextChanged);
+			labelTask.addEventListener(EditableLabelEvent.TEXT_EDITING_FINISHED, labelTask_onEditingFinished);
+			addChild(labelTask);
+		}
+		
+		private function createCheckBox():void {
 			checkBoxDone = new CheckBox;
 			checkBoxDone.addEventListener(Event.CHANGE, checkBoxDone_onChange);
 			addChild(checkBoxDone);
-			labelTask = new EditableLabel;
-			labelTask.editable = true;			
-			labelTask.setStyle('fontSize',13);
-			labelTask.addEventListener(EditableLabelEvent.TEXT_CHANGED, labelTask_onTextChanged);
-			addChild(labelTask);
+		}		
+		
+		private function createDeleteButton():void {
 			buttonDelete = new Button;
 			buttonDelete.setStyle('skin', skinButtonDelete);
 			buttonDelete.addEventListener(MouseEvent.MOUSE_DOWN, buttonDelete_onMouseDown);
-			addChild(buttonDelete);			
+			addChild(buttonDelete);	
+		}		
+		
+		private function createTaskItem():void {
+			createCheckBox();
+			createLabel();
+			createDeleteButton();
 		}
 		
 		private function createAddTaskItem():void {
+			createCheckBox();
+			createLabel();
 			labelAddTask = new Label;
-			labelAddTask.setStyle('fontSize',13);
-			labelAddTask.setStyle('fontWeight','bold');			
-			labelAddTask.text = "Add New Task...";
-			labelAddTask.addEventListener(MouseEvent.MOUSE_DOWN, labelAddTask_onMouseDown);
-			addChild(labelAddTask);
+			labelAddTask.text = "Add new item...";
+			labelAddTask.setStyle('fontWeight', 'bold');
+			labelAddTask.setStyle('fontSize', 13);
+			labelAddTask.addEventListener(MouseEvent.CLICK, labelAddTask_onClick);
+			addChild(labelAddTask);	
 		}
 		
 		private function setLabelTaskFontStyle():void {
@@ -69,9 +82,10 @@ package atasks.ui
 			}
 		}
 		
-		private function labelAddTask_onMouseDown(event:MouseEvent):void {
-			
-		}
+		private function labelAddTask_onClick(event:MouseEvent):void {
+			labelAddTask.visible = false;
+			labelTask.dispatchEvent(event);
+		}		
 		
 		private function checkBoxDone_onChange(event:Event):void {
 			data.task.done = checkBoxDone.selected;
@@ -83,9 +97,27 @@ package atasks.ui
 			data.fnDeleteTask(data);
 		}
 		
+		private function labelTask_onEditingFinished(event:EditableLabelEvent):void {
+			if( !data.task && !labelTask.text ) {
+				labelAddTask.visible = true;
+				invalidateProperties();
+			}		
+		}
+		
 		private function labelTask_onTextChanged(event:EditableLabelEvent):void {
-			data.task.content = labelTask.text;
-			data.fnUpdateTask(data.task);
+			if( data.task ) {
+				data.task.content = labelTask.text;
+				data.fnUpdateTask(data.task);
+				invalidateProperties();
+			} else {
+				if( labelTask.text ) { 
+					var task:Task = new Task;
+					task.content = labelTask.text;
+					data.task = task;
+					data.fnAddTask(data.task, event.finishedReason == "enter");
+					invalidateProperties();
+				}
+			}			
 		}
 		
 		override protected function commitProperties():void {
@@ -105,7 +137,7 @@ package atasks.ui
 			if(labelAddTask) {
 				removeChild(labelAddTask);
 				labelAddTask = null;
-			}
+			}			
 			if( data ) {
 				if( data.task ) {
 					createTaskItem();
@@ -114,7 +146,7 @@ package atasks.ui
 					labelTask.text = task.content;
 					setLabelTaskFontStyle();		
 				} else {
-					createAddTaskItem();
+					createAddTaskItem();					
 				}								 
 			}
 		}
@@ -134,6 +166,13 @@ package atasks.ui
 				labelTask.setActualSize(unscaledWidth - startX, labelTask.measuredHeight);
 				labelTask.y = (unscaledHeight - labelTask.height) / 2;				
 			}
+			if( labelAddTask ) {
+				labelAddTask.x = labelTask.x;
+				checkBoxDone.visible = false;
+				if( data && data.editableAtFirst ) {
+					labelAddTask.dispatchEvent(new MouseEvent(MouseEvent.CLICK));	
+				}
+			}
 			if( buttonDelete ) {
 				if( List(owner).isItemHighlighted(data) ) {
 					buttonDelete.visible = true;
@@ -144,17 +183,15 @@ package atasks.ui
 					buttonDelete.visible = false;
 				}
 			}
-			
-			if( data && data.editing ) {
-				var listParent:DisplayObject = List(owner).parent;
-				var r:Rectangle = labelTask.getBounds(listParent);
-				trace(r);
+			if( data && data.editableAtFirst ) {
+				
 			}
+						
 			
 		}
 		
 		override protected function measure():void {
-			measuredHeight = 30;
+			measuredHeight = 25;
 		}
 
 	}
