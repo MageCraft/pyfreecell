@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:VBox id="main" width="100%" height="100%">
+		<mx:HBox width="100%">
+			<mx:Button id="btnList" label="list" click="list()"/>
+			<mx:Button id="btnAdd" label="add" click="add()"/>
+			<mx:Button id="btnDelete" label="delete" click="del()"/>
+			<mx:Button id="btnUpdate" label="update" click="update()"/>
+		</mx:HBox>
+		<mx:HRule width="100%"/>
+		<mx:TextArea id="txtResults" editable="false" width="100%" height="100%"/>
+	</mx:VBox>
+	<mx:Script>
+		<![CDATA[
+			import atasks.core.Task;
+			include 'engine.as'			
+			private var _tasks:Array;		
+			
+			private function list():void {
+				var url:String = 'http://localhost:8080/list';
+				var resultHandler:Function = function(event:Event):void {
+					var xml:String = URLLoader(event.target).data;
+					trace(xml);
+					var xmlDoc:XML = new XML(xml);
+					var tasks:XMLList = xmlDoc.task;
+					_tasks = new Array;					
+					for each(var task:XML in tasks) {
+						var t:Task = new Task;
+						t.key = task.@key;
+						t.content = task.@content;
+						_tasks.push(t);	
+					}
+					
+					txtResults.text += URLLoader(event.target).data + '\n';
+					
+				}
+				send(url, resultHandler);				
+			}
+			
+			
+			private function add():void {				
+				var url:String = 'http://localhost:8080/add';				
+				var vars:URLVariables = new URLVariables;								
+				vars.content = 'My Task ' + Math.round(Math.random()*1000);				
+				var resultHandler:Function = function(event:Event):void {
+					var key:String = URLLoader(event.target).data.key;
+					txtResults.text += 'New Task Created, key is ' + key + '\n';
+					var t:Task = new Task;
+					t.key = key;
+					t.content = vars.content;
+				}
+				send(url, resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);
+				
+			}
+			
+			private function del():void {
+				var url:String = 'http://localhost:8080/delete';
+				var vars:URLVariables = new URLVariables;
+				vars.key = _tasks[_tasks.length-1].key;				
+				var resultHandler:Function = function(event:Event):void {										
+					txtResults.text += URLLoader(event.target).data + '\n';
+					_tasks.pop();
+				}
+				send(url, resultHandler, URLRequestMethod.POST, vars);	
+			}
+			
+			private function update():void {
+				var url:String = 'http://localhost:8080/update';
+				var vars:URLVariables = new URLVariables;
+				var task:Task = _tasks[_tasks.length-1];
+				vars.key = task.key;
+				vars.content = task.content + ' updated';				
+				var resultHandler:Function = function(event:Event):void {
+					txtResults.text += URLLoader(event.target).data + '\n';
+				}
+				send(url,resultHandler,URLRequestMethod.POST,vars);	
+			}
+		]]>
+	</mx:Script>	
+</mx:VBox>

@@ -3,8 +3,10 @@ package atasks.ui
 	import atasks.core.Task;
 	import atasks.events.EditableLabelEvent;
 	
+	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.Rectangle;
 	import flash.text.FontStyle;
 	
 	import mx.containers.Canvas;
@@ -113,13 +115,14 @@ package atasks.ui
 					setLabelTaskFontStyle();		
 				} else {
 					createAddTaskItem();
-				}				 
+				}								 
 			}
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			var startX:int = 0;
+			
 			if( checkBoxDone ) {
 				checkBoxDone.x = startX;
 				checkBoxDone.setActualSize(checkBoxDone.measuredWidth, checkBoxDone.measuredHeight);
@@ -141,6 +144,13 @@ package atasks.ui
 					buttonDelete.visible = false;
 				}
 			}
+			
+			if( data && data.editing ) {
+				var listParent:DisplayObject = List(owner).parent;
+				var r:Rectangle = labelTask.getBounds(listParent);
+				trace(r);
+			}
+			
 		}
 		
 		override protected function measure():void {
