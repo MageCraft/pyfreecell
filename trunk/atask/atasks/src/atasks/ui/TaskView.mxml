@@ -12,7 +12,8 @@
 		<mx:Canvas width="100%" height="100%">
 			<ui:TaskList id="listTasks" itemRenderer="atasks.ui.TaskListItemRenderer" width="100%" height="100%" change="onChanged()"
 				 verticalAlign="middle" paddingTop="0" paddingBottom="0" borderStyle="none" horizontalScrollPolicy="off"				  
-				 updateComplete="onListUpdateComplete(event)" styleName="MyFont"/>				
+				 updateComplete="onListUpdateComplete(event)" styleName="MyFont"/>
+			<mx:TextInput id="inputTask" visible="false"/>				
 		</mx:Canvas>
 	</mx:VBox>	
 		
@@ -102,7 +103,9 @@
 			}
 			
 			private function onChanged():void {
-				trace('onChanged');				
+				trace('onChanged');
+				var item:Object = listTasks.selectedItem;
+				item.editing = true;				
 			}
 			
 			private function addItem(task:Task, dp:ArrayCollection, newTask:Boolean=false, continueAdd:Boolean=false):void {				
@@ -111,7 +114,8 @@
 				item.fnDeleteTask = deleteTask;
 				item.fnUpdateTask = updateTask;
 				item.fnAddTask = addTask;
-				item.editableAtFirst = continueAdd;				
+				item.editableAtFirst = continueAdd;	
+				item.input = inputTask;			
 				
 				dp.addItem(item);
 				
