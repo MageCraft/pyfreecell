@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300"
+	borderStyle="solid" borderColor="0x484848" borderThickness="2"
+	paddingLeft="12" paddingRight="12"
+	paddingTop="8" paddingBottom="8">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import flatasks.core.HttpApi;
+			
+			private var api:HttpApi = new HttpApi;
+			
+			private var task:Object = new Object;
+			
+			private function listContacts():void {
+				var url:String = '/list';
+				var resultHandler:Function = function(event:Event):void {
+					info('on listContacts() response:');					
+					var xml:String = URLLoader(event.target).data;
+					info(xml);					
+					var xmlDoc:XML = new XML(xml);
+					var tasks:XMLList = xmlDoc.task;
+					var dp:ArrayCollection = new ArrayCollection;					
+					for each(var t:XML in tasks) {						
+						task.key = t.@key;
+						task.content = t.@content;
+						task.done = t.@done == 'false' ? false:true;
+						info(task.key + ', ' + task.content + ', ' + task.done);						
+					}
+					info('\n');				
+				}				
+				HttpApi.send(url, resultHandler, URLRequestMethod.GET);
+			}
+			
+			private function addContact():void {
+				trace('addTask');							
+				var url:String = '/add';
+				var vars:URLVariables = new URLVariables;
+				task = {content:'new task'};
+				vars.content = task ? task.content : '';				
+				var resultHandler:Function = function(event:Event):void {
+					info('on addContact() reponse...');
+					var key:String = URLLoader(event.target).data.key;					
+					task.key = key;
+					info('new task key is ' + task.key);										
+				}
+				HttpApi.send(url,resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);
+			}
+			
+			private function deleteContact():void {								
+				var url:String = '/delete';
+				var vars:URLVariables = new URLVariables;
+				vars.key = task.key;
+				var resultHandler:Function = function(event:Event):void {					
+					info('on deleteContact()...');
+					info(URLLoader(event.target).data);
+					
+				}
+				HttpApi.send(url, resultHandler, URLRequestMethod.POST, vars);
+			}
+			
+			private function updateContact():void {
+				var url:String = '/update'
+				var vars:URLVariables = new URLVariables;
+				vars.key = task.key;
+				vars.content = task.content + ' updated';
+				vars.done = !task.done;				
+				trace(vars.toString());
+				var resultHandler:Function = function(event:Event):void {
+					info('on updateContact() response...');
+					info(URLLoader(event.target).data);
+				}
+				HttpApi.send(url, resultHandler, URLRequestMethod.POST, vars);
+			}
+			
+			private function info(msg:String):void {
+				infoPanel.text = infoPanel.text + msg + '\n';
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox width="100%">
+		<mx:Button label="list" click="listContacts()"/>
+		<mx:Button label="add" click="addContact()"/>
+		<mx:Button label="delete" click="deleteContact()"/>
+		<mx:Button label="update" click="updateContact()"/>
+	</mx:HBox>
+	
+	<mx:TextArea id="infoPanel" height="100%" width="100%"/>
+</mx:VBox>
