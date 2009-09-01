@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
-	xmlns:test="flatasks.test.*">
+	xmlns:test="flatasks.test.*"
+	xmlns:ui="flatasks.ui.*">
 	<mx:Script>
 		<![CDATA[
 			import flatasks.core.HttpApi;
 			
 		]]>
 	</mx:Script>
-	<test:TestView left="20" top="20"/>
+	<!--<test:TestView left="20" top="20"/>-->
+	<ui:FlatasksView verticalCenter="0" horizontalCenter="0"/>
 </mx:Application>
