@@ -3,6 +3,8 @@ package flatasks.ui
 	import flash.events.Event;
 	import flash.events.FocusEvent;
 	
+	import flatasks.ui.controls.FlatasksCheckBox;
+	
 	import mx.containers.Canvas;
 	import mx.controls.CheckBox;
 	import mx.controls.TextInput;
@@ -20,7 +22,7 @@ package flatasks.ui
 		
 		
 		private function createCheckBoxDone():void {
-			checkBoxDone = new CheckBox();
+			checkBoxDone = new FlatasksCheckBox();
 			checkBoxDone.addEventListener(Event.CHANGE, checkBoxDone_onChange);
 			addChild(checkBoxDone);			
 		}
@@ -36,14 +38,24 @@ package flatasks.ui
 			data.onTaskUpdated(data.task);
 		}
 		
+		private function setInputStyle(focusIn:Boolean=true):void {
+			if(focusIn) {
+				input.setStyle('alpha',0.3);					
+				input.setStyle('backgroundAlpha',0.3);
+			} else {
+				input.setStyle('alpha',0);					
+				input.setStyle('backgroundAlpha',0);
+			}
+		}
+		
 		private function createInput():void {
 			input = new TextInput();
 			input.setStyle('borderStyle', 'none');
-			input.setStyle('backgroundAlpha',0);
-			input.setStyle('alpha',0);
-			input.setStyle('focusAlpha',0);	
+			input.setStyle('focusAlpha',0);			
+			setInputStyle(false);			
 			input.addEventListener(FlexEvent.ENTER, input_onEnter);
-			input.addEventListener(FocusEvent.FOCUS_OUT, input_onFocusOut);	
+			input.addEventListener(FocusEvent.FOCUS_OUT, input_onFocusOut);
+			input.addEventListener(FocusEvent.FOCUS_IN, input_onFocusIn);
 			addChild(input);
 		}
 		
@@ -60,7 +72,12 @@ package flatasks.ui
 			updateTaskContent()
 		}
 		
+		private function input_onFocusIn(event:FocusEvent):void {
+			setInputStyle();
+		}
+		
 		private function input_onFocusOut(event:FocusEvent):void {
+			setInputStyle(false);
 			updateTaskContent();
 		}
 		
