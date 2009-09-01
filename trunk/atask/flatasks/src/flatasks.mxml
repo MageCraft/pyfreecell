@@ -8,6 +8,8 @@
 			
 		]]>
 	</mx:Script>
-	<!--<test:TestView left="20" top="20"/>-->
+	<test:TestView left="20" top="20" visible="false"/>
 	<ui:FlatasksView verticalCenter="0" horizontalCenter="0"/>
+	
+	<mx:Style source="/assets/css/main.css"/>
 </mx:Application>

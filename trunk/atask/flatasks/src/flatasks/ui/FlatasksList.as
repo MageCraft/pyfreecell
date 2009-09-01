@@ -1,8 +1,11 @@
 package flatasks.ui
 {
+	import flash.display.Sprite;
+	
 	import mx.controls.CheckBox;
 	import mx.controls.List;
 	import mx.controls.TextInput;
+	import mx.controls.listClasses.IListItemRenderer;
 
 	public class FlatasksList extends List
 	{
@@ -14,23 +17,15 @@ package flatasks.ui
 			super();
 		}
 		
-		private function createCheckBoxDone():void {
-			checkBoxDone = new CheckBox();
-			addChild(checkBoxDone);			
+		override protected function drawSelectionIndicator(indicator:Sprite, x:Number, y:Number, width:Number, height:Number, color:uint, itemRenderer:IListItemRenderer):void {
+			
 		}
 		
-		private function createInput():void {
-			input = new Input();
-			addChild(input);
+		override protected function drawHighlightIndicator(indicator:Sprite, x:Number, y:Number, width:Number, height:Number, color:uint, itemRenderer:IListItemRenderer):void {
+			
 		}
 		
-		override protected function commitProperties():void {
-			super.commitProperties();
-		}
 		
-		override protected function updateDisplayList(w:Number, h:Number):void {
-			super.updateDisplayList(w,h);
-		}
 		
 	}
 }
