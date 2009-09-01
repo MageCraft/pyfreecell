@@ -1,0 +1,20 @@
+/* CSS file */
+
+
+.MainView {
+	borderStyle: solid;
+	borderColor: #FFFFFF;
+	borderThickness: 2;
+	paddingLeft: 8;
+	paddingRight: 8;
+	paddingTop: 8;
+	paddingBottom: 8;
+	fontFamily: Calibri, Consolas, Arial, Helvetica, "_sans";
+	fontSize: 14;
+}
+
+.ListTasks {
+	backgroundAlpha: 0;
+	paddingBottom: 0;
+	borderStyle: none;	
+}

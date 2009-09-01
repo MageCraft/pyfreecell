@@ -12,7 +12,7 @@
 			
 			private var task:Object = new Object;
 			
-			private function listContacts():void {
+			private function listTasks():void {
 				var url:String = '/list';
 				var resultHandler:Function = function(event:Event):void {
 					info('on listContacts() response:');					
@@ -32,7 +32,7 @@
 				HttpApi.send(url, resultHandler, URLRequestMethod.GET);
 			}
 			
-			private function addContact():void {
+			private function addTask():void {
 				trace('addTask');							
 				var url:String = '/add';
 				var vars:URLVariables = new URLVariables;
@@ -47,7 +47,7 @@
 				HttpApi.send(url,resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);
 			}
 			
-			private function deleteContact():void {								
+			private function deleteTask():void {								
 				var url:String = '/delete';
 				var vars:URLVariables = new URLVariables;
 				vars.key = task.key;
@@ -59,7 +59,7 @@
 				HttpApi.send(url, resultHandler, URLRequestMethod.POST, vars);
 			}
 			
-			private function updateContact():void {
+			private function updateTask():void {
 				var url:String = '/update'
 				var vars:URLVariables = new URLVariables;
 				vars.key = task.key;
@@ -79,10 +79,10 @@
 		]]>
 	</mx:Script>
 	<mx:HBox width="100%">
-		<mx:Button label="list" click="listContacts()"/>
-		<mx:Button label="add" click="addContact()"/>
-		<mx:Button label="delete" click="deleteContact()"/>
-		<mx:Button label="update" click="updateContact()"/>
+		<mx:Button label="list" click="listTasks()"/>
+		<mx:Button label="add" click="addTask()"/>
+		<mx:Button label="delete" click="deleteTask()"/>
+		<mx:Button label="update" click="updateTask()"/>
 	</mx:HBox>
 	
 	<mx:TextArea id="infoPanel" height="100%" width="100%"/>

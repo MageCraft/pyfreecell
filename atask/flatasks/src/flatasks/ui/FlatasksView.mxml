@@ -1,18 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-	borderStyle="solid" borderColor="0xFFFFFF" borderThickness="2" 
+	xmlns:ui="flatasks.ui.*"	
 	width="800" height="600"
-	paddingLeft="8" paddingRight="8" paddingTop="8" paddingBottom="8" creationComplete="this_onCreationComplete()">
+	creationComplete="this_onCreationComplete()"
+	styleName="MainView">
 	<mx:Script>
 		<![CDATA[
+			import flatasks.core.HttpApi;
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			private var listData:ArrayCollection;
+			
+			 
 			private function this_onCreationComplete():void {
-				
+				getAllContacts();
+			}
+			
+			private function addDataItem(task:Object):void {
+				var item:Object = new Object;
+				item.task = task;
+				item.onTaskUpdated = updateTask;				
+				listData.addItem(item);
+			}
+			
+			private function getAllContacts():void {
+				var url:String = '/list';
+				var resultHandler:Function = function(event:Event):void {
+					info('on listContacts() response:');					
+					var xml:String = URLLoader(event.target).data;
+					info(xml);					
+					var xmlDoc:XML = new XML(xml);
+					var tasks:XMLList = xmlDoc.task;
+					listData = new ArrayCollection;					
+					for each(var t:XML in tasks) {
+						var task:Object = new Object;						
+						task.key = t.@key;
+						task.content = t.@content;
+						task.done = t.@done == 'false' ? false:true;
+						info(task.key + ', ' + task.content + ', ' + task.done);
+						addDataItem(task);												
+					}
+					info('\n');				
+				}								
+				HttpApi.send(url, resultHandler, URLRequestMethod.GET);
+			}
+			
+			private function info(msg:String):void {
+				trace(msg);
+			}
+			
+			private function updateTask(task:Object):void {
+				var url:String = '/update'
+				var vars:URLVariables = new URLVariables;
+				vars.key = task.key;
+				vars.content = task.content;
+				vars.done = task.done;				
+				trace(vars.toString());
+				var resultHandler:Function = function(event:Event):void {
+					info('on updateContact() response...');
+					info(URLLoader(event.target).data);
+				}
+				HttpApi.send(url, resultHandler, URLRequestMethod.POST, vars);
+			}
+			
+			private function addTask():void {
+				trace('addTask');							
+				var url:String = '/add';
+				var vars:URLVariables = new URLVariables;
+				var task:Object = new Object;
+				task = {content:inputNewTask.text};
+				vars.content = task ? task.content : '';				
+				var resultHandler:Function = function(event:Event):void {
+					info('on addContact() reponse...');
+					var key:String = URLLoader(event.target).data.key;					
+					task.key = key;
+					info('new task key is ' + task.key);
+					addDataItem(task);
+					inputNewTask.text = '';										
+				}
+				HttpApi.send(url,resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);
 			}
 		]]>
 	</mx:Script>
-	<mx:Label text="My Task List" fontSize="16"/>
+	<mx:Label text="My Task List" fontSize="16" fontWeight="bold"/>
 	<mx:Spacer height="8"/>
-	<mx:List width="100%" height="100%" backgroundAlpha="0" paddingTop="0" paddingBottom="0" borderStyle="none"
-		itemRenderer="flatasks.ui.FlatasksListItemRenderer"/>
+	<ui:FlatasksList id="listTasks" width="100%" height="100%" styleName="ListTasks"
+		itemRenderer="flatasks.ui.FlatasksListItemRenderer" dataProvider="{listData}"/>
+	<mx:HBox width="100%">
+		<mx:TextInput id="inputNewTask" width="100%" alpha="0.3" borderStyle="solid" focusAlpha="0" backgroundAlpha="0.3"
+			enter="addTask()"/>
+		<mx:Button label="New Task" cornerRadius="3" click="addTask()"/>	
+	</mx:HBox>
+	
 	
 </mx:VBox>
