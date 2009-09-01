@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:CheckBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	upIcon="{icon}"
+	overIcon="{icon}"
+	downIcon="{icon}"
+	selectedUpIcon="{icon1}"
+	selectedOverIcon="{icon1}"
+	selectedDownIcon="{icon1}">
+	<mx:Script>
+		<![CDATA[
+			[Bindable]
+			[Embed(source="/assets/img/checkBox_up.png")]
+			private var icon:Class;
+			
+			[Bindable]
+			[Embed(source="/assets/img/checkBox_selected.png")]
+			private var icon1:Class;
+		]]>
+	</mx:Script>
+	
+</mx:CheckBox>

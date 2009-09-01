@@ -84,7 +84,7 @@
 	</mx:Script>
 	<mx:Label text="My Task List" fontSize="16" fontWeight="bold"/>
 	<mx:Spacer height="8"/>
-	<ui:FlatasksList id="listTasks" width="100%" height="100%" styleName="ListTasks"
+	<ui:FlatasksList id="listTasks" width="100%" height="100%" styleName="ListTasks" verticalScrollBarStyleName="ListVerticalScrollBar"
 		itemRenderer="flatasks.ui.FlatasksListItemRenderer" dataProvider="{listData}"/>
 	<mx:HBox width="100%">
 		<mx:TextInput id="inputNewTask" width="100%" alpha="0.3" borderStyle="solid" focusAlpha="0" backgroundAlpha="0.3"

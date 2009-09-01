@@ -2,6 +2,7 @@
 
 
 .MainView {
+	backgroundColor: #484848;
 	borderStyle: solid;
 	borderColor: #FFFFFF;
 	borderThickness: 2;
@@ -11,10 +12,20 @@
 	paddingBottom: 8;
 	fontFamily: Calibri, Consolas, Arial, Helvetica, "_sans";
 	fontSize: 14;
+	color: #D4D4D4
 }
 
 .ListTasks {
 	backgroundAlpha: 0;
 	paddingBottom: 0;
 	borderStyle: none;	
+}
+
+.ListVerticalScrollBar {
+	upArrowSkin: ClassReference(null);
+	downArrowSkin: ClassReference(null);
+	thumbUpSkin: ClassReference("flatasks.ui.skin.ScrollBarSkinThumb");
+	thumbDownSkin: ClassReference("flatasks.ui.skin.ScrollBarSkinThumb");
+	thumbOverSkin: ClassReference("flatasks.ui.skin.ScrollBarSkinThumb");
+	trackSkin: ClassReference("flatasks.ui.skin.ScrollBarSkinTrack");
 }
