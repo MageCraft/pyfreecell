@@ -2,11 +2,16 @@ package flatasks.ui
 {
 	import flash.events.Event;
 	import flash.events.FocusEvent;
+	import flash.events.MouseEvent;
+	import flash.geom.Point;
 	
 	import flatasks.ui.controls.FlatasksCheckBox;
 	
 	import mx.containers.Canvas;
+	import mx.controls.Alert;
+	import mx.controls.Button;
 	import mx.controls.CheckBox;
+	import mx.controls.Label;
 	import mx.controls.TextInput;
 	import mx.events.FlexEvent;
 
@@ -14,12 +19,33 @@ package flatasks.ui
 	{
 		private var checkBoxDone:CheckBox;
 		private var input:TextInput;
+		private var labelText:Label;
+		private var editing:Boolean;
+		private var buttonSetting:Button;
 		
 		public function FlatasksListItemRenderer()
 		{
 			super();
+			setStyle('borderColor', 0x8D8D8D);
+			setStyle('borderStyle', 'solid');
+			setStyle('borderSides', 'bottom');			
+			horizontalScrollPolicy = 'off';
+			clipContent = false;
 		}
 		
+		private function createLabelText():void {
+			labelText = new Label();
+			labelText.addEventListener(MouseEvent.CLICK, labelText_onClick);
+			addChild(labelText);
+			
+		}
+		
+		private function labelText_onClick(event:MouseEvent):void {			
+			if(!editing) {
+				editing = true;
+				invalidateProperties();
+			}
+		}
 		
 		private function createCheckBoxDone():void {
 			checkBoxDone = new FlatasksCheckBox();
@@ -32,6 +58,23 @@ package flatasks.ui
 				data.task.done = checkBoxDone.selected;
 				updateTask();	
 			}
+		}
+		
+		private function createButtonSetting():void {
+			buttonSetting = new Button();
+			buttonSetting.label="S";
+			buttonSetting.addEventListener(MouseEvent.MOUSE_DOWN, buttonSetting_onMouseDown);
+			addChild(buttonSetting);			
+		}
+		
+		private function buttonSetting_onMouseDown(event:MouseEvent):void {			
+			//Alert.show('hello');
+			var pt:Point = new Point(buttonSetting.x, buttonSetting.y);
+			var pt1:Point = localToGlobal(pt);
+			var pt2:Point = owner.globalToLocal(pt1);
+			data.showTaskSettingMenu(pt2.x, pt2.y);
+			
+			//Alert.show(pt2.x + ', ' + pt2.y);			
 		}
 		
 		private function updateTask():void {
@@ -69,7 +112,7 @@ package flatasks.ui
 		}
 		
 		private function input_onEnter(event:FlexEvent):void {
-			updateTaskContent()
+			input_onFocusOut(null);		
 		}
 		
 		private function input_onFocusIn(event:FocusEvent):void {
@@ -79,25 +122,48 @@ package flatasks.ui
 		private function input_onFocusOut(event:FocusEvent):void {
 			setInputStyle(false);
 			updateTaskContent();
+			editing = false;
+			invalidateProperties();
 		}
 		
 		
 		override protected function commitProperties():void {
 			super.commitProperties();
 			if(checkBoxDone) {
+				checkBoxDone.removeEventListener(Event.CHANGE, checkBoxDone_onChange);
 				removeChild(checkBoxDone);
 				checkBoxDone = null;
 			}
 			if(input) {
+				input.removeEventListener(FlexEvent.ENTER, input_onEnter);
+				input.removeEventListener(FocusEvent.FOCUS_OUT, input_onFocusOut);
+				input.removeEventListener(FocusEvent.FOCUS_IN, input_onFocusIn);
 				removeChild(input);
 				input = null;
+			}
+			if(labelText) {
+				labelText.removeEventListener(MouseEvent.CLICK, labelText_onClick);
+				removeChild(labelText);
+				labelText = null;
+			}
+			if(buttonSetting) {
+				buttonSetting.removeEventListener(MouseEvent.MOUSE_DOWN, buttonSetting_onMouseDown);
+				removeChild(buttonSetting);
+				buttonSetting = null;
 			}
 			
 			if(data) {
 				createCheckBoxDone();
-				createInput();				
-				checkBoxDone.selected = data.task.done;
-				input.text = data.task.content;
+				if(editing) {
+					createInput();
+					input.text = data.task.content;
+					input.setFocus();
+				} else {
+					createLabelText();
+					labelText.text = data.task.content;
+				}	
+				createButtonSetting();			
+				checkBoxDone.selected = data.task.done;				
 			}
 		}
 		
@@ -110,11 +176,29 @@ package flatasks.ui
 				checkBoxDone.y = (h - checkBoxDone.height)/2;
 				startX += checkBoxDone.width + 3;
 			}
+			if(labelText) {
+				labelText.setActualSize(labelText.measuredWidth, labelText.measuredHeight);
+				labelText.x = startX;
+				labelText.y = (h - labelText.height) / 2;
+			}
+			if(buttonSetting) {
+				buttonSetting.setActualSize(buttonSetting.measuredWidth, buttonSetting.measuredHeight);
+				buttonSetting.x = w - buttonSetting.width - 3;
+				buttonSetting.y = (h - buttonSetting.height) / 2;
+				/*
+				if(List(owner).isItemHighlighted(data)) {
+					buttonSetting.visible = true;					
+				} else {
+					buttonSetting.visible = false;
+				}
+				*/
+			}
 			if(input) {
 				input.setActualSize(w-startX, input.measuredHeight);
 				input.x = startX;
 				input.y = (h - input.height) / 2;				
 			}
+			
 		}
 		
 		

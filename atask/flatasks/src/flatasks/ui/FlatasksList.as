@@ -1,6 +1,7 @@
 package flatasks.ui
 {
 	import flash.display.Sprite;
+	import flash.events.KeyboardEvent;
 	
 	import mx.controls.CheckBox;
 	import mx.controls.List;
@@ -22,6 +23,10 @@ package flatasks.ui
 		}
 		
 		override protected function drawHighlightIndicator(indicator:Sprite, x:Number, y:Number, width:Number, height:Number, color:uint, itemRenderer:IListItemRenderer):void {
+			
+		}
+		
+		override protected function keyDownHandler(event:KeyboardEvent):void {
 			
 		}
 		

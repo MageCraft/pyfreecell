@@ -6,6 +6,10 @@
 	styleName="MainView">
 	<mx:Script>
 		<![CDATA[
+			import mx.events.FlexEvent;
+			import flatasks.ui.controls.FlatasksMenu;
+			import mx.controls.Alert;
+			import mx.controls.Menu;
 			import flatasks.core.HttpApi;
 			import mx.collections.ArrayCollection;
 			[Bindable]
@@ -19,7 +23,8 @@
 			private function addDataItem(task:Object):void {
 				var item:Object = new Object;
 				item.task = task;
-				item.onTaskUpdated = updateTask;				
+				item.onTaskUpdated = updateTask;
+				item.showTaskSettingMenu = showTaskSettingMenu;				
 				listData.addItem(item);
 			}
 			
@@ -80,6 +85,48 @@
 				}
 				HttpApi.send(url,resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);
 			}
+			
+			private function showTaskSettingMenu(x:Number, y:Number):void {
+				
+				var menu:Menu = Menu.createMenu(this, menuData);
+				menu.addEventListener(FlexEvent.UPDATE_COMPLETE, menu_onUpdateComplete);				
+				var pt:Point = new Point(listTasks.x, listTasks.y+listTasks.height);
+				var pt1:Point = this.localToGlobal(pt);
+				menu.show(pt1.x, pt1.y);
+				//Alert.show(pt1.x + ', ' + pt1.y);
+				
+			}
+			
+			private function menu_onUpdateComplete(event:FlexEvent):void {
+				
+			}
+			
+			private function buttonNewTask_onClick():void {
+				addTask();
+				/*
+				var menu:Menu = Menu.createMenu(this, menuData);
+				menu.addEventListener(FlexEvent.UPDATE_COMPLETE, menu_onUpdateComplete);				
+				var pt:Point = new Point(listTasks.x, listTasks.y+listTasks.height);
+				var pt1:Point = this.localToGlobal(pt);
+				menu.show(pt1.x, pt1.y);
+				*/
+								
+								
+			}
+			
+			 [Bindable] 
+            public var menuData:Array = [
+            	{label: "delete"},            	
+            	{label: "priority", children: [
+            		{label: "important", type:"radio", toggled: false},
+            		{label: "normal", type:"radio", toggled: true},
+            		]},
+            	{label: "move to", children: [
+            		{label: "list 1"},
+            		{label: "list 2"},
+            		]},            	
+                
+                ];
 		]]>
 	</mx:Script>
 	<mx:Label text="My Task List" fontSize="16" fontWeight="bold"/>
@@ -89,7 +136,7 @@
 	<mx:HBox width="100%">
 		<mx:TextInput id="inputNewTask" width="100%" alpha="0.3" borderStyle="solid" focusAlpha="0" backgroundAlpha="0.3"
 			enter="addTask()"/>
-		<mx:Button label="New Task" cornerRadius="3" click="addTask()"/>	
+		<mx:Button id="buttonNewTask" label="New Task" cornerRadius="3" click="buttonNewTask_onClick()"/>	
 	</mx:HBox>
 	
 	
