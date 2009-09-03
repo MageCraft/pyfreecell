@@ -8,7 +8,6 @@ package flatasks.ui
 	import flatasks.ui.controls.FlatasksCheckBox;
 	
 	import mx.containers.Canvas;
-	import mx.controls.Alert;
 	import mx.controls.Button;
 	import mx.controls.CheckBox;
 	import mx.controls.Label;
@@ -23,10 +22,13 @@ package flatasks.ui
 		private var editing:Boolean;
 		private var buttonSetting:Button;
 		
+		[Embed(source="/assets/img/btn_setting.png")]
+		private var skinButtonSetting:Class;
+		
 		public function FlatasksListItemRenderer()
 		{
 			super();
-			setStyle('borderColor', 0x8D8D8D);
+			setStyle('borderColor', 0xAFB3CD);
 			setStyle('borderStyle', 'solid');
 			setStyle('borderSides', 'bottom');			
 			horizontalScrollPolicy = 'off';
@@ -62,7 +64,7 @@ package flatasks.ui
 		
 		private function createButtonSetting():void {
 			buttonSetting = new Button();
-			buttonSetting.label="S";
+			buttonSetting.setStyle('skin', skinButtonSetting);
 			buttonSetting.addEventListener(MouseEvent.MOUSE_DOWN, buttonSetting_onMouseDown);
 			addChild(buttonSetting);			
 		}
