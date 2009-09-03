@@ -2,9 +2,9 @@
 
 
 .MainView {
-	backgroundColor: #484848;
+	backgroundColor: #F0F0F0;
 	borderStyle: solid;
-	borderColor: #FFFFFF;
+	borderColor: #484848;
 	borderThickness: 2;
 	paddingLeft: 8;
 	paddingRight: 8;
@@ -12,7 +12,7 @@
 	paddingBottom: 8;
 	fontFamily: Calibri, Consolas, Arial, Helvetica, "_sans";
 	fontSize: 14;
-	color: #D4D4D4
+	color: #505164;
 }
 
 .ListTasks {

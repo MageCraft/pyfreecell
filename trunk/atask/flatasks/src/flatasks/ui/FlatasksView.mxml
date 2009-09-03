@@ -129,7 +129,7 @@
                 ];
 		]]>
 	</mx:Script>
-	<mx:Label text="My Task List" fontSize="16" fontWeight="bold"/>
+	<mx:Label text="My Task List" fontSize="16" fontWeight="bold" color="0x235c3d"/>
 	<mx:Spacer height="8"/>
 	<ui:FlatasksList id="listTasks" width="100%" height="100%" styleName="ListTasks" verticalScrollBarStyleName="ListVerticalScrollBar"
 		itemRenderer="flatasks.ui.FlatasksListItemRenderer" dataProvider="{listData}"/>

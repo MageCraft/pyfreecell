@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:CheckBox xmlns:mx="http://www.adobe.com/2006/mxml"
+<mx:CheckBox xmlns:mx="http://www.adobe.com/2006/mxml">
+	<!--
 	upIcon="{icon}"
 	overIcon="{icon}"
 	downIcon="{icon}"
 	selectedUpIcon="{icon1}"
 	selectedOverIcon="{icon1}"
 	selectedDownIcon="{icon1}">
+	-->
 	<mx:Script>
 		<![CDATA[
 			[Bindable]
