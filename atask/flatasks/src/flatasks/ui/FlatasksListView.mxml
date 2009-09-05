@@ -1,4 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
-	
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:ui="flatasks.ui.*" 
+	creationComplete="this_onCreationComplete()"
+	styleName="ListView"
+	verticalScrollBarStyleName="ListVerticalScrollBar">
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CollectionEvent;
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			public var dataProvider:ArrayCollection; 
+			
+			[Bindable]
+			private var vScrollBarWidth:Number;
+			
+			private function this_onCreationComplete():void {
+				dataProvider.addEventListener(CollectionEvent.COLLECTION_CHANGE, listData_onCollectionChange);
+			}
+			
+			private function listData_onCollectionChange(event:CollectionEvent):void {
+				updateListHeight();
+			}
+			
+			private function updateListHeight():void {				
+				listTasks.height = listTasks.rowHeight * dataProvider.length;
+			}
+			
+			override public function validateDisplayList():void {
+				super.validateDisplayList();
+				if(verticalScrollBar) {
+					vScrollBarWidth =  verticalScrollBar.width;
+				} else {
+					vScrollBarWidth = 0;
+				}
+				
+			}
+		]]>
+	</mx:Script>
+	<ui:FlatasksList id="listTasks" width="{width-vScrollBarWidth}" styleName="ListTasks" 
+			itemRenderer="flatasks.ui.FlatasksListItemRenderer" dataProvider="{dataProvider}" selectable="true"/>
 </mx:Canvas>

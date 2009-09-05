@@ -2,6 +2,7 @@ package flatasks.ui
 {
 	import flash.display.Sprite;
 	import flash.events.KeyboardEvent;
+	import flash.events.MouseEvent;
 	
 	import mx.controls.CheckBox;
 	import mx.controls.List;
@@ -27,6 +28,10 @@ package flatasks.ui
 		}
 		
 		override protected function keyDownHandler(event:KeyboardEvent):void {
+			
+		}
+		
+		override protected function mouseDownHandler(event:MouseEvent):void {
 			
 		}
 		

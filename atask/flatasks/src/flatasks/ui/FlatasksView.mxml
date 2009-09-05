@@ -6,19 +6,22 @@
 	styleName="MainView">
 	<mx:Script>
 		<![CDATA[
+			import mx.events.CollectionEvent;
 			import mx.events.FlexEvent;
 			import flatasks.ui.controls.FlatasksMenu;
 			import mx.controls.Alert;
 			import mx.controls.Menu;
 			import flatasks.core.HttpApi;
 			import mx.collections.ArrayCollection;
+			
 			[Bindable]
-			private var listData:ArrayCollection;
+			private var listData:ArrayCollection = new ArrayCollection;
 			
 			 
 			private function this_onCreationComplete():void {
-				getAllContacts();
-			}
+							
+				getAllContacts();				
+			}			
 			
 			private function addDataItem(task:Object):void {
 				var item:Object = new Object;
@@ -35,8 +38,7 @@
 					var xml:String = URLLoader(event.target).data;
 					info(xml);					
 					var xmlDoc:XML = new XML(xml);
-					var tasks:XMLList = xmlDoc.task;
-					listData = new ArrayCollection;					
+					var tasks:XMLList = xmlDoc.task;										
 					for each(var t:XML in tasks) {
 						var task:Object = new Object;						
 						task.key = t.@key;
@@ -87,13 +89,14 @@
 			}
 			
 			private function showTaskSettingMenu(x:Number, y:Number):void {
-				
+				/*
 				var menu:Menu = Menu.createMenu(this, menuData);
 				menu.addEventListener(FlexEvent.UPDATE_COMPLETE, menu_onUpdateComplete);				
 				var pt:Point = new Point(listTasks.x, listTasks.y+listTasks.height);
 				var pt1:Point = this.localToGlobal(pt);
 				menu.show(pt1.x, pt1.y);
 				//Alert.show(pt1.x + ', ' + pt1.y);
+				*/
 				
 			}
 			
@@ -112,7 +115,7 @@
 				*/
 								
 								
-			}
+			}			
 			
 			 [Bindable] 
             public var menuData:Array = [
@@ -131,12 +134,13 @@
 	</mx:Script>
 	<mx:Label text="My Task List" fontSize="16" fontWeight="bold" color="0x235c3d"/>
 	<mx:Spacer height="8"/>
-	<ui:FlatasksList id="listTasks" width="100%" height="100%" styleName="ListTasks" verticalScrollBarStyleName="ListVerticalScrollBar"
-		itemRenderer="flatasks.ui.FlatasksListItemRenderer" dataProvider="{listData}"/>
+	<ui:FlatasksListView id="listView" width="100%" height="100%" dataProvider="{listData}"/>
 	<mx:HBox width="100%">
-		<mx:TextInput id="inputNewTask" width="100%" alpha="0.3" borderStyle="solid" focusAlpha="0" backgroundAlpha="0.3"
+		<mx:TextInput id="inputNewTask" width="100%" borderStyle="solid" borderColor="0x999999"
 			enter="addTask()"/>
-		<mx:Button id="buttonNewTask" label="New Task" cornerRadius="3" click="buttonNewTask_onClick()"/>	
+		<mx:HBox paddingLeft="3" paddingRight="3" borderStyle="solid" borderColor="0x999999">
+			<mx:Label text="New Task"/>
+		</mx:HBox>	
 	</mx:HBox>
 	
 	
