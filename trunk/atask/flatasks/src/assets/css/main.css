@@ -1,13 +1,16 @@
 /* CSS file */
 
+.App {
+	backgroundColor: #D1D3D5;
+}
 
 .MainView {
-	backgroundColor: #F0F0F0;
+	backgroundColor: #F3F3F3;
 	borderStyle: solid;
-	borderColor: #484848;
-	borderThickness: 2;
-	paddingLeft: 8;
-	paddingRight: 8;
+	borderColor: #999999;
+	borderThickness: 1;
+	paddingLeft: 2;
+	paddingRight: 1;
 	paddingTop: 8;
 	paddingBottom: 8;
 	fontFamily: Calibri, Consolas, Arial, Helvetica, "_sans";
@@ -15,10 +18,18 @@
 	color: #505164;
 }
 
+.ListView {
+	borderColor: #999999;
+	borderSides: top;
+	borderStyle: solid;
+}
+
 .ListTasks {
 	backgroundAlpha: 0;
 	paddingBottom: 0;
-	borderStyle: none;	
+	borderStyle: soild;
+	borderSides: right;
+	borderColor: #999999;	
 }
 
 .ListVerticalScrollBar {

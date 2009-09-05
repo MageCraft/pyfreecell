@@ -7,33 +7,42 @@ package flatasks.ui.skin
 
 	public class ScrollBarSkinThumb extends Border
 	{
-
-		private static const THUMB_FILL_COLORS:Array = [0x626262,0x8D8D8D,0x8D8D8D,0x626262];
-		private static const THUMB_FILL_ALPHAS:Array = [1,1,1,1];
-		private static const THUMB_FILL_RATIOS:Array = [0,80,175,255];		
-
-		override public function get measuredWidth():Number
-		{
-			return 14;
-		}
-
-		override public function get measuredHeight():Number
-		{
+		
+		override public function get measuredHeight():Number {
 			return 1;
-		}	
+		}
 		
+		override public function get measuredWidth():Number {
+			return 16;
+		}
 		
-		override protected function updateDisplayList(w:Number, h:Number):void  {
-			super.updateDisplayList(w, h);
-			graphics.clear();       
+		override protected function updateDisplayList(w:Number, h:Number):void {
+			trace('MyScrollThumb', 'updateDisplayList', w, h );
+			super.updateDisplayList(w,h);
+			
+			if( w <= 0 || h <= 0 ) {
+				return;
+			}
+			graphics.clear();
+			graphics.beginFill(0xF9F9F9);
+			graphics.drawRect(0,0,w,h);
+			
 			var matrix:Matrix = new Matrix();
-			matrix.createGradientBox(w,h,0,0,0);
-			graphics.beginGradientFill(GradientType.LINEAR,THUMB_FILL_COLORS,THUMB_FILL_ALPHAS,THUMB_FILL_RATIOS,matrix);
-			graphics.moveTo(0,4);
-			graphics.lineTo(0,h-4);
-			graphics.curveTo(w/2,h+1,w,h-4);
-			graphics.lineTo(w,4);
-			graphics.curveTo(w/2,-1,0,4);
+			matrix.createGradientBox(w,h);			
+			graphics.beginGradientFill(GradientType.LINEAR, [0xF9F9F9, 0xEDEDED],[1,1],[0,255],matrix);
+			graphics.drawRect(1,1,w-2,h-2);
+			
+			graphics.beginFill(0x999999);
+			graphics.drawRect(0,h-1,w,1);
+			var w1:int = 4;
+			var h1:int = 1;			
+			graphics.drawRect((w-w1)/2,h/2-2*h1,w1,h1);
+			graphics.drawRect((w-w1)/2,h/2+h1,w1,h1);
+			
+			graphics.beginFill(0xFFFFFF);
+			graphics.drawRect((w-w1)/2,h/2-h1,w1,h1);
+			graphics.drawRect((w-w1)/2,h/2+2*h1,w1,h1);			
+			
 			graphics.endFill();
 		}
 	}

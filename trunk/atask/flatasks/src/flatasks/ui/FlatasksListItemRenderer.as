@@ -11,6 +11,7 @@ package flatasks.ui
 	import mx.controls.Button;
 	import mx.controls.CheckBox;
 	import mx.controls.Label;
+	import mx.controls.List;
 	import mx.controls.TextInput;
 	import mx.events.FlexEvent;
 
@@ -30,10 +31,9 @@ package flatasks.ui
 			super();
 			setStyle('borderColor', 0xAFB3CD);
 			setStyle('borderStyle', 'solid');
-			setStyle('borderSides', 'bottom');			
-			horizontalScrollPolicy = 'off';
-			clipContent = false;
-		}
+			setStyle('borderSides', 'bottom');		
+						
+		}	
 		
 		private function createLabelText():void {
 			labelText = new Label();
@@ -66,7 +66,9 @@ package flatasks.ui
 			buttonSetting = new Button();
 			buttonSetting.setStyle('skin', skinButtonSetting);
 			buttonSetting.addEventListener(MouseEvent.MOUSE_DOWN, buttonSetting_onMouseDown);
-			addChild(buttonSetting);			
+			buttonSetting.visible = false;
+			addChild(buttonSetting);
+					
 		}
 		
 		private function buttonSetting_onMouseDown(event:MouseEvent):void {			
@@ -85,19 +87,18 @@ package flatasks.ui
 		
 		private function setInputStyle(focusIn:Boolean=true):void {
 			if(focusIn) {
-				input.setStyle('alpha',0.3);					
-				input.setStyle('backgroundAlpha',0.3);
+				input.setStyle('focusAlpha',1);					
+				//input.setStyle('backgroundAlpha',0.3);
 			} else {
-				input.setStyle('alpha',0);					
-				input.setStyle('backgroundAlpha',0);
+				input.setStyle('focusAlpha',0);					
+				//input.setStyle('backgroundAlpha',0);
 			}
 		}
 		
 		private function createInput():void {
-			input = new TextInput();
-			input.setStyle('borderStyle', 'none');
-			input.setStyle('focusAlpha',0);			
-			setInputStyle(false);			
+			input = new TextInput();			
+			input.setStyle('borderStyle', 'none');						
+			setInputStyle(true);			
 			input.addEventListener(FlexEvent.ENTER, input_onEnter);
 			input.addEventListener(FocusEvent.FOCUS_OUT, input_onFocusOut);
 			input.addEventListener(FocusEvent.FOCUS_IN, input_onFocusIn);
@@ -114,7 +115,8 @@ package flatasks.ui
 		}
 		
 		private function input_onEnter(event:FlexEvent):void {
-			input_onFocusOut(null);		
+			input_onFocusOut(null);
+			
 		}
 		
 		private function input_onFocusIn(event:FocusEvent):void {
@@ -122,10 +124,11 @@ package flatasks.ui
 		}
 		
 		private function input_onFocusOut(event:FocusEvent):void {
+			input.visible = false;
 			setInputStyle(false);
 			updateTaskContent();
 			editing = false;
-			invalidateProperties();
+			invalidateProperties();			
 		}
 		
 		
@@ -186,21 +189,26 @@ package flatasks.ui
 			if(buttonSetting) {
 				buttonSetting.setActualSize(buttonSetting.measuredWidth, buttonSetting.measuredHeight);
 				buttonSetting.x = w - buttonSetting.width - 3;
-				buttonSetting.y = (h - buttonSetting.height) / 2;
-				/*
+				buttonSetting.y = (h - buttonSetting.height) / 2;				
+				
 				if(List(owner).isItemHighlighted(data)) {
 					buttonSetting.visible = true;					
 				} else {
 					buttonSetting.visible = false;
 				}
-				*/
+				
+				
 			}
 			if(input) {
-				input.setActualSize(w-startX, input.measuredHeight);
+				input.setActualSize(w-startX-2, input.measuredHeight);
 				input.x = startX;
 				input.y = (h - input.height) / 2;				
 			}
 			
+		}
+		
+		override protected function measure():void {
+			measuredHeight = 24;
 		}
 		
 		
