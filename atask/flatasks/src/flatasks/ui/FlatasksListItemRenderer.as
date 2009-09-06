@@ -65,20 +65,16 @@ package flatasks.ui
 		private function createButtonSetting():void {
 			buttonSetting = new Button();
 			buttonSetting.setStyle('skin', skinButtonSetting);
-			buttonSetting.addEventListener(MouseEvent.MOUSE_DOWN, buttonSetting_onMouseDown);
+			buttonSetting.addEventListener(MouseEvent.CLICK, buttonSetting_onClick);
 			buttonSetting.visible = false;
 			addChild(buttonSetting);
 					
 		}
 		
-		private function buttonSetting_onMouseDown(event:MouseEvent):void {			
-			//Alert.show('hello');
+		private function buttonSetting_onClick(event:MouseEvent):void {						
 			var pt:Point = new Point(buttonSetting.x, buttonSetting.y);
-			var pt1:Point = localToGlobal(pt);
-			var pt2:Point = owner.globalToLocal(pt1);
-			data.showTaskSettingMenu(pt2.x, pt2.y);
-			
-			//Alert.show(pt2.x + ', ' + pt2.y);			
+			var pt1:Point = localToGlobal(pt);			
+			data.showTaskSettingMenu(pt1.x, pt1.y);						
 		}
 		
 		private function updateTask():void {
@@ -152,7 +148,7 @@ package flatasks.ui
 				labelText = null;
 			}
 			if(buttonSetting) {
-				buttonSetting.removeEventListener(MouseEvent.MOUSE_DOWN, buttonSetting_onMouseDown);
+				buttonSetting.removeEventListener(MouseEvent.CLICK, buttonSetting_onClick);
 				removeChild(buttonSetting);
 				buttonSetting = null;
 			}
