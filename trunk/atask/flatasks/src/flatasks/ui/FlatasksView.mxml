@@ -88,16 +88,11 @@
 				HttpApi.send(url,resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);
 			}
 			
-			private function showTaskSettingMenu(x:Number, y:Number):void {
-				/*
+			private function showTaskSettingMenu(x:Number, y:Number):void {				
 				var menu:Menu = Menu.createMenu(this, menuData);
+				menu.styleName = "SettingMenu";
 				menu.addEventListener(FlexEvent.UPDATE_COMPLETE, menu_onUpdateComplete);				
-				var pt:Point = new Point(listTasks.x, listTasks.y+listTasks.height);
-				var pt1:Point = this.localToGlobal(pt);
-				menu.show(pt1.x, pt1.y);
-				//Alert.show(pt1.x + ', ' + pt1.y);
-				*/
-				
+				menu.show(x, y);		
 			}
 			
 			private function menu_onUpdateComplete(event:FlexEvent):void {
@@ -105,30 +100,19 @@
 			}
 			
 			private function buttonNewTask_onClick():void {
-				addTask();
-				/*
-				var menu:Menu = Menu.createMenu(this, menuData);
-				menu.addEventListener(FlexEvent.UPDATE_COMPLETE, menu_onUpdateComplete);				
-				var pt:Point = new Point(listTasks.x, listTasks.y+listTasks.height);
-				var pt1:Point = this.localToGlobal(pt);
-				menu.show(pt1.x, pt1.y);
-				*/
-								
-								
+				addTask();								
 			}			
 			
 			 [Bindable] 
             public var menuData:Array = [
-            	{label: "delete"},            	
-            	{label: "priority", children: [
-            		{label: "important", type:"radio", toggled: false},
-            		{label: "normal", type:"radio", toggled: true},
-            		]},
-            	{label: "move to", children: [
-            		{label: "list 1"},
-            		{label: "list 2"},
-            		]},            	
-                
+            	{label: "delete item"},   
+            	         	
+            	{label: "priority", enabled:false},
+        		{label: "  important", type:"check", toggled: false},
+        		{label: "  normal", type:"check", toggled: true},
+            	{label: "move to", enabled:false},	
+        		{label: "  list 1"},
+        		{label: "  list 2"},               
                 ];
 		]]>
 	</mx:Script>
