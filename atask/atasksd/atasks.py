@@ -72,6 +72,7 @@ class Task(db.Model):
     content = db.StringProperty(multiline=True)
     date = db.DateTimeProperty(auto_now_add=True)
     email=db.StringProperty()
+    priority=db.StringProperty()
 
 
 class RESTHandler(webapp.RequestHandler):
@@ -98,6 +99,7 @@ class List(RESTHandler):
             task_node.setAttribute('key', str(task.key()))
             task_node.setAttribute('content', task.content)
             task_node.setAttribute('done', str(task.done).lower())
+            task_node.setAttribute('priority', task.priority)
             tasks_node.appendChild(task_node)
         trace(doc.toxml())
         self.response.headers['Content-Type'] = 'text/xml'
@@ -107,6 +109,7 @@ class Add(RESTHandler):
     def post(self):
         task = Task()
         task.content = self.request.get('content')
+        task.priority = self.request.get('priority')
         task.email = self.get_current_email()
         task.put()
         self.response.out.write('key=%s' % (str(task.key())) )
@@ -126,16 +129,14 @@ class Update(RESTHandler):
         key = self.request.get('key');
         content = self.request.get('content')
         doneStr = self.request.get('done')
-        trace(key) 
-        trace(content)
-        trace(doneStr)
+        priority = self.request.get('priority')
         done = True
         if doneStr == 'false':
             done = False
         task = db.get(db.Key(key));
-        trace(task.content);
         task.content = content
         task.done = done
+        task.priority = priority
         task.put()
         self.response.out.write('updated')
         
