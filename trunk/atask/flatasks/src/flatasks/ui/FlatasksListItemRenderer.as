@@ -74,7 +74,7 @@ package flatasks.ui
 		private function buttonSetting_onClick(event:MouseEvent):void {						
 			var pt:Point = new Point(buttonSetting.x, buttonSetting.y);
 			var pt1:Point = localToGlobal(pt);			
-			data.showTaskSettingMenu(pt1.x, pt1.y);						
+			data.showTaskSettingMenu(pt1.x, pt1.y,data);						
 		}
 		
 		private function updateTask():void {
@@ -89,6 +89,14 @@ package flatasks.ui
 				input.setStyle('focusAlpha',0);					
 				//input.setStyle('backgroundAlpha',0);
 			}
+		}
+		
+		private function setLabelTextStyle():void {
+			if( data.task.priority == 'Important' ) {
+				labelText.setStyle('fontWeight', 'bold');
+				labelText.setStyle('color', 0x000000);
+			}
+			
 		}
 		
 		private function createInput():void {
@@ -161,7 +169,8 @@ package flatasks.ui
 					input.setFocus();
 				} else {
 					createLabelText();
-					labelText.text = data.task.content;
+					setLabelTextStyle();
+					labelText.text = data.task.content;					
 				}	
 				createButtonSetting();			
 				checkBoxDone.selected = data.task.done;				

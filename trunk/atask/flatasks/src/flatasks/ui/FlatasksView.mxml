@@ -6,6 +6,7 @@
 	styleName="MainView">
 	<mx:Script>
 		<![CDATA[
+			import mx.events.MenuEvent;
 			import mx.events.CollectionEvent;
 			import mx.events.FlexEvent;
 			import flatasks.ui.controls.FlatasksMenu;
@@ -17,6 +18,11 @@
 			[Bindable]
 			private var listData:ArrayCollection = new ArrayCollection;
 			
+			private static const PRIORITY_REGULAR:String = 'Regular';
+			private static const PRIORITY_IMPORTANT:String = 'Important';
+			
+			
+			private var siteURL:String = '/';
 			 
 			private function this_onCreationComplete():void {
 							
@@ -32,7 +38,7 @@
 			}
 			
 			private function getAllContacts():void {
-				var url:String = '/list';
+				var url:String = siteURL + 'list';
 				var resultHandler:Function = function(event:Event):void {
 					info('on listContacts() response:');					
 					var xml:String = URLLoader(event.target).data;
@@ -44,6 +50,7 @@
 						task.key = t.@key;
 						task.content = t.@content;
 						task.done = t.@done == 'false' ? false:true;
+						task.priority = t.@priority;
 						info(task.key + ', ' + task.content + ', ' + task.done);
 						addDataItem(task);												
 					}
@@ -57,11 +64,12 @@
 			}
 			
 			private function updateTask(task:Object):void {
-				var url:String = '/update'
+				var url:String = siteURL + 'update'
 				var vars:URLVariables = new URLVariables;
 				vars.key = task.key;
 				vars.content = task.content;
-				vars.done = task.done;				
+				vars.done = task.done;	
+				vars.priority = task.priority;			
 				trace(vars.toString());
 				var resultHandler:Function = function(event:Event):void {
 					info('on updateContact() response...');
@@ -72,11 +80,12 @@
 			
 			private function addTask():void {
 				trace('addTask');							
-				var url:String = '/add';
+				var url:String = siteURL + 'add';
 				var vars:URLVariables = new URLVariables;
 				var task:Object = new Object;
-				task = {content:inputNewTask.text};
-				vars.content = task ? task.content : '';				
+				task = {content:inputNewTask.text, priority:PRIORITY_REGULAR};
+				vars.content = task.content;
+				vars.priority = task.priority;				
 				var resultHandler:Function = function(event:Event):void {
 					info('on addContact() reponse...');
 					var key:String = URLLoader(event.target).data.key;					
@@ -88,13 +97,66 @@
 				HttpApi.send(url,resultHandler, URLRequestMethod.POST, vars, URLLoaderDataFormat.VARIABLES);
 			}
 			
-			private function showTaskSettingMenu(x:Number, y:Number):void {				
-				var menu:Menu = Menu.createMenu(this, menuData);
-				menu.styleName = "SettingMenu";
-				menu.addEventListener(FlexEvent.UPDATE_COMPLETE, menu_onUpdateComplete);				
-				menu.show(x, y);		
+			private function deleteTask(dpItem:Object):void {								
+				var url:String = siteURL + 'delete';
+				var vars:URLVariables = new URLVariables;
+				vars.key = dpItem.task.key;
+				var resultHandler:Function = function(event:Event):void {					
+					trace('on deleteContact()...');
+					trace(URLLoader(event.target).data);
+					var idx:int = listData.getItemIndex(dpItem);
+					if( idx != -1 ) {
+						listData.removeItemAt(idx);
+					}				
+				}
+				HttpApi.send(url, resultHandler, URLRequestMethod.POST, vars);
 			}
 			
+			private function showTaskSettingMenu(x:Number, y:Number, dpItem:Object):void {	
+				var menuData:Object = createMenuData(dpItem);			
+				var menu:Menu = Menu.createMenu(this, menuData);
+				menu.styleName = "SettingMenu";
+				menu.addEventListener(FlexEvent.UPDATE_COMPLETE, menu_onUpdateComplete);
+				menu.addEventListener(MenuEvent.ITEM_CLICK, menu_onItemClick);				
+				menu.show(x, y);		
+			}
+
+			private function createMenuData(dpItem:Object):Object {
+				var menuData:Array = new Array();
+				var deleteItem:Object = {label:'Delete Item', dpItem: dpItem, click:menu_onDeletItemClick};
+				menuData.push(deleteItem);
+				var priortyItem:Object = {label:"PRIORTY:", enabled:false};
+				var priortyRegularItem:Object = {label:'  '+PRIORITY_REGULAR, 
+												type:'check', toggled: dpItem.task.priority == PRIORITY_REGULAR,
+												priority: PRIORITY_REGULAR,
+												dpItem: dpItem, click:menu_onPriortyItemClick};
+				var priortyImportantItem:Object = {label:'  '+PRIORITY_IMPORTANT, 
+												type:'check', toggled: dpItem.task.priority == PRIORITY_IMPORTANT,
+												priority: PRIORITY_IMPORTANT,
+												dpItem: dpItem, click:menu_onPriortyItemClick};												
+				menuData.push(priortyItem, priortyRegularItem, priortyImportantItem);
+				return menuData;  
+			}
+			
+			private function menu_onPriortyItemClick(menuDataItem:Object):void {
+				var task:Object = menuDataItem.dpItem.task;
+				task.priority = menuDataItem.priority;
+				updateTask(task);
+				listData.itemUpdated(menuDataItem.dpItem);				 
+			}			
+			
+			
+			private function menu_onDeletItemClick(menuDataItem:Object):void {
+				deleteTask(menuDataItem.dpItem);
+			}
+			
+			private function menu_onItemClick(event:MenuEvent):void {
+				var dataItem:Object = event.item;
+				if(dataItem) {
+					var clickFunc:Function = dataItem.click;					
+					clickFunc(dataItem);
+				}
+			}			
 			private function menu_onUpdateComplete(event:FlexEvent):void {
 				
 			}
@@ -103,14 +165,13 @@
 				addTask();								
 			}			
 			
-			 [Bindable] 
+			 
             public var menuData:Array = [
-            	{label: "delete item"},   
-            	         	
-            	{label: "priority", enabled:false},
+            	{label: "Delete Item"},           	         	
+            	{label: "Priority:", enabled:false},
         		{label: "  important", type:"check", toggled: false},
         		{label: "  normal", type:"check", toggled: true},
-            	{label: "move to", enabled:false},	
+            	{label: "Move to", enabled:false},	
         		{label: "  list 1"},
         		{label: "  list 2"},               
                 ];
