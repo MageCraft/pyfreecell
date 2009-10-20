@@ -11,19 +11,20 @@ import android.graphics.drawable.*;
 
 import android.view.*;
 import android.widget.*;
-import android.view.View.OnTouchListener;
 
 import java.util.*;
 
 
 enum Area { Free, Home, Field }
 
+
 class Card {
+	
 	private Drawable drawable;
 	private int id;	
 	private boolean selected;
 	private Area area;
-	
+	private FieldColumn owner;
 	public static final int width = 29;
 	public static final int height = 38;
 	
@@ -47,6 +48,14 @@ class Card {
 		this.id = id;
 		this.drawable = drawable;
 		area = Area.Field;
+	}
+	
+	public void setOwner(FieldColumn column) {
+		owner = column;
+	}
+	
+	public FieldColumn getOwner() {
+		return owner;
 	}
 	
 	public void setArea(Area area) {
@@ -141,6 +150,9 @@ class FreeSlot {
 		card.setPosition(x, y);
 		card.setArea(Area.Free);
 	}
+	public Card getCard() {
+		return card;
+	}
 	public void setEmpty() {
 		card = null;
 	}
@@ -193,6 +205,9 @@ class HomeSlot {
 		card.setPosition(x, y);
 		card.setArea(Area.Home);
 	}
+	public Card getCard() {
+		return cards.lastElement();
+	}
 	
 	public Card pop() {
 		if(!cards.empty())
@@ -228,6 +243,7 @@ class FieldColumn {
 		int cardY = y + (cards.size()-1) * VERTICAL_GAP;
 		card.setPosition(x, cardY);
 		card.setArea(Area.Field);
+		card.setOwner(this);
 	}
 	
 	public void setPostion(int x, int y) {
@@ -250,6 +266,10 @@ class FieldColumn {
 	
 	public Card last() {
 		return cards.isEmpty() ? null : cards.lastElement();
+	}
+	
+	public Vector<Card> getCards() {
+		return cards;
 	}
 	
 	public void draw(Canvas canvas) {
@@ -395,53 +415,168 @@ public class MyView extends View{
 		}
 	}
 	
+	private Vector<FreeSlot> getEmptyFreeSlots() {
+		Vector<FreeSlot> slots = new Vector<FreeSlot>();
+		for(FreeSlot slot:freeSlots) {
+			if(!slot.empty())
+				slots.add(slot);
+		}
+		return slots;
+	}
+	
+	private Vector<FieldColumn> getEmptyFieldColumns(FieldColumn dst) {
+		Vector<FieldColumn> cols = new Vector<FieldColumn>();
+		for(FieldColumn col:fieldColumns) {
+			if(!col.empty() && col != dst)
+				cols.add(col);
+		}
+		return cols;
+	}
+	
+	private int getSuperMoveMax(Vector<FreeSlot> slots, Vector<FieldColumn> cols) {
+		int m = slots.size();
+		int n = cols.size();
+		return (n+1)*(2*m+n)/2 + 1;
+	}
+	
+	private boolean superMove(FieldColumn src, FieldColumn dst, boolean test) {
+		Vector<FreeSlot> emptyFree = getEmptyFreeSlots();
+		Vector<FieldColumn> emptyCol = getEmptyFieldColumns(dst);
+		int max = getSuperMoveMax(emptyFree,emptyCol);
+		Vector<Card> series = new Vector<Card>();
+		Card dstCard = dst.empty() ? null : dst.last();
+		Vector<Card> srcCards = src.getCards();
+		for(int row = srcCards.size()-1 ; row >= 0; row--) {
+			series.add(0,srcCards.get(row));
+			if(row-1<0 ||
+					!srcCards.get(row).fitField(srcCards.get(row-1)) ||
+					dstCard != null && srcCards.get(row).fitField(dstCard) ||
+					series.size() == max) 
+						break;					
+		}
+		
+		return true;
+	}
+	
+	private boolean move2Field(FreeSlot src, FieldColumn dst, boolean test) {
+		return false;
+	}
+	
+	private boolean move2Field(FieldColumn src, FieldColumn dst, boolean test) {
+		if(src == dst) {
+			Log.i(LOG_TAG, "select same field column");
+			emptySelectedCard();
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean move2Field(Card src, FieldColumn dst, boolean test) {
+		if(src.getArea() == Area.Field) {
+			FieldColumn col = src.getOwner();
+			return move2Field(col,dst,test);
+		}
+		return false;
+	}
+	
+	private void emptySelectedCard() {
+		if(hasSelectedCard()) {
+			selectedCard.setSelected(false);
+			selectedCard = null;
+		}
+	}
+	
 	private void selectCard(Card card) {
 		if(hasSelectedCard()) {
+			selectedCard.setSelected(false);
+			if(selectedCard == card) {
+				Log.i(LOG_TAG, "selected same card in free slot again");
+				selectedCard = null;
+				return;
+			}
+		}
+		card.setSelected(true);
+		selectedCard = card;		
+	}
+	
+	private boolean clickFreeSlots(int x, int y) {
+		FreeSlot clickedSlot = null;
+		for(FreeSlot slot:freeSlots) {
+			if(slot.contains(x, y)) {
+				clickedSlot = slot;
+				break;
+			}
+				
+		}
+		if( clickedSlot == null ) {
+			return false;
+		}
+		//select card in free slot
+	    //1. no select before, just highlight it
+	    //2. selected card before
+	    //   a. card in free ==> card in free, just switch highlight
+	    //   b. card in field ==> card in free, just switch highlight
+		if(clickedSlot.empty()) {
+			Log.i(LOG_TAG, "clicked the empty free slot");
+			return true;
+		}
+		selectCard(clickedSlot.getCard());
+		return true;		
+	}
+	
+	private boolean clickHomeSlots(int x, int y) {
+		HomeSlot clickedSlot = null;
+		for(HomeSlot slot:homeSlots) {
+			if(slot.contains(x, y)) {
+				clickedSlot = slot;
+				break;
+			}
+		}
+		if(clickedSlot == null) {
+			return false;
+		}		
+		return true;
+	}
+	
+	private boolean clickFieldColumns(int x, int y) {
+		FieldColumn clickedColumn = null;
+		for(FieldColumn fieldColumn:fieldColumns) {
+			if(fieldColumn.contains(x, y)) {
+				clickedColumn = fieldColumn;
+				break;
+			}
+		}
+		if(clickedColumn == null) {
+			return false;
+		}
+		if(!hasSelectedCard()) {
+			//1. no select before, just highlight the column's last card
+			Card card = clickedColumn.last();
+			selectCard(card);			
+		} else {
+			//2. selected before
+		    //   a. card in free ==> card in field, if fit, move to it, or, do nothing
+		    //   b. card in field ==> card in field
 			
 		}
-	}
-	
-	private FreeSlot ifClickFreeSlots(int x, int y) {
-		for(FreeSlot slot:freeSlots) {
-			if(slot.contains(x, y))
-				return slot;
-		}
-		return null;
-	}
-	
-	private HomeSlot ifClickHomeSlots(int x, int y) {
-		for(HomeSlot slot:homeSlots) {
-			if(slot.contains(x, y))
-				return slot;
-		}
-		return null;
-	}
-	
-	private FieldColumn ifClickFields(int x, int y) {
-		for(FieldColumn fieldColumn:fieldColumns) {
-			if(fieldColumn.contains(x, y))
-				return fieldColumn;
-		}
-		return null;
+		return true;
+		
 	}
 	
 	public boolean onTouchEvent(MotionEvent event) {
 		//Log.i(LOG_TAG, "onTouchEvent, action: " + event.getAction());
 		if(event.getAction() == MotionEvent.ACTION_UP) {
 			int x = (int)event.getX();
-			int y = (int)event.getY();
-			HomeSlot clickHomeSlot = ifClickHomeSlots(x, y);
-			FreeSlot clickFreeSlot = ifClickFreeSlots(x, y);
-			FieldColumn clickFieldColumn = ifClickFields(x,y); 
-			if( clickHomeSlot != null) {
+			int y = (int)event.getY();			 
+			if(clickHomeSlots(x,y)) {
 				Log.i(LOG_TAG, "onTouchEvent, click home slots");
 				
 			}
-			else if( clickFreeSlot != null) {
+			else if( clickFreeSlots(x,y) ) {
 				Log.i(LOG_TAG, "onTouchEvent, click free slots");
 				
 			}
-			else if( clickFieldColumn != null) {
+			else if( clickFieldColumns(x,y)) {
 				Log.i(LOG_TAG, "onTouchEvent, click fields");
 			} else {
 				Log.i(LOG_TAG, "onTouchEvent, click empty field");
