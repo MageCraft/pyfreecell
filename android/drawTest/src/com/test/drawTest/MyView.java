@@ -10,7 +10,7 @@ import android.graphics.*;
 import android.graphics.drawable.*;
 
 import android.view.*;
-import android.widget.*;
+//import android.widget.*;
 
 import java.util.*;
 
@@ -285,7 +285,9 @@ class FieldColumn extends CardOwner {
 	}
 	
 	public boolean contains(int x1, int y1) {
-		if(empty()) return false;
+		if(empty()) {
+			return x1 >= x && x1 <= x+Card.width && y1 >= y;
+		}
 		int h = (cards.size()-1) * VERTICAL_GAP + Card.height;
 		Rect r = new Rect(x,y,x+Card.width,y+h);
 		return r.contains(x1,y1);
@@ -506,6 +508,7 @@ public class MyView extends View{
 		return (n+1)*(2*m+n)/2 + 1;
 	}
 	
+	//used in normal move and super, undo 
 	private boolean move2Free(CardOwner src, FreeSlot dst, boolean disableAuto, MoveType moveType) {
 		//if src is HomeSlot, should return false
 		if(src instanceof FreeSlot)
@@ -532,6 +535,7 @@ public class MyView extends View{
 		emptySelectedCard();
 		if( auto && !disableAuto) {
 			//auto play
+			autoPlay();
 		}
 		return true;
 	}
@@ -544,7 +548,7 @@ public class MyView extends View{
 		dst.push(src.last());
 		src.pop();
 	}
-	
+	//used in normal move and super move, undo
 	private boolean free2field(FreeSlot src, FieldColumn dst, MoveType moveType, boolean test) {
 		if( src.getCard().fitField(dst.last()) || moveType == MoveType.Undo ) {
 			if(test)
@@ -552,6 +556,7 @@ public class MyView extends View{
 			dst.push(src.getCard());
 			src.setEmpty();
 			emptySelectedCard();
+			//record step
 			return true;
 		}
 		return false;
@@ -570,7 +575,7 @@ public class MyView extends View{
 	//used in normal move and auto play
 	private boolean move2Home(CardOwner src, HomeSlot dst, boolean autoPlay, boolean test) {
 		boolean moved = false;
-		MoveType moveType = autoPlay ? MoveType.AutoPlay : MoveType.NormalMove;
+		//MoveType moveType = autoPlay ? MoveType.AutoPlay : MoveType.NormalMove;
 		if(src instanceof FieldColumn) {
 			FieldColumn srcCol = (FieldColumn)src;
 			//field => home
@@ -585,7 +590,7 @@ public class MyView extends View{
 		if(src instanceof FreeSlot) {
 			//free => home
 			FreeSlot srcSlot = (FreeSlot)src;
-			if(srcSlot.getCard().fitField(dst.getCard())) {
+			if(srcSlot.getCard().fitHome(dst.getCard())) {
 				if(test) return true;
 				dst.setCard(srcSlot.getCard());
 				srcSlot.setEmpty();
@@ -687,19 +692,64 @@ public class MyView extends View{
 			}
 			//super move
 			if(superMove(srcCol,dst,test)) {
-				if(!test) {
-					//auto play
-				}
+				if(!test)
+					autoPlay();				
 				return true;
 			}
-		}
-		
+		}		
 		if(src instanceof FreeSlot) {
 			FreeSlot srcSlot = (FreeSlot)src;
 			return free2field(srcSlot, dst, MoveType.NormalMove, test);
 		}		
 		return false;
-	}	
+	}
+	
+	private boolean isSafeAutoPlay(Card card) {
+		if(card.getValue() == Card.ACE || card.getValue() == 1)
+			return true; //A or 2
+		int count = 0;
+		for(HomeSlot slot:homeSlots) {
+			if(!slot.empty()) {
+				Card card1 = slot.getCard();
+				if( (card1.isBlack() ^ card.isBlack()) && (card1.getValue() >= card.getValue()-1) ) {
+					count += 1;
+				}
+			}
+		}
+		return count == 2;	
+	}
+	
+	private void autoPlay() {
+		//scan every last card in field col and free, check if fit home
+		boolean auto = false;
+		//scan every card in free slot, check if it fit home and safe to do auto play
+		for(FreeSlot src:freeSlots) {
+			if(src.empty()) continue;
+			for(HomeSlot dst:homeSlots) {
+				if(src.getCard().fitHome(dst.getCard()) && isSafeAutoPlay(src.getCard())) {
+					move2Home(src,dst,true,false);//auto play
+					auto = true;
+					break;		
+				}
+			}
+		}
+		//scan every last card in field column, check if it fit home and safe to auto play
+		for(FieldColumn src:fieldColumns) {
+			if(src.empty()) continue;
+			for(HomeSlot dst:homeSlots) {
+				if(src.last().fitHome(dst.getCard()) && isSafeAutoPlay(src.last()) ) {
+					move2Home(src, dst, true, false);//auto play
+					auto = true;
+					break;
+				}
+			}
+		}
+		//keep call me until auto is false;
+		if(auto) {
+			autoPlay();
+		}
+
+	}
 	
 	private void emptySelectedCard() {
 		if(hasSelectedCard()) {
@@ -709,14 +759,8 @@ public class MyView extends View{
 	}
 	
 	private void selectCard(Card card) {
-		if(hasSelectedCard()) {
-			selectedCard.setSelected(false);
-			if(selectedCard == card) {
-				Log.i(LOG_TAG, "selected same card in free slot again");
-				selectedCard = null;
-				return;
-			}
-		}
+		if(hasSelectedCard())
+			selectedCard.setSelected(false);		
 		card.setSelected(true);
 		selectedCard = card;		
 	}
@@ -745,7 +789,12 @@ public class MyView extends View{
 				selectCard(clickedSlot.getCard());
 		} else {
 			if(!clickedSlot.empty()) {
-				//alert user
+				if(selectedCard == clickedSlot.getCard()) {
+					Log.i(LOG_TAG, "select same card in free slot again");
+					emptySelectedCard();
+				}
+				else 
+					selectCard(clickedSlot.getCard());				
 			} else 
 				move2Free(selectedCard.getOwner(), clickedSlot, false, MoveType.NormalMove);			
 		}		
@@ -768,9 +817,10 @@ public class MyView extends View{
 			return true;
 		}
 		emptySelectedCard();
-		//auto play
+		autoPlay();
 		return true;
 	}
+	
 	
 	private boolean clickFieldColumns(int x, int y) {
 		FieldColumn clickedColumn = null;
@@ -781,12 +831,18 @@ public class MyView extends View{
 			}
 		}
 		if(clickedColumn == null) {
+			//1. doesn't click field column
+			//2. click a empty column
 			return false;
 		}
 		if(!hasSelectedCard()) {
-			//1. no select before, just highlight the column's last card
-			Card card = clickedColumn.last();
-			selectCard(card);			
+			//1. no select before, just highlight the column's last card	
+			if(clickedColumn.empty()) {
+				Log.i(LOG_TAG, "select empty column");				
+			} else {
+				Card card = clickedColumn.last();
+				selectCard(card);
+			}
 		} else {
 			//2. selected before
 		    //   a. card in free ==> card in field, if fit, move to it, or, do nothing
