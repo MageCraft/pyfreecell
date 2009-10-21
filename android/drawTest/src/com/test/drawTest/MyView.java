@@ -24,7 +24,7 @@ class Card {
 	private int id;	
 	private boolean selected;
 	private Area area;
-	private FieldColumn owner;
+	private CardOwner owner;
 	public static final int width = 29;
 	public static final int height = 38;
 	
@@ -50,11 +50,11 @@ class Card {
 		area = Area.Field;
 	}
 	
-	public void setOwner(FieldColumn column) {
-		owner = column;
+	public void setOwner(CardOwner owner) {
+		this.owner = owner;
 	}
 	
-	public FieldColumn getOwner() {
+	public CardOwner getOwner() {
 		return owner;
 	}
 	
@@ -124,7 +124,11 @@ class Card {
 	}
 }
 
-class FreeSlot {
+class CardOwner {
+	
+}
+
+class FreeSlot extends CardOwner {
 	private Card card;
 	private int x;
 	private int y;
@@ -149,6 +153,7 @@ class FreeSlot {
 		this.card = card;
 		card.setPosition(x, y);
 		card.setArea(Area.Free);
+		card.setOwner(this);
 	}
 	public Card getCard() {
 		return card;
@@ -170,7 +175,7 @@ class FreeSlot {
 	}
 }
 
-class HomeSlot {
+class HomeSlot extends CardOwner {
 	public static final int width = FreeSlot.width;
 	public static final int height = FreeSlot.height;
 	private Stack<Card> cards;
@@ -204,9 +209,10 @@ class HomeSlot {
 		cards.push(card);
 		card.setPosition(x, y);
 		card.setArea(Area.Home);
+		card.setOwner(this);
 	}
-	public Card getCard() {
-		return cards.lastElement();
+	public Card getCard() {		
+		return cards.isEmpty() ? null : cards.lastElement(); 
 	}
 	
 	public Card pop() {
@@ -225,7 +231,7 @@ class HomeSlot {
 	}
 }
 
-class FieldColumn {
+class FieldColumn extends CardOwner {
 	public static final int VERTICAL_GAP = 15;
 	
 	private Vector<Card> cards;
@@ -316,6 +322,67 @@ public class MyView extends View{
 	
 	private Card selectedCard;
 	
+	enum MoveType { SuperMove, NormalMove, Undo, AutoPlay }
+	
+	abstract class MoveFunction {				
+		abstract void call(MyView funcOwner, CardOwner src, CardOwner dst, MoveType moveType);
+	}
+	
+	class MoveFunc_free2field extends MoveFunction {		
+		public void call(MyView funcOwner, CardOwner src, CardOwner dst, MoveType moveType) {
+			funcOwner.free2field((FreeSlot)src, (FieldColumn)dst, moveType, false);
+		}
+	}
+	
+	class MoveFunc_field2field extends MoveFunction {
+		public void call(MyView funcOwner, CardOwner src, CardOwner dst, MoveType moveType) {
+			funcOwner.field2field((FieldColumn)src, (FieldColumn)dst, moveType);
+		}
+	}
+	
+	class MoveFunc_field2free extends MoveFunction {
+		public void call(MyView funcOwner, CardOwner src, CardOwner dst, MoveType moveType) {
+			funcOwner.field2free((FieldColumn)src, (FreeSlot)dst, moveType);
+		}
+	}
+	
+	class MoveFunc_move2home extends MoveFunction {
+		public void call(MyView funcOwner, CardOwner src, CardOwner dst, MoveType moveType) {
+			funcOwner.move2Home(src, (HomeSlot)dst, false, false);
+		}
+	}
+	
+	class MoveFunc_moveFromHome extends MoveFunction {
+		public void call(MyView funcOwner, CardOwner src, CardOwner dst, MoveType moveType) {
+			funcOwner.moveFromHome((HomeSlot)src, dst);
+		}
+	}
+	
+	private MoveFunction moveFuncFactory(CardOwner src, CardOwner dst) {
+		MoveFunction func = null;
+		if(src instanceof FreeSlot && dst instanceof FieldColumn)
+			func = new MoveFunc_free2field();
+		else if(src instanceof FieldColumn && dst instanceof FieldColumn)
+			func = new MoveFunc_field2field();
+		else if(src instanceof FieldColumn && dst instanceof FreeSlot)
+			func = new MoveFunc_field2free();
+		else if(dst instanceof HomeSlot) 
+			func = new MoveFunc_move2home();
+		else if(src instanceof HomeSlot)
+			func = new MoveFunc_moveFromHome();		
+		return func;
+	}
+	
+	class MoveStep {
+		public final CardOwner src;
+		public final CardOwner dst;
+		public MoveStep(CardOwner src, CardOwner dst) {
+			this.src = src;
+			this.dst = dst;
+		}
+	}
+	
+	
 	
 	private void init() {
 		cards = new Card[DECK_SIZE];		
@@ -366,7 +433,7 @@ public class MyView extends View{
 			for(int row = 0 ; row < 6 ; row++) {
 				fieldColumns[col].push(cards[deck[idx++]]);
 			}
-		}
+		}	
 		
 	}
 	
@@ -418,7 +485,7 @@ public class MyView extends View{
 	private Vector<FreeSlot> getEmptyFreeSlots() {
 		Vector<FreeSlot> slots = new Vector<FreeSlot>();
 		for(FreeSlot slot:freeSlots) {
-			if(!slot.empty())
+			if(slot.empty())
 				slots.add(slot);
 		}
 		return slots;
@@ -427,7 +494,7 @@ public class MyView extends View{
 	private Vector<FieldColumn> getEmptyFieldColumns(FieldColumn dst) {
 		Vector<FieldColumn> cols = new Vector<FieldColumn>();
 		for(FieldColumn col:fieldColumns) {
-			if(!col.empty() && col != dst)
+			if(col.empty() && col != dst)
 				cols.add(col);
 		}
 		return cols;
@@ -437,6 +504,145 @@ public class MyView extends View{
 		int m = slots.size();
 		int n = cols.size();
 		return (n+1)*(2*m+n)/2 + 1;
+	}
+	
+	private boolean move2Free(CardOwner src, FreeSlot dst, boolean disableAuto, MoveType moveType) {
+		//if src is HomeSlot, should return false
+		if(src instanceof FreeSlot)
+			return false;
+		//if dst is null, will find the empty slot automaticlly, for double click field cards cases
+		boolean auto = false;
+		if(src instanceof FieldColumn) {
+			//field ==> free
+			FieldColumn srcCol = (FieldColumn)src;
+			dst.setCard(srcCol.last());
+			srcCol.pop();
+			//record step
+			auto = true;		
+		}
+		if(src instanceof FreeSlot) {
+			//free => free
+			FreeSlot srcSlot = (FreeSlot)src;
+			if(src != dst) {
+				dst.setCard(srcSlot.getCard());
+				srcSlot.setEmpty();
+				//record step
+			}
+		}
+		emptySelectedCard();
+		if( auto && !disableAuto) {
+			//auto play
+		}
+		return true;
+	}
+	
+	private boolean field2free(FieldColumn src, FreeSlot dst, MoveType moveType) {
+		return move2Free(src, dst, true, moveType);
+	}
+	
+	private void field2field(FieldColumn src, FieldColumn dst, MoveType moveType) {
+		dst.push(src.last());
+		src.pop();
+	}
+	
+	private boolean free2field(FreeSlot src, FieldColumn dst, MoveType moveType, boolean test) {
+		if( src.getCard().fitField(dst.last()) || moveType == MoveType.Undo ) {
+			if(test)
+				return true;
+			dst.push(src.getCard());
+			src.setEmpty();
+			emptySelectedCard();
+			return true;
+		}
+		return false;
+	}
+	
+	//only used in undo
+	private void moveFromHome(HomeSlot src, CardOwner dst) {
+		if(dst instanceof FieldColumn)
+			((FieldColumn)dst).push(src.getCard());
+		if(dst instanceof FreeSlot)
+			((FreeSlot)dst).setCard(src.getCard());
+		src.pop();
+		//notify left card
+	}
+	
+	//used in normal move and auto play
+	private boolean move2Home(CardOwner src, HomeSlot dst, boolean autoPlay, boolean test) {
+		boolean moved = false;
+		MoveType moveType = autoPlay ? MoveType.AutoPlay : MoveType.NormalMove;
+		if(src instanceof FieldColumn) {
+			FieldColumn srcCol = (FieldColumn)src;
+			//field => home
+			if(srcCol.last().fitHome(dst.getCard())) {
+				if(test) return true;
+				dst.setCard(srcCol.last());
+				srcCol.pop();
+				//record step
+				moved = true;			
+			}		
+		}
+		if(src instanceof FreeSlot) {
+			//free => home
+			FreeSlot srcSlot = (FreeSlot)src;
+			if(srcSlot.getCard().fitField(dst.getCard())) {
+				if(test) return true;
+				dst.setCard(srcSlot.getCard());
+				srcSlot.setEmpty();
+				//record step
+				moved = true;
+			}
+		}
+		if(moved) {
+			//notify left card
+			return true;
+		}
+		return false;
+	}
+	
+	private void superMovePack(Vector<FreeSlot> emptySlots, Vector<FieldColumn> emptyColumns, 
+			FieldColumn src, Card end, Vector<MoveStep> stack) {
+		if(src.empty() || src.last() == end)
+			return;
+		//move cards to free slot at first
+		for(FreeSlot slot:emptySlots) {
+			field2free(src, slot, MoveType.SuperMove);
+			stack.add(0,new MoveStep(src,slot));
+			if(src.empty() || src.last() == end)
+				return;				
+		}
+		//move cards to empty field from left to right
+		for(FieldColumn col:emptyColumns) {
+			field2field(src, col, MoveType.SuperMove);
+			stack.add(0,new MoveStep(src,col));
+			if(src.empty() || src.last() == end)
+				return;	
+		}
+		//move cards from (n-2),(n-3)....,0 to n-1 field col
+		for(int i = emptyColumns.size()-2 ; i >= 0 ; i--) {
+			field2field(emptyColumns.get(i), emptyColumns.lastElement(), MoveType.SuperMove);
+			stack.add(0,new MoveStep(emptyColumns.get(i), emptyColumns.lastElement()));
+		}
+		//move card from free to field, from right to left
+		for(int i = emptySlots.size()-1 ; i >= 0 ; i--) {
+			free2field(emptySlots.get(i), emptyColumns.lastElement(),MoveType.SuperMove, false);
+			stack.add(0, new MoveStep(emptySlots.get(i), emptyColumns.lastElement()));
+		}
+		
+		emptyColumns.remove(emptyColumns.lastElement()); //remove last
+		//call me again
+		superMovePack(emptySlots, emptyColumns, src, end, stack);		
+	}
+	
+	private void superMoveUnPack(Vector<MoveStep> stack, FieldColumn oldSrcCol, FieldColumn newSrcCol) {
+		for(MoveStep step:stack) {
+			CardOwner src = step.src;
+			CardOwner dst = step.dst;
+			if(src instanceof FieldColumn && src == oldSrcCol)
+				src = newSrcCol;
+			MoveFunction moveFunc = moveFuncFactory(dst, src);
+			moveFunc.call(this, dst, src, MoveType.SuperMove);			
+		}
 	}
 	
 	private boolean superMove(FieldColumn src, FieldColumn dst, boolean test) {
@@ -454,30 +660,46 @@ public class MyView extends View{
 					series.size() == max) 
 						break;					
 		}
-		
+		Card srcCard = series.firstElement();
+		if(!srcCard.fitField(dstCard))
+			return false;
+		if(test)
+			return true;
+		emptySelectedCard();
+		Vector<MoveStep> stack = new Vector<MoveStep>();
+		superMovePack(emptyFree, emptyCol, src, srcCard, stack);
+		if(stack.isEmpty()) {
+			field2field(src, dst, MoveType.NormalMove);
+		} else {
+			field2field(src, dst, MoveType.SuperMove);
+			superMoveUnPack(stack, src, dst);			
+		}	
 		return true;
 	}
 	
-	private boolean move2Field(FreeSlot src, FieldColumn dst, boolean test) {
-		return false;
-	}
-	
-	private boolean move2Field(FieldColumn src, FieldColumn dst, boolean test) {
-		if(src == dst) {
-			Log.i(LOG_TAG, "select same field column");
-			emptySelectedCard();
-			return true;
+	private boolean move2Field(CardOwner src, FieldColumn dst, boolean test) {
+		if(src instanceof FieldColumn) {
+			FieldColumn srcCol = (FieldColumn)src;
+			if(srcCol == dst) {
+				Log.i(LOG_TAG, "select same field column");
+				emptySelectedCard();
+				return true;//not alert user
+			}
+			//super move
+			if(superMove(srcCol,dst,test)) {
+				if(!test) {
+					//auto play
+				}
+				return true;
+			}
 		}
+		
+		if(src instanceof FreeSlot) {
+			FreeSlot srcSlot = (FreeSlot)src;
+			return free2field(srcSlot, dst, MoveType.NormalMove, test);
+		}		
 		return false;
-	}
-	
-	private boolean move2Field(Card src, FieldColumn dst, boolean test) {
-		if(src.getArea() == Area.Field) {
-			FieldColumn col = src.getOwner();
-			return move2Field(col,dst,test);
-		}
-		return false;
-	}
+	}	
 	
 	private void emptySelectedCard() {
 		if(hasSelectedCard()) {
@@ -516,11 +738,17 @@ public class MyView extends View{
 	    //2. selected card before
 	    //   a. card in free ==> card in free, just switch highlight
 	    //   b. card in field ==> card in free, just switch highlight
-		if(clickedSlot.empty()) {
-			Log.i(LOG_TAG, "clicked the empty free slot");
-			return true;
-		}
-		selectCard(clickedSlot.getCard());
+		if(!hasSelectedCard()) {
+			if(clickedSlot.empty()) 
+				Log.i(LOG_TAG, "clicked the empty free slot");				
+			else 
+				selectCard(clickedSlot.getCard());
+		} else {
+			if(!clickedSlot.empty()) {
+				//alert user
+			} else 
+				move2Free(selectedCard.getOwner(), clickedSlot, false, MoveType.NormalMove);			
+		}		
 		return true;		
 	}
 	
@@ -534,7 +762,13 @@ public class MyView extends View{
 		}
 		if(clickedSlot == null) {
 			return false;
-		}		
+		}
+		if(!move2Home(selectedCard.getOwner(), clickedSlot, false, false)) {
+			//alert user
+			return true;
+		}
+		emptySelectedCard();
+		//auto play
 		return true;
 	}
 	
@@ -557,6 +791,10 @@ public class MyView extends View{
 			//2. selected before
 		    //   a. card in free ==> card in field, if fit, move to it, or, do nothing
 		    //   b. card in field ==> card in field
+			if(!move2Field(selectedCard.getOwner(), clickedColumn, false)) {
+				//alert user
+				return true;
+			}
 			
 		}
 		return true;
@@ -572,11 +810,11 @@ public class MyView extends View{
 				Log.i(LOG_TAG, "onTouchEvent, click home slots");
 				
 			}
-			else if( clickFreeSlots(x,y) ) {
+			else if(clickFreeSlots(x,y) ) {
 				Log.i(LOG_TAG, "onTouchEvent, click free slots");
 				
 			}
-			else if( clickFieldColumns(x,y)) {
+			else if(clickFieldColumns(x,y)) {
 				Log.i(LOG_TAG, "onTouchEvent, click fields");
 			} else {
 				Log.i(LOG_TAG, "onTouchEvent, click empty field");
