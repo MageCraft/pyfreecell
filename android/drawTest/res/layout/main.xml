@@ -3,5 +3,6 @@
 	android:id="@+id/cardView"    
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="#007F00"
 />
 

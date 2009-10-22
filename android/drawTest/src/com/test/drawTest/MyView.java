@@ -133,8 +133,8 @@ class FreeSlot extends CardOwner {
 	private int x;
 	private int y;
 	
-	public static final int width = Card.width + 2;
-	public static final int height = Card.height + 2;
+	public static final int width = Card.width;
+	public static final int height = Card.height;
 	
 	public FreeSlot(int x, int y) {
 		this.x = x;
@@ -166,10 +166,9 @@ class FreeSlot extends CardOwner {
 		return new Rect(x,y,x+width, y+height).contains(x1,y1);
 	}
 	
-	public void draw(Canvas canvas) {
-		Paint p = new Paint();
-		p.setColor(Color.BLUE);
-		MyUtil.drawRectFrame(canvas, new Rect(x,y,x+width,y+height), p);
+	public void draw(Canvas canvas) {		
+		MyUtil.drawRectFrameWithShawdowColor(canvas, new Rect(x,y,x+width,y+height), 
+				Color.BLACK, Color.GREEN);
 		if(card!=null) 
 			card.draw(canvas);
 	}
@@ -222,10 +221,9 @@ class HomeSlot extends CardOwner {
 			return null;		
 	}
 	
-	public void draw(Canvas canvas) {
-		Paint p = new Paint();
-		p.setColor(Color.YELLOW);
-		MyUtil.drawRectFrame(canvas, new Rect(x,y,x+width,y+height), p);
+	public void draw(Canvas canvas) {		
+		MyUtil.drawRectFrameWithShawdowColor(canvas, new Rect(x,y,x+width,y+height), 
+				Color.BLACK, Color.GREEN);
 		if(!cards.isEmpty())
 			cards.lastElement().draw(canvas);
 	}
@@ -297,13 +295,29 @@ class FieldColumn extends CardOwner {
 
 class MyUtil {
 	public static void drawRectFrame(Canvas canvas, Rect r, Paint paint) {
-		float[] pts = { r.left, r.top, r.right, r.top, 
-						r.right, r.top,r.right, r.bottom, 
-						r.right, r.bottom,r.left, r.bottom,
-						r.left, r.bottom, r.left, r.top 
+		float[] pts = { r.left, r.top, r.right-1, r.top, 
+						r.right-1, r.top, r.right-1, r.bottom, 
+						r.right, r.bottom-1, r.left, r.bottom-1,
+						r.left, r.bottom-1, r.left, r.top 
 					  };
-		canvas.drawLines(pts, paint);
-		
+		canvas.drawLines(pts, paint);		
+	}
+	
+	public static void drawRectFrameWithShawdowColor(Canvas canvas, Rect r, int clr1, int clr2) {
+		Paint p1 = new Paint();
+		p1.setColor(clr1);
+		Paint p2 = new Paint();
+		p2.setColor(clr2);
+		float[] pts1 = { 
+				r.left, r.top, r.right-1, r.top,				
+				r.left, r.bottom-1, r.left, r.top 
+			  };
+		float[] pts2 = {  
+				r.right-1, r.top, r.right-1, r.bottom, 
+				r.right, r.bottom-1, r.left, r.bottom-1,				 
+			  };
+		canvas.drawLines(pts1,p1);
+		canvas.drawLines(pts2,p2);
 	}
 }
 
@@ -324,6 +338,7 @@ public class MyView extends View{
 	private int seed;	
 	private Card selectedCard; 
 	private State state;
+	private Drawable flag;
 	
 	public enum State { Idle, Playing }
 	
@@ -396,6 +411,7 @@ public class MyView extends View{
 			Card card = new Card(i,drawable);			
 			cards[i] = card;
 		}
+		flag = res.getDrawable(R.drawable.flag);		
 		
 		freeSlots = new FreeSlot[4];
 		homeSlots = new HomeSlot[4];
@@ -410,7 +426,13 @@ public class MyView extends View{
 			freeSlots[i] = new FreeSlot(startX,freeTop);
 			startX += FreeSlot.width;
 		}
-		startX += Card.width * 8 + HORIZONTAL_GAP * 7 - FreeSlot.width * 8;		
+		int gap = Card.width * 8 + HORIZONTAL_GAP * 7 - FreeSlot.width * 8;
+		int flagX = startX + (gap-flag.getIntrinsicWidth())/2;
+		int flagY = freeTop + (FreeSlot.height - flag.getIntrinsicHeight())/2;
+		Rect flagR = new Rect(flagX, flagY, flagX+flag.getIntrinsicWidth(), flagY+flag.getIntrinsicHeight());
+		flag.setBounds(flagR);
+		
+		startX += gap;		
 		for( int i = 0 ; i < 4 ; i++) {
 			homeSlots[i] = new HomeSlot(startX,freeTop);
 			startX += HomeSlot.width;
@@ -506,14 +528,19 @@ public class MyView extends View{
 	
 	protected void onDraw(Canvas canvas) {
 		for(FreeSlot slot:freeSlots) {
-			slot.draw(canvas);
+			slot.draw(canvas);			
 		}
+		
+		flag.draw(canvas);
+		
 		for(HomeSlot slot:homeSlots) {
 			slot.draw(canvas);
 		}
+		
 		for(FieldColumn column:fieldColumns) {
 			column.draw(canvas);
 		}
+		
 	}
 	
 	private Vector<FreeSlot> getEmptyFreeSlots() {
