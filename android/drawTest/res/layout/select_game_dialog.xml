@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
+  android:gravity="center_horizontal"
+  android:orientation="vertical">
+  <TextView
+  		android:layout_width="wrap_content"
+  		android:layout_height="wrap_content"
+  		android:text="Select a game number\nfrom 1 to 30000"  		 
+  		/>
+  <EditText 
+  		android:id="@+id/seedEdit"
+  		android:layout_width="100dip"
+  		android:layout_height="wrap_content"
+  		android:inputType="number" 
+  		/>
+</LinearLayout>
