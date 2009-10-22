@@ -313,16 +313,19 @@ public class MyView extends View{
 	private static final int RES_BASE_ID = R.drawable.card00;
 	
 	public static final int HORIZONTAL_GAP = 8;
-	public static final int DECK_SIZE=52;
+	public static final int DECK_SIZE = 52;
+	public static final int GAME_MAX_SIZE = 30000;
 	
 	private Card[] cards;	
 	private FreeSlot[] freeSlots;
 	private HomeSlot[] homeSlots;
 	private FieldColumn[] fieldColumns;
 	private int[] deck;
-	private int seed;
+	private int seed;	
+	private Card selectedCard; 
+	private State state;
 	
-	private Card selectedCard;
+	public enum State { Idle, Playing }
 	
 	enum MoveType { SuperMove, NormalMove, Undo, AutoPlay }
 	
@@ -382,9 +385,7 @@ public class MyView extends View{
 			this.src = src;
 			this.dst = dst;
 		}
-	}
-	
-	
+	}	
 	
 	private void init() {
 		cards = new Card[DECK_SIZE];		
@@ -399,12 +400,8 @@ public class MyView extends View{
 		freeSlots = new FreeSlot[4];
 		homeSlots = new HomeSlot[4];
 		fieldColumns = new FieldColumn[8];
-		deck = new int[DECK_SIZE];
-		Random r = new Random();
-		seed = r.nextInt(30000);
-		shuffle();
+		deck = new int[DECK_SIZE];			
 		
-		int idx = 0;
 		int left = ( 320 - Card.width * 8 - HORIZONTAL_GAP * 7 ) / 2;
 		int startX = left;
 		
@@ -421,22 +418,57 @@ public class MyView extends View{
 		
 		int fieldTop = freeTop + FreeSlot.height + 12;		
 		startX = left;
-		for(int col = 0 ; col < 4 ; col++) {
+		for(int col = 0 ; col < 8 ; col++) {
 			fieldColumns[col] = new FieldColumn(startX,fieldTop);			
 			startX += Card.width + HORIZONTAL_GAP;
+		}	
+		
+		state = State.Idle;
+	}
+	
+	public State getState() {
+		return state;
+	}
+	
+	public void playNewGame() {
+		Random r = new Random();
+		seed = r.nextInt(30000);
+		playGame(seed);
+	}
+	
+	public void replayGame() {
+		playGame(seed);
+	}
+	
+	public void playSpecGame(int seed) {
+		playGame(seed);
+	}
+	
+	private void playGame(int seed) {
+		state = State.Playing;
+		shuffle();
+		cleanup();
+		int idx = 0;
+		for(int col = 0 ; col < 4 ; col++) {			
 			for(int row = 0 ; row < 7 ; row++) {
 				fieldColumns[col].push(cards[deck[idx++]]);
 			}
-		}
-		
-		for(int col = 4; col < 8 ; col++) {
-			fieldColumns[col] = new FieldColumn(startX,fieldTop);			
-			startX += Card.width + HORIZONTAL_GAP;
+		}		
+		for(int col = 4; col < 8 ; col++) {			
 			for(int row = 0 ; row < 6 ; row++) {
 				fieldColumns[col].push(cards[deck[idx++]]);
 			}
-		}	
-		
+		}
+		invalidate();
+	}
+	
+	private void cleanup() {
+		for(FreeSlot slot:freeSlots) 
+			slot.setEmpty();
+		for(HomeSlot slot:homeSlots) 
+			slot.setEmpty();
+		for(FieldColumn col:fieldColumns)
+			col.setEmpty();
 	}
 	
 	
