@@ -27,6 +27,7 @@ public class DrawTest extends Activity {
 	private static final int DIALOG_CHOOSE_GAME = 0;
 	private static final int DIALOG_CURRENT_GAME_DONE = 1;
 	private static final int DIALOG_END_CURRENT_GAME = 2;
+	private static final int DIALOG_PICK_ACTION_ON_START = 3;
 	
 	private MyView cardView;	
 	
@@ -39,7 +40,8 @@ public class DrawTest extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        cardView = (MyView)findViewById(R.id.cardView);
+        cardView = (MyView)findViewById(R.id.cardView); 
+        showDialog(DIALOG_PICK_ACTION_ON_START);
     }
     
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -83,6 +85,24 @@ public class DrawTest extends Activity {
     protected Dialog onCreateDialog(int id) {    	
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	switch(id) {
+    	case DIALOG_PICK_ACTION_ON_START:
+    		final CharSequence[] items = { "New Game", "Select Game", "Load Game" };
+    		builder.setTitle("Pick a action");
+    		builder.setItems(items, new DialogInterface.OnClickListener() {				
+				public void onClick(DialogInterface dialog, int item) {					
+					switch(item) {
+					case 0://New game
+						newGame();
+						break;
+					case 1://Select game
+						showDialog(DIALOG_CHOOSE_GAME);
+						break;
+					default:
+						break;
+					}
+				}
+			});
+    		break;
     	case DIALOG_END_CURRENT_GAME:    		
     		builder.setMessage("Do you want to resign this game?");
     		builder.setCancelable(false);
@@ -97,6 +117,8 @@ public class DrawTest extends Activity {
 						break;
 					case SelectGame:
 						DrawTest.this.selectGameToPlay(-1);
+						break;
+					default:
 						break;
 					}					
 				}
