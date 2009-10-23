@@ -15,4 +15,5 @@
 	<string name="prompt_end_game">你想结束当前的游戏吗?</string>
 	<string name="dlg_title_game_number">游戏编号</string>
 	<string name="prompt_pick_game_number">请选择一个游戏编号\n(从{0}到{1})</string>
+	<string name="prompt_invalid_game_number">请选择一个从{0}到{1}的游戏编号</string>
 </resources>
