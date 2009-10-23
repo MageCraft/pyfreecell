@@ -43,7 +43,7 @@ public class DrawTest extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         cardView = (MyView)findViewById(R.id.cardView); 
-        showDialog(DIALOG_PICK_ACTION_ON_START);
+        showDialog(DIALOG_PICK_ACTION_ON_START);        
     }
     
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -140,7 +140,7 @@ public class DrawTest extends Activity {
     		final View selectGameView = factory.inflate(R.layout.select_game_dialog, null);
     		TextView textView = (TextView)selectGameView.findViewById(R.id.text);
     		String prompt = getString(R.string.prompt_pick_game_number);
-    		prompt = MessageFormat.format(prompt, 1, 30000);
+    		prompt = MessageFormat.format(prompt, Integer.toString(1), Integer.toString(30000));
     		textView.setText(prompt);
     		builder.setCancelable(false);
     		builder.setTitle(getString(R.string.dlg_title_game_number));
@@ -149,8 +149,13 @@ public class DrawTest extends Activity {
     		builder.setPositiveButton(ok, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int which) {					
 					EditText seedEdit = (EditText)selectGameView.findViewById(R.id.seed_edit);
-					String content = seedEdit.getText().toString();					
-					int seed = Integer.parseInt(content);
+					String content = seedEdit.getText().toString();
+					int seed = -1;
+					try {
+						seed = Integer.parseInt(content);
+					} catch(NumberFormatException e) {
+						seed = -1;
+					}
 					DrawTest.this.selectGameToPlay(seed);
 				}
 			});
@@ -162,6 +167,16 @@ public class DrawTest extends Activity {
     	return builder.create();    	
     }
     
+    private void setAppTitle(int seed) {
+    	String title = getString(R.string.app_title);
+    	title = MessageFormat.format(title, Integer.toString(seed));
+    	setTitle(title);
+    }
+    
+    private boolean validateSeed(int seed) {
+    	return seed >= 1 && seed <= 30000;
+    }
+    
     private boolean alertUserAboutEndCurrentGame() {
     	if(cardView.getState() == State.Playing) {
     		showDialog(DIALOG_END_CURRENT_GAME);
@@ -171,18 +186,21 @@ public class DrawTest extends Activity {
     }
     
     private void newGame() {    	
-    	cardView.playNewGame();
+    	int seed = cardView.playNewGame();
+    	setAppTitle(seed);
     }
     
     private void restartGame() {    	
     	cardView.replayGame();
     }
     
-    private void selectGameToPlay(int seed) {
-    	if(seed < 0) {
-    		showDialog(DIALOG_CHOOSE_GAME);
-    	} else {
-    		cardView.playSpecGame(seed);
-    	}
+    private void selectGameToPlay(int seed) {    	
+		if(!validateSeed(seed)) {
+			showDialog(DIALOG_CHOOSE_GAME);
+		} else {
+			cardView.playSpecGame(seed);
+			setAppTitle(seed);
+		}
+			
     }
 }

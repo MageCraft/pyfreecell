@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>    
     <string name="app_name">空当接龙</string>
+    <string name="app_title">空当接龙 #{0}</string>
 	<string name="menu_new_game">新游戏</string>
 	<string name="menu_select_game">选择游戏</string>
 	<string name="menu_restart_game">重玩</string>
