@@ -10,6 +10,8 @@ import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
+import java.text.MessageFormat;
 
 import com.test.drawTest.MyView;
 import com.test.drawTest.MyView.State;
@@ -45,12 +47,12 @@ public class DrawTest extends Activity {
     }
     
     public boolean onCreateOptionsMenu(Menu menu) {
-    	menu.add(0,MENU_NEW_GAME, 0, "New Game");    	
-    	menu.add(0,MENU_SELECT_GAME, 0, "Select Game");
-    	menu.add(0,MENU_RESTART_GAME, 0, "Restart Game");
-    	menu.add(0,MENU_UNDO, 0, "Undo");
-    	menu.add(0,MENU_REDO, 0, "Redo");
-    	menu.add(0,MENU_SETTINGS, 0, "Settings");
+    	menu.add(0,MENU_NEW_GAME, 0, getString(R.string.menu_new_game));    	
+    	menu.add(0,MENU_SELECT_GAME, 0, getString(R.string.menu_select_game));
+    	menu.add(0,MENU_RESTART_GAME, 0, getString(R.string.menu_restart_game));
+    	menu.add(0,MENU_UNDO, 0, getString(R.string.menu_undo));
+    	menu.add(0,MENU_REDO, 0, getString(R.string.menu_redo));
+    	menu.add(0,MENU_SETTINGS, 0, getString(R.string.menu_settings));   
     	return true;
     }
     
@@ -86,8 +88,10 @@ public class DrawTest extends Activity {
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	switch(id) {
     	case DIALOG_PICK_ACTION_ON_START:
-    		final CharSequence[] items = { "New Game", "Select Game", "Load Game" };
-    		builder.setTitle("Pick a action");
+    		final CharSequence[] items = { getString(R.string.picker_opt_new_game),
+    				 getString(R.string.picker_opt_select_game),
+    				 getString(R.string.picker_opt_load_game)};
+    		builder.setTitle(getString(R.string.picker_title));
     		builder.setItems(items, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int item) {					
 					switch(item) {
@@ -104,9 +108,11 @@ public class DrawTest extends Activity {
 			});
     		break;
     	case DIALOG_END_CURRENT_GAME:    		
-    		builder.setMessage("Do you want to resign this game?");
+    		builder.setMessage(getString(R.string.prompt_end_game));
     		builder.setCancelable(false);
-    		builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {				
+    		CharSequence yes = getString(android.R.string.yes);
+    		CharSequence no = getString(android.R.string.no);
+    		builder.setPositiveButton(yes, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int which) {
 					switch(gameAction) {
 					case NewGame:
@@ -123,7 +129,7 @@ public class DrawTest extends Activity {
 					}					
 				}
 			});
-    		builder.setNegativeButton("No", new DialogInterface.OnClickListener() {				
+    		builder.setNegativeButton(no, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.cancel();					
 				}
@@ -132,11 +138,17 @@ public class DrawTest extends Activity {
     	case DIALOG_CHOOSE_GAME:
     		LayoutInflater factory = LayoutInflater.from(this);
     		final View selectGameView = factory.inflate(R.layout.select_game_dialog, null);
-    		builder.setTitle("Game number");
+    		TextView textView = (TextView)selectGameView.findViewById(R.id.text);
+    		String prompt = getString(R.string.prompt_pick_game_number);
+    		prompt = MessageFormat.format(prompt, 1, 30000);
+    		textView.setText(prompt);
+    		builder.setCancelable(false);
+    		builder.setTitle(getString(R.string.dlg_title_game_number));
     		builder.setView(selectGameView);
-    		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {				
+    		CharSequence ok = getString(android.R.string.ok);
+    		builder.setPositiveButton(ok, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int which) {					
-					EditText seedEdit = (EditText)selectGameView.findViewById(R.id.seedEdit);
+					EditText seedEdit = (EditText)selectGameView.findViewById(R.id.seed_edit);
 					String content = seedEdit.getText().toString();					
 					int seed = Integer.parseInt(content);
 					DrawTest.this.selectGameToPlay(seed);

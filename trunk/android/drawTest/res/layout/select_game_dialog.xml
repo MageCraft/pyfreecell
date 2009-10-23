@@ -5,13 +5,13 @@
   android:layout_height="wrap_content"
   android:gravity="center_horizontal"
   android:orientation="vertical">
-  <TextView
+  <TextView android:id="@+id/text"
   		android:layout_width="wrap_content"
-  		android:layout_height="wrap_content"
-  		android:text="Select a game number\nfrom 1 to 30000"  		 
+  		android:layout_height="wrap_content"  		
+  		android:gravity="center_horizontal"  		 
   		/>
   <EditText 
-  		android:id="@+id/seedEdit"
+  		android:id="@+id/seed_edit"
   		android:layout_width="100dip"
   		android:layout_height="wrap_content"
   		android:inputType="number" 
