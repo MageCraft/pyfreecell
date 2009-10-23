@@ -444,18 +444,21 @@ public class MyView extends View{
 			fieldColumns[col] = new FieldColumn(startX,fieldTop);			
 			startX += Card.width + HORIZONTAL_GAP;
 		}	
-		
+		seed = -1;
 		state = State.Idle;
 	}
-	
+	public int getSeed() {
+		return seed;
+	}
 	public State getState() {
 		return state;
 	}
 	
-	public void playNewGame() {
+	public int playNewGame() {
 		Random r = new Random();
 		seed = r.nextInt(30000);
 		playGame(seed);
+		return seed;
 	}
 	
 	public void replayGame() {
