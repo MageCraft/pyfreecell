@@ -11,10 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import java.text.MessageFormat;
+import android.widget.Toast;
 
+import java.text.MessageFormat;
 import com.test.drawTest.MyView;
 import com.test.drawTest.MyView.State;
+import android.util.*;
+import android.content.*;
 
 
 public class DrawTest extends Activity {
@@ -35,6 +38,7 @@ public class DrawTest extends Activity {
 	
 	enum GameAction { NewGame, SelectGame, RestartGame }
 	private GameAction gameAction;
+	private Toast toastInvalidGameNumber;
 	
 	
     /** Called when the activity is first created. */
@@ -43,8 +47,10 @@ public class DrawTest extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         cardView = (MyView)findViewById(R.id.cardView); 
-        showDialog(DIALOG_PICK_ACTION_ON_START);        
+        showDialog(DIALOG_PICK_ACTION_ON_START);     
     }
+    
+    
     
     public boolean onCreateOptionsMenu(Menu menu) {
     	menu.add(0,MENU_NEW_GAME, 0, getString(R.string.menu_new_game));    	
@@ -71,7 +77,7 @@ public class DrawTest extends Activity {
     	case MENU_SELECT_GAME:
     		gameAction = GameAction.SelectGame;
     		if(!alertUserAboutEndCurrentGame())
-    			selectGameToPlay(-1);    		
+    			selectGameToPlay(-1,false);    		
 			break;
     	case MENU_UNDO:
 			break;
@@ -122,7 +128,7 @@ public class DrawTest extends Activity {
 						DrawTest.this.restartGame();
 						break;
 					case SelectGame:
-						DrawTest.this.selectGameToPlay(-1);
+						DrawTest.this.selectGameToPlay(-1,false);
 						break;
 					default:
 						break;
@@ -156,7 +162,7 @@ public class DrawTest extends Activity {
 					} catch(NumberFormatException e) {
 						seed = -1;
 					}
-					DrawTest.this.selectGameToPlay(seed);
+					DrawTest.this.selectGameToPlay(seed,true);
 				}
 			});
     		
@@ -164,17 +170,17 @@ public class DrawTest extends Activity {
     	case DIALOG_CURRENT_GAME_DONE:
     		break;
     	}    	
-    	return builder.create();    	
+    	return builder.create();   	
     }
     
-    private void setAppTitle(int seed) {
+    private void setAppTitle(int number) {
     	String title = getString(R.string.app_title);
-    	title = MessageFormat.format(title, Integer.toString(seed));
+    	title = MessageFormat.format(title, Integer.toString(number));
     	setTitle(title);
     }
     
-    private boolean validateSeed(int seed) {
-    	return seed >= 1 && seed <= 30000;
+    private boolean validateSeed(int number) {
+    	return number >= 1 && number <= 30000;
     }
     
     private boolean alertUserAboutEndCurrentGame() {
@@ -192,14 +198,37 @@ public class DrawTest extends Activity {
     
     private void restartGame() {    	
     	cardView.replayGame();
+    }    
+    
+    
+	protected void onPrepareDialog(int id, Dialog dialog) {		
+		super.onPrepareDialog(id, dialog);
+	}
+	
+	private void showInvalidGameNumberPrompt() {
+    	if(toastInvalidGameNumber == null) {
+	    	String text = getString(R.string.prompt_invalid_game_number);
+	    	text = MessageFormat.format(text, Integer.toString(1), Integer.toString(30000));
+	        int duration = Toast.LENGTH_SHORT;
+	        toastInvalidGameNumber = Toast.makeText(getApplicationContext(), text, duration);
+    	}
+    	toastInvalidGameNumber.show();
     }
     
-    private void selectGameToPlay(int seed) {    	
-		if(!validateSeed(seed)) {
+    private void selectGameToPlay(int number, boolean validate) {
+    	
+    	if(!validate) {
+    		removeDialog(DIALOG_CHOOSE_GAME);
+    		showDialog(DIALOG_CHOOSE_GAME);
+    		return;
+    	}
+		if(!validateSeed(number)) {	
+			removeDialog(DIALOG_CHOOSE_GAME);
+			showInvalidGameNumberPrompt();
 			showDialog(DIALOG_CHOOSE_GAME);
 		} else {
-			cardView.playSpecGame(seed);
-			setAppTitle(seed);
+			cardView.playSpecGame(number-1);
+			setAppTitle(number);
 		}
 			
     }

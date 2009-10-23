@@ -15,4 +15,5 @@
 	<string name="prompt_end_game">Do you want to resign this game?</string>
 	<string name="dlg_title_game_number">Game number</string>
 	<string name="prompt_pick_game_number">Select a game number\nfrom {0} to {1}</string>
+	<string name="prompt_invalid_game_number">Please select a game number from {0} to {1}</string>
 </resources>
