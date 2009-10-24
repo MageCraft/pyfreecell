@@ -16,11 +16,9 @@ import android.widget.Toast;
 import java.text.MessageFormat;
 import com.test.drawTest.MyView;
 import com.test.drawTest.MyView.State;
-import android.util.*;
-import android.content.*;
 
 
-public class DrawTest extends Activity {
+public class DrawTest extends Activity implements GameInterface.OnGameOverListener {
 	
 	private static final int MENU_NEW_GAME = 0;
 	private static final int MENU_RESTART_GAME = 1;
@@ -30,9 +28,10 @@ public class DrawTest extends Activity {
 	private static final int MENU_SETTINGS = 5;	
 	
 	private static final int DIALOG_CHOOSE_GAME = 0;
-	private static final int DIALOG_CURRENT_GAME_DONE = 1;
+	private static final int DIALOG_GAME_OVER = 1;
 	private static final int DIALOG_END_CURRENT_GAME = 2;
 	private static final int DIALOG_PICK_ACTION_ON_START = 3;
+	
 	
 	private MyView cardView;	
 	
@@ -46,11 +45,10 @@ public class DrawTest extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        cardView = (MyView)findViewById(R.id.cardView); 
-        showDialog(DIALOG_PICK_ACTION_ON_START);     
-    }
-    
-    
+        cardView = (MyView)findViewById(R.id.cardView);
+        cardView.setOnGameOverListener(this);
+        showDialog(DIALOG_PICK_ACTION_ON_START);        
+    }    
     
     public boolean onCreateOptionsMenu(Menu menu) {
     	menu.add(0,MENU_NEW_GAME, 0, getString(R.string.menu_new_game));    	
@@ -115,10 +113,8 @@ public class DrawTest extends Activity {
     		break;
     	case DIALOG_END_CURRENT_GAME:    		
     		builder.setMessage(getString(R.string.prompt_end_game));
-    		builder.setCancelable(false);
-    		CharSequence yes = getString(android.R.string.yes);
-    		CharSequence no = getString(android.R.string.no);
-    		builder.setPositiveButton(yes, new DialogInterface.OnClickListener() {				
+    		builder.setCancelable(false);    		
+    		builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int which) {
 					switch(gameAction) {
 					case NewGame:
@@ -135,9 +131,9 @@ public class DrawTest extends Activity {
 					}					
 				}
 			});
-    		builder.setNegativeButton(no, new DialogInterface.OnClickListener() {				
+    		builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int which) {
-					dialog.cancel();					
+										
 				}
 			});
     		break;    	
@@ -162,12 +158,33 @@ public class DrawTest extends Activity {
 					} catch(NumberFormatException e) {
 						seed = -1;
 					}
+					seedEdit.setText("");
 					DrawTest.this.selectGameToPlay(seed,true);
 				}
 			});
     		
     		break;
-    	case DIALOG_CURRENT_GAME_DONE:
+    	case DIALOG_GAME_OVER: 
+    		final CharSequence[] items1 = { getString(R.string.picker_opt_new_game),
+    									getString(R.string.picker_opt_select_game) };
+    		builder.setCancelable(false);
+    		builder.setTitle(getString(R.string.prompt_you_win));
+    		builder.setItems(items1, new DialogInterface.OnClickListener() {				
+				public void onClick(DialogInterface dialog, int item) {					
+					switch(item) {
+					case 0://New game
+						newGame();
+						break;
+					case 1://Select game
+						selectGameToPlay(-1,false);
+						break;
+					default:
+						break;
+					}
+				}
+			});    		
+    		break;
+    	default:
     		break;
     	}    	
     	return builder.create();   	
@@ -218,7 +235,7 @@ public class DrawTest extends Activity {
     private void selectGameToPlay(int number, boolean validate) {
     	
     	if(!validate) {
-    		removeDialog(DIALOG_CHOOSE_GAME);
+    		//removeDialog(DIALOG_CHOOSE_GAME);
     		showDialog(DIALOG_CHOOSE_GAME);
     		return;
     	}
@@ -232,4 +249,10 @@ public class DrawTest extends Activity {
 		}
 			
     }
+
+	@Override
+	public void onGameOver() {
+		showDialog(DIALOG_GAME_OVER);
+		
+	}    
 }

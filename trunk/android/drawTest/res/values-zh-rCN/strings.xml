@@ -2,18 +2,22 @@
 <resources>    
     <string name="app_name">空当接龙</string>
     <string name="app_title">空当接龙 #{0}</string>
-	<string name="menu_new_game">新游戏</string>
-	<string name="menu_select_game">选择游戏</string>
+	<string name="menu_new_game">开局</string>
+	<string name="menu_select_game">选局</string>
 	<string name="menu_restart_game">重玩</string>
 	<string name="menu_undo">撤销</string>
 	<string name="menu_redo">重做</string>
 	<string name="menu_settings">设置</string>
-	<string name="picker_opt_new_game">新游戏</string>
-	<string name="picker_opt_select_game">选择游戏</string>
+	<string name="picker_opt_new_game">开局</string>
+	<string name="picker_opt_select_game">选局</string>
 	<string name="picker_opt_load_game">加载游戏</string>
 	<string name="picker_title">请选择</string>
-	<string name="prompt_end_game">你想结束当前的游戏吗?</string>
-	<string name="dlg_title_game_number">游戏编号</string>
-	<string name="prompt_pick_game_number">请选择一个游戏编号\n(从{0}到{1})</string>
-	<string name="prompt_invalid_game_number">请选择一个从{0}到{1}的游戏编号</string>
+	<string name="prompt_end_game">是否结束本局?</string>
+	<string name="dlg_title_game_number">选局</string>
+	<string name="prompt_pick_game_number">选局\n(从{0}到{1})</string>
+	<string name="prompt_invalid_game_number">请输入一个从{0}到{1}的数字</string>
+	<string name="yes">是</string>
+	<string name="no">否</string>
+	<string name="dlg_title_game_over">游戏结束</string>
+	<string name="prompt_you_win">恭喜,您赢了!</string>	
 </resources>
