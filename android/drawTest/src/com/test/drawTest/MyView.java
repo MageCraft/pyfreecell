@@ -339,6 +339,7 @@ public class MyView extends View{
 	private Card selectedCard; 
 	private State state;
 	private Drawable flag;
+	private GameInterface.OnGameOverListener onGameOverListener; 
 	
 	public enum State { Idle, Playing }
 	
@@ -402,6 +403,10 @@ public class MyView extends View{
 		}
 	}	
 	
+	public void setOnGameOverListener(GameInterface.OnGameOverListener listener) {
+		onGameOverListener = listener;
+	}
+	
 	private void init() {
 		cards = new Card[DECK_SIZE];		
 		Resources res = getContext().getResources();	
@@ -457,19 +462,20 @@ public class MyView extends View{
 	public int playNewGame() {
 		Random r = new Random();
 		seed = r.nextInt(30000);
-		playGame(seed);
+		playGame();
 		return seed;
 	}
 	
 	public void replayGame() {
-		playGame(seed);
+		playGame();//with current seed
 	}
 	
 	public void playSpecGame(int seed) {
-		playGame(seed);
+		this.seed = seed;
+		playGame();
 	}
 	
-	private void playGame(int seed) {
+	private void playGame() {
 		state = State.Playing;
 		shuffle();
 		cleanup();
@@ -859,7 +865,8 @@ public class MyView extends View{
 					selectCard(clickedSlot.getCard());				
 			} else 
 				move2Free(selectedCard.getOwner(), clickedSlot, false, MoveType.NormalMove);			
-		}		
+		}	
+		checkGameOver();
 		return true;		
 	}
 	
@@ -880,6 +887,7 @@ public class MyView extends View{
 		}
 		emptySelectedCard();
 		autoPlay();
+		checkGameOver();
 		return true;
 	}
 	
@@ -915,8 +923,30 @@ public class MyView extends View{
 			}
 			
 		}
+		checkGameOver();
 		return true;
 		
+	}
+	
+	private void checkGameOver() {
+		if(getLeftCardCount() == 0) {
+			//game over
+			if(onGameOverListener != null)
+				onGameOverListener.onGameOver();
+		}
+			
+	}
+	
+	private int getLeftCardCount() {
+		int count = 0;
+		for(FreeSlot slot:freeSlots) {
+			if(!slot.empty())
+				count++;
+		}
+		for(FieldColumn col:fieldColumns)
+			count += col.getCards().size();
+		Log.i(LOG_TAG, "getLeftCardCount, left card is "+count);
+		return count;
 	}
 	
 	public boolean onTouchEvent(MotionEvent event) {
