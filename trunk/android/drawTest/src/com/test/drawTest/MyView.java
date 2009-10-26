@@ -339,11 +339,12 @@ public class MyView extends View{
 	private Card selectedCard; 
 	private State state;
 	private Drawable flag;
-	private GameInterface.OnGameOverListener onGameOverListener; 
+	private GameEventListener gameEventListener;	
+	private Vector<MoveStepT> moveSteps;
 	
 	public enum State { Idle, Playing }
 	
-	enum MoveType { SuperMove, NormalMove, Undo, AutoPlay }
+	enum MoveType { SuperMove, NormalMove, Undo, AutoPlay, SuperMoveBegin, SuperMoveEnd }
 	
 	abstract class MoveFunction {				
 		abstract void call(MyView funcOwner, CardOwner src, CardOwner dst, MoveType moveType);
@@ -401,10 +402,18 @@ public class MyView extends View{
 			this.src = src;
 			this.dst = dst;
 		}
-	}	
+	}
 	
-	public void setOnGameOverListener(GameInterface.OnGameOverListener listener) {
-		onGameOverListener = listener;
+	class MoveStepT extends MoveStep{
+		public final MoveType moveType;
+		public MoveStepT(MoveType moveType, CardOwner src, CardOwner dst) {
+			super(src, dst);
+			this.moveType = moveType;
+		}
+	}
+	
+	public void setGameEventListener(GameEventListener listener) {
+		gameEventListener = listener;
 	}
 	
 	private void init() {
@@ -451,12 +460,16 @@ public class MyView extends View{
 		}	
 		seed = -1;
 		state = State.Idle;
+		moveSteps = new Vector<MoveStepT>();
 	}
 	public int getSeed() {
 		return seed;
 	}
 	public State getState() {
 		return state;
+	}
+	public boolean isUndoEnabled() {
+		return !moveSteps.isEmpty();
 	}
 	
 	public int playNewGame() {
@@ -473,6 +486,37 @@ public class MyView extends View{
 	public void playSpecGame(int seed) {
 		this.seed = seed;
 		playGame();
+	}
+	
+	
+	//return true means can contiune undo
+	public void undo() {
+		boolean moved = false;
+		while(!moveSteps.isEmpty()) {
+			MoveStepT lastStep = moveSteps.lastElement();
+			MoveType moveType = lastStep.moveType;
+			CardOwner src = lastStep.src;
+			CardOwner dst = lastStep.dst;
+			boolean go = false;
+			if(moveType == MoveType.AutoPlay || moveType == MoveType.SuperMove)
+				go = true;
+			if(moveType == MoveType.SuperMoveEnd) {
+				moveSteps.remove(lastStep);
+				continue;
+			}
+			if(moveType == MoveType.SuperMoveBegin) {
+				moveSteps.remove(lastStep);
+				break;
+			}
+			MoveFunction mvFunc = moveFuncFactory(dst, src);
+			mvFunc.call(this, dst, src, MoveType.Undo);
+			moveSteps.remove(lastStep);	
+			moved = true;
+			if(!go) break;
+		}
+		if(moved) {
+			invalidate();			
+		}
 	}
 	
 	private void playGame() {
@@ -500,9 +544,8 @@ public class MyView extends View{
 			slot.setEmpty();
 		for(FieldColumn col:fieldColumns)
 			col.setEmpty();
+		moveSteps.removeAllElements();
 	}
-	
-	
 	
 	private boolean hasSelectedCard() {
 		return selectedCard != null;
@@ -588,7 +631,7 @@ public class MyView extends View{
 			FieldColumn srcCol = (FieldColumn)src;
 			dst.setCard(srcCol.last());
 			srcCol.pop();
-			//record step
+			recordStep(moveType, src, dst);
 			auto = true;		
 		}
 		if(src instanceof FreeSlot) {
@@ -597,7 +640,7 @@ public class MyView extends View{
 			if(src != dst) {
 				dst.setCard(srcSlot.getCard());
 				srcSlot.setEmpty();
-				//record step
+				recordStep(moveType, src, dst);
 			}
 		}
 		emptySelectedCard();
@@ -615,6 +658,7 @@ public class MyView extends View{
 	private void field2field(FieldColumn src, FieldColumn dst, MoveType moveType) {
 		dst.push(src.last());
 		src.pop();
+		recordStep(moveType,src,dst);
 	}
 	//used in normal move and super move, undo
 	private boolean free2field(FreeSlot src, FieldColumn dst, MoveType moveType, boolean test) {
@@ -624,7 +668,7 @@ public class MyView extends View{
 			dst.push(src.getCard());
 			src.setEmpty();
 			emptySelectedCard();
-			//record step
+			recordStep(moveType, src, dst);
 			return true;
 		}
 		return false;
@@ -643,7 +687,7 @@ public class MyView extends View{
 	//used in normal move and auto play
 	private boolean move2Home(CardOwner src, HomeSlot dst, boolean autoPlay, boolean test) {
 		boolean moved = false;
-		//MoveType moveType = autoPlay ? MoveType.AutoPlay : MoveType.NormalMove;
+		MoveType moveType = autoPlay ? MoveType.AutoPlay : MoveType.NormalMove;
 		if(src instanceof FieldColumn) {
 			FieldColumn srcCol = (FieldColumn)src;
 			//field => home
@@ -651,7 +695,7 @@ public class MyView extends View{
 				if(test) return true;
 				dst.setCard(srcCol.last());
 				srcCol.pop();
-				//record step
+				recordStep(moveType, src, dst);
 				moved = true;			
 			}		
 		}
@@ -662,7 +706,7 @@ public class MyView extends View{
 				if(test) return true;
 				dst.setCard(srcSlot.getCard());
 				srcSlot.setEmpty();
-				//record step
+				recordStep(moveType, src, dst);
 				moved = true;
 			}
 		}
@@ -740,12 +784,15 @@ public class MyView extends View{
 			return true;
 		emptySelectedCard();
 		Vector<MoveStep> stack = new Vector<MoveStep>();
+		MoveStepT stepSuperMoveBegin = recordStep(MoveType.SuperMoveBegin,null,null);
 		superMovePack(emptyFree, emptyCol, src, srcCard, stack);
 		if(stack.isEmpty()) {
+			moveSteps.remove(stepSuperMoveBegin);//not super move 
 			field2field(src, dst, MoveType.NormalMove);
 		} else {
 			field2field(src, dst, MoveType.SuperMove);
-			superMoveUnPack(stack, src, dst);			
+			superMoveUnPack(stack, src, dst);
+			recordStep(MoveType.SuperMoveEnd,null,null);
 		}	
 		return true;
 	}
@@ -866,7 +913,7 @@ public class MyView extends View{
 			} else 
 				move2Free(selectedCard.getOwner(), clickedSlot, false, MoveType.NormalMove);			
 		}	
-		checkGameOver();
+		checkGameOver();		
 		return true;		
 	}
 	
@@ -887,7 +934,7 @@ public class MyView extends View{
 		}
 		emptySelectedCard();
 		autoPlay();
-		checkGameOver();
+		checkGameOver();		
 		return true;
 	}
 	
@@ -923,7 +970,7 @@ public class MyView extends View{
 			}
 			
 		}
-		checkGameOver();
+		checkGameOver();		
 		return true;
 		
 	}
@@ -931,8 +978,8 @@ public class MyView extends View{
 	private void checkGameOver() {
 		if(getLeftCardCount() == 0) {
 			//game over
-			if(onGameOverListener != null)
-				onGameOverListener.onGameOver();
+			if(gameEventListener != null)
+				gameEventListener.onGameOver();
 		}
 			
 	}
@@ -970,5 +1017,14 @@ public class MyView extends View{
 			invalidate();			
 		}
 		return true;
+	}
+	
+	private MoveStepT recordStep(MoveType moveType, CardOwner src, CardOwner dst) {
+		MoveStepT moveStep = null;
+		if(moveType != MoveType.Undo) {
+			moveStep = new MoveStepT(moveType,src,dst);
+			moveSteps.add(moveStep);
+		}
+		return moveStep;
 	}
 }
