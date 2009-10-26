@@ -30,4 +30,7 @@
 	<string name="prompt_move_single_card">Move single card</string>
 	<string name="summary_display_msg_illegal_move">Display alert messages when illegal moves happened</string>	
 	<string name="title_settings">Settings</string>
+	<string name="dlg_title_about">About FreeCell</string>
+	<string name="prompt_about">Version {0}\nCopyright 2009, All Rights Reserved\nby Frank Zheng\n\nhustzxq524@gmail.com</string>
+	
 </resources>

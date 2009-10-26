@@ -17,6 +17,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 
 import java.text.MessageFormat;
 import com.test.drawTest.MyView;
@@ -41,6 +43,7 @@ public class DrawTest extends Activity implements GameEventListener
 	private static final int DIALOG_MOVE_NOT_ALLOWED = 4;
 	private static final int DIALOG_SUPERMOVE_NOT_ENOUGH_SPACE = 5;
 	private static final int DIALOG_MOVE_TO_EMPTY_COLUMN = 6;
+	private static final int DIALOG_ABOUT = 7;
 	
 	private static final int REQUEST_CODE_PREFERENCES = 0;
 	
@@ -105,6 +108,7 @@ public class DrawTest extends Activity implements GameEventListener
     		undoGame();
 			break;
     	case MENU_ABOUT:
+    		showDialog(DIALOG_ABOUT);
 			break;
     	case MENU_SETTINGS:
     		settings();
@@ -187,8 +191,30 @@ public class DrawTest extends Activity implements GameEventListener
 					seedEdit.setText("");
 					DrawTest.this.selectGameToPlay(seed,true);
 				}
+			});    		
+    		break;
+    	case DIALOG_ABOUT:
+    		final View aboutView = factory.inflate(R.layout.about_dialog, null);
+    		TextView textAbout = (TextView)aboutView.findViewById(R.id.text_about);
+    		PackageManager pm = getPackageManager();
+    		String versionName = null;
+    		try {
+    			PackageInfo pi = pm.getPackageInfo(getPackageName(), 0);
+    			versionName = pi.versionName;
+    		} catch(PackageManager.NameNotFoundException ex) {
+    			versionName = "";
+    		}
+    		String about = MessageFormat.format(getString(R.string.prompt_about), versionName);
+    		textAbout.setText(about);
+    		builder.setTitle(R.string.dlg_title_about);
+    		builder.setView(aboutView);
+    		  		
+    		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					//do nothing					
+				}
 			});
-    		
     		break;
     	case DIALOG_GAME_OVER: 
     		final CharSequence[] items1 = { getString(R.string.picker_opt_new_game),
@@ -390,8 +416,7 @@ public class DrawTest extends Activity implements GameEventListener
 		} else {
 			cardView.playSpecGame(number-1);
 			setAppTitle(number);
-		}
-			
+		}			
     }
 
 	@Override
