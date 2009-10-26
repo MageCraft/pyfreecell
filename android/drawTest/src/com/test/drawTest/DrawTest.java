@@ -51,6 +51,7 @@ public class DrawTest extends Activity implements GameEventListener
 	private GameAction gameAction;
 	private Toast toastInvalidGameNumber;
 	private String superMoveNotEnoughSpaceMsg;
+	private Toast toastMoveNotAllowed;
 	
     /** Called when the activity is first created. */
     @Override
@@ -400,13 +401,17 @@ public class DrawTest extends Activity implements GameEventListener
 	}
 	@Override
 	public void onMoveNotAllowed() {
-		showDialog(DIALOG_MOVE_NOT_ALLOWED);
+		//showDialog(DIALOG_MOVE_NOT_ALLOWED);
+		if(toastMoveNotAllowed == null) {		
+			toastMoveNotAllowed = Toast.makeText(this, R.string.prompt_move_not_allowed, Toast.LENGTH_SHORT);
+		}
+		toastMoveNotAllowed.show();
 	}
 
 	@Override
 	public void onSuperMoveNotEnoughSpace(int countToMoved, int freeSpace) {
 		superMoveNotEnoughSpaceMsg = MessageFormat.format(getString(R.string.prompt_supermove_not_enough_space), countToMoved, freeSpace);
-		showDialog(DIALOG_SUPERMOVE_NOT_ENOUGH_SPACE);		
+		//showDialog(DIALOG_SUPERMOVE_NOT_ENOUGH_SPACE);		
 	}
 	
 }
