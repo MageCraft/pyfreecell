@@ -30,4 +30,6 @@
 	<string name="prompt_move_single_card">移动单张牌</string>
 	<string name="summary_display_msg_illegal_move">当移牌违规时显示警告信息</string>
 	<string name="title_settings">设置</string>
+	<string name="dlg_title_about">关于 空当接龙</string>
+	<string name="prompt_about">版本  {0}\n版权所有 2009，保留所有权利\nby Frank Zheng\n\nhustzxq524@gmail.com</string>
 </resources>
