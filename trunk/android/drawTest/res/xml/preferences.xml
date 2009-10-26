@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+   <CheckBoxPreference
+                android:key="pref_key_alert_illegal_move"
+                android:title="@string/prompt_display_msg_illegal_move"
+                android:summary="@string/summary_display_msg_illegal_move" />
+</PreferenceScreen>

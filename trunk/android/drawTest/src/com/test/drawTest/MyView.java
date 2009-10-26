@@ -341,6 +341,7 @@ public class MyView extends View{
 	private Drawable flag;
 	private GameEventListener gameEventListener;	
 	private Vector<MoveStepT> moveSteps;
+	private boolean illegalMoveAlert;
 	
 	public enum State { Idle, Playing }
 	
@@ -470,6 +471,9 @@ public class MyView extends View{
 	}
 	public boolean isUndoEnabled() {
 		return !moveSteps.isEmpty();
+	}
+	public void setIllegalMoveAlert(boolean showAlert) {
+		illegalMoveAlert = showAlert;
 	}
 	
 	public int playNewGame() {
@@ -782,6 +786,11 @@ public class MyView extends View{
 			return false;
 		if(test)
 			return true;
+		
+		if(dst.empty() && series.size() > 1) {
+			//if super move to empty column, need alert user if move column or single card
+			//defer it, always move entire column
+		}
 		emptySelectedCard();
 		Vector<MoveStep> stack = new Vector<MoveStep>();
 		MoveStepT stepSuperMoveBegin = recordStep(MoveType.SuperMoveBegin,null,null);
@@ -908,8 +917,10 @@ public class MyView extends View{
 					Log.i(LOG_TAG, "select same card in free slot again");
 					emptySelectedCard();
 				}
-				else 
-					selectCard(clickedSlot.getCard());				
+				else {
+					alertUserAboutIllegalMove();//alert user
+				}
+				return true;
 			} else 
 				move2Free(selectedCard.getOwner(), clickedSlot, false, MoveType.NormalMove);			
 		}	
@@ -929,7 +940,7 @@ public class MyView extends View{
 			return false;
 		}
 		if(!move2Home(selectedCard.getOwner(), clickedSlot, false, false)) {
-			//alert user
+			alertUserAboutIllegalMove();//alert user
 			return true;
 		}
 		emptySelectedCard();
@@ -965,7 +976,7 @@ public class MyView extends View{
 		    //   a. card in free ==> card in field, if fit, move to it, or, do nothing
 		    //   b. card in field ==> card in field
 			if(!move2Field(selectedCard.getOwner(), clickedColumn, false)) {
-				//alert user
+				alertUserAboutIllegalMove();//alert user
 				return true;
 			}
 			
@@ -973,6 +984,15 @@ public class MyView extends View{
 		checkGameOver();		
 		return true;
 		
+	}
+	
+	private void alertUserAboutIllegalMove() {
+		if(illegalMoveAlert) {
+			if(gameEventListener!=null) {
+				gameEventListener.onMoveNotAllowed();
+				emptySelectedCard();
+			}
+		}
 	}
 	
 	private void checkGameOver() {

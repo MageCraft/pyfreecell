@@ -20,5 +20,14 @@
 	<string name="yes">Yes</string>
 	<string name="no">No</string>
 	<string name="dlg_title_game_over">Game Over</string>
-	<string name="prompt_you_win">Congratulations, you win!</string>
+	<string name="prompt_you_win">Congratulations, you win!</string>	
+	<string name="prompt_move_not_allowed">That move is not allowed</string>
+	<string name="prompt_supermove_not_enough_space">That Move requires moving {0} cards. You only have enough free space to move {1}.</string>
+	<string name="prompt_display_msg_illegal_move">Display alert messages</string>	
+	<string name="dlg_title_illegal_move">Illegal Move</string>
+	<string name="dlg_title_move_to_empty_column">Move to Empty Column...</string>
+	<string name="prompt_move_column">Move column</string>
+	<string name="prompt_move_single_card">Move single card</string>
+	<string name="summary_display_msg_illegal_move">Display alert messages when illegal moves happened</string>	
+	<string name="title_settings">Settings</string>
 </resources>
