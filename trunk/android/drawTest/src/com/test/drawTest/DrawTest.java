@@ -31,8 +31,7 @@ public class DrawTest extends Activity implements GameEventListener
 	private static final int MENU_NEW_GAME = 0;
 	private static final int MENU_RESTART_GAME = 1;
 	private static final int MENU_SELECT_GAME = 2;
-	private static final int MENU_UNDO = 3;
-	//private static final int MENU_REDO = 4;
+	private static final int MENU_UNDO = 3;	
 	private static final int MENU_SETTINGS = 5;
 	private static final int MENU_ABOUT = 6;
 	
@@ -45,10 +44,10 @@ public class DrawTest extends Activity implements GameEventListener
 	private static final int DIALOG_MOVE_TO_EMPTY_COLUMN = 6;
 	private static final int DIALOG_ABOUT = 7;
 	
-	private static final int REQUEST_CODE_PREFERENCES = 0;
+	private static final int REQUEST_CODE_PREFERENCES = 0;	
 	
-	
-	private MyView cardView;	
+	private MyView cardView;
+	private final MyLog log = new MyLog("DrawTest"); 
 	
 	enum GameAction { NewGame, SelectGame, RestartGame }
 	private GameAction gameAction;
@@ -64,7 +63,13 @@ public class DrawTest extends Activity implements GameEventListener
         cardView = (MyView)findViewById(R.id.cardView);
         cardView.setGameEventListener(this);        
         checkIllegalMoveAlertPref();
-        showDialog(DIALOG_PICK_ACTION_ON_START);
+        //showDialog(DIALOG_PICK_ACTION_ON_START);
+        
+        
+        if(!load()) {
+        	showDialog(DIALOG_PICK_ACTION_ON_START);
+        }
+        
         //showDialog(DIALOG_MOVE_TO_EMPTY_COLUMN);        
     }   
     
@@ -333,9 +338,47 @@ public class DrawTest extends Activity implements GameEventListener
 	
 
 	@Override
-	protected void onDestroy() {
-		// TODO Auto-generated method stub
+	protected void onDestroy() {		
 		super.onDestroy();
+		log.i("onDestroy");
+		if(isFinishing()) {
+			log.i("by finish()");
+			save();
+		} else {
+			log.i("by other reason");
+		}
+	}
+	
+	private boolean load() {
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		int gameNumber = pref.getInt("gameNumber", -1);
+		//int leftCard = pref.getInt("leftCard", -1);
+		String freeSlotsSavedString = pref.getString("freeSlots", "");
+		String homeSlotsSavedString = pref.getString("homeSlots", "");
+		String fieldColumnsSavedString = pref.getString("fieldColumns", "");
+		if(gameNumber != -1) {
+			cardView.playSavedGame(gameNumber, freeSlotsSavedString, homeSlotsSavedString, fieldColumnsSavedString);
+			return true;
+		}
+		return false;
+	}
+	
+	private void save() {
+		//game number - int, -1 means first time
+		//left card - int, 0 means game over
+		//free slots - string, v1,v2,v3,v4, -1 means empty
+		//home slots - string, v1,v2,v3,v4, -1 means empty
+		//field columns - string, v1,v2...#v1,v2...#v1,v2#...		
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = pref.edit();
+		editor.putInt("gameNumber", cardView.getSeed());
+		editor.putInt("leftCard", cardView.getLeftCardCount());
+		if(cardView.getLeftCardCount() != MyView.DECK_SIZE) {
+			editor.putString("freeSlots", cardView.freeSlotsSave2String());
+			editor.putString("homeSlots", cardView.homeSlotsSave2String());
+			editor.putString("fieldColumns", cardView.fieldColumnsSave2String());
+		}
+		editor.commit();		
 	}
 
 	private void setAppTitle(int number) {
