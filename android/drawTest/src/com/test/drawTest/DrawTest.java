@@ -2,16 +2,21 @@ package com.test.drawTest;
 
 import android.app.Activity;
 import android.os.*;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.app.Dialog;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
 
 import java.text.MessageFormat;
 import com.test.drawTest.MyView;
@@ -33,6 +38,11 @@ public class DrawTest extends Activity implements GameEventListener
 	private static final int DIALOG_GAME_OVER = 1;
 	private static final int DIALOG_END_CURRENT_GAME = 2;
 	private static final int DIALOG_PICK_ACTION_ON_START = 3;
+	private static final int DIALOG_MOVE_NOT_ALLOWED = 4;
+	private static final int DIALOG_SUPERMOVE_NOT_ENOUGH_SPACE = 5;
+	private static final int DIALOG_MOVE_TO_EMPTY_COLUMN = 6;
+	
+	private static final int REQUEST_CODE_PREFERENCES = 0;
 	
 	
 	private MyView cardView;	
@@ -40,6 +50,7 @@ public class DrawTest extends Activity implements GameEventListener
 	enum GameAction { NewGame, SelectGame, RestartGame }
 	private GameAction gameAction;
 	private Toast toastInvalidGameNumber;
+	private String superMoveNotEnoughSpaceMsg;
 	
     /** Called when the activity is first created. */
     @Override
@@ -48,8 +59,10 @@ public class DrawTest extends Activity implements GameEventListener
         setContentView(R.layout.main);
         cardView = (MyView)findViewById(R.id.cardView);
         cardView.setGameEventListener(this);        
-        showDialog(DIALOG_PICK_ACTION_ON_START);        
-    }    
+        checkIllegalMoveAlertPref();
+        showDialog(DIALOG_PICK_ACTION_ON_START);
+        //showDialog(DIALOG_MOVE_TO_EMPTY_COLUMN);        
+    }   
     
     public boolean onCreateOptionsMenu(Menu menu) {
     	menu.add(0,MENU_NEW_GAME, 0, getString(R.string.menu_new_game));    	
@@ -93,6 +106,7 @@ public class DrawTest extends Activity implements GameEventListener
     	case MENU_ABOUT:
 			break;
     	case MENU_SETTINGS:
+    		settings();
 			break;	
     	}
     	return true;
@@ -101,13 +115,14 @@ public class DrawTest extends Activity implements GameEventListener
     
     protected Dialog onCreateDialog(int id) {    	
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	LayoutInflater factory = LayoutInflater.from(this);
     	switch(id) {
     	case DIALOG_PICK_ACTION_ON_START:
     		final CharSequence[] items = { getString(R.string.picker_opt_new_game),
     				 getString(R.string.picker_opt_select_game),
     				 getString(R.string.picker_opt_load_game)};
     		builder.setCancelable(false);
-    		builder.setTitle(getString(R.string.picker_title));
+    		builder.setTitle(R.string.picker_title);
     		builder.setItems(items, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int item) {					
 					switch(item) {
@@ -145,22 +160,20 @@ public class DrawTest extends Activity implements GameEventListener
 			});
     		builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int which) {
-										
+					//do nothing				
 				}
 			});
     		break;    	
-    	case DIALOG_CHOOSE_GAME:
-    		LayoutInflater factory = LayoutInflater.from(this);
+    	case DIALOG_CHOOSE_GAME:    		
     		final View selectGameView = factory.inflate(R.layout.select_game_dialog, null);
     		TextView textView = (TextView)selectGameView.findViewById(R.id.text);
     		String prompt = getString(R.string.prompt_pick_game_number);
     		prompt = MessageFormat.format(prompt, Integer.toString(1), Integer.toString(30000));
     		textView.setText(prompt);
     		builder.setCancelable(false);
-    		builder.setTitle(getString(R.string.dlg_title_game_number));
-    		builder.setView(selectGameView);
-    		CharSequence ok = getString(android.R.string.ok);
-    		builder.setPositiveButton(ok, new DialogInterface.OnClickListener() {				
+    		builder.setTitle(R.string.dlg_title_game_number);
+    		builder.setView(selectGameView);    		
+    		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int which) {					
 					EditText seedEdit = (EditText)selectGameView.findViewById(R.id.seed_edit);
 					String content = seedEdit.getText().toString();
@@ -180,7 +193,7 @@ public class DrawTest extends Activity implements GameEventListener
     		final CharSequence[] items1 = { getString(R.string.picker_opt_new_game),
     									getString(R.string.picker_opt_select_game) };
     		builder.setCancelable(false);
-    		builder.setTitle(getString(R.string.prompt_you_win));
+    		builder.setTitle(R.string.prompt_you_win);
     		builder.setItems(items1, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int item) {					
 					switch(item) {
@@ -196,13 +209,109 @@ public class DrawTest extends Activity implements GameEventListener
 				}
 			});    		
     		break;
-    	default:
+    	case DIALOG_MOVE_NOT_ALLOWED:
+    	case DIALOG_SUPERMOVE_NOT_ENOUGH_SPACE:
+    		final View illegalMoveAlertView = factory.inflate(R.layout.illegal_move_alert, null);
+    		TextView msg = (TextView)illegalMoveAlertView.findViewById(R.id.text);    		
+    		if(id == DIALOG_MOVE_NOT_ALLOWED) {
+    			msg.setText(R.string.prompt_move_not_allowed);
+    		} else if(id == DIALOG_SUPERMOVE_NOT_ENOUGH_SPACE){    			
+    			msg.setText(superMoveNotEnoughSpaceMsg);
+    		}
+    		builder.setView(illegalMoveAlertView);
+    		builder.setTitle(R.string.dlg_title_illegal_move);
+    		builder.setCancelable(false);    		
+    		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {					
+					//do nothing
+				}
+			});
+    		break;
+    	case DIALOG_MOVE_TO_EMPTY_COLUMN:
+    		final View move2EmptyColumnView = factory.inflate(R.layout.move_to_empty_column_dialog, null);
+    		builder.setView(move2EmptyColumnView);
+    		builder.setTitle(R.string.dlg_title_move_to_empty_column);    		
+    		builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					//do nothing					
+				}
+			});
+    		final Dialog dlg = builder.create();
+    		Button btn1 = (Button)move2EmptyColumnView.findViewById(R.id.btn_move_column);
+    		btn1.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					dlg.dismiss();					
+				}    			
+    		});
+    		Button btn2 = (Button)move2EmptyColumnView.findViewById(R.id.btn_move_single_card);
+    		btn2.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					dlg.dismiss();					
+				}    			
+    		});
+    		return dlg;
+    		
+    	default:    		
     		break;
     	}    	
     	return builder.create();   	
-    }
+    }    
     
-    private void setAppTitle(int number) {
+    
+    @Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onRestoreInstanceState(savedInstanceState);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+	}
+
+	@Override
+	protected void onRestart() {
+		// TODO Auto-generated method stub
+		super.onRestart();
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+	}
+
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+	}
+
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+	}
+	
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+	}
+
+	private void setAppTitle(int number) {
     	String title = getString(R.string.app_title);
     	title = MessageFormat.format(title, Integer.toString(number));
     	setTitle(title);
@@ -233,6 +342,25 @@ public class DrawTest extends Activity implements GameEventListener
     	cardView.undo();
     }
     
+    private void settings() {
+    	Intent settingsActivity = new Intent().setClass(this, Preferences.class);
+    	startActivityForResult(settingsActivity, REQUEST_CODE_PREFERENCES);
+    }
+    
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(requestCode == REQUEST_CODE_PREFERENCES) {
+			checkIllegalMoveAlertPref();			
+		}
+	}
+	
+	private void checkIllegalMoveAlertPref() {
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		final boolean showAlert = sharedPref.getBoolean(Preferences.KEY_ALERT_ILLEGAL_MOVE, false);
+		cardView.setIllegalMoveAlert(showAlert);
+	}
+
 	protected void onPrepareDialog(int id, Dialog dialog) {		
 		super.onPrepareDialog(id, dialog);
 	}
@@ -269,6 +397,16 @@ public class DrawTest extends Activity implements GameEventListener
 	public void onGameOver() {
 		showDialog(DIALOG_GAME_OVER);
 		
+	}
+	@Override
+	public void onMoveNotAllowed() {
+		showDialog(DIALOG_MOVE_NOT_ALLOWED);
+	}
+
+	@Override
+	public void onSuperMoveNotEnoughSpace(int countToMoved, int freeSpace) {
+		superMoveNotEnoughSpaceMsg = MessageFormat.format(getString(R.string.prompt_supermove_not_enough_space), countToMoved, freeSpace);
+		showDialog(DIALOG_SUPERMOVE_NOT_ENOUGH_SPACE);		
 	}
 	
 }
