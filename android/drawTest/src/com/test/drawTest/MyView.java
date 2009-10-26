@@ -323,7 +323,6 @@ class MyUtil {
 
 public class MyView extends View{
 	
-	private static final String LOG_TAG = "MyView";
 	private static final int RES_BASE_ID = R.drawable.card00;
 	
 	public static final int HORIZONTAL_GAP = 8;
@@ -342,6 +341,8 @@ public class MyView extends View{
 	private GameEventListener gameEventListener;	
 	private Vector<MoveStepT> moveSteps;
 	private boolean illegalMoveAlert;
+	
+	private final MyLog log = new MyLog("MyView");
 	
 	public enum State { Idle, Playing }
 	
@@ -490,6 +491,17 @@ public class MyView extends View{
 	public void playSpecGame(int seed) {
 		this.seed = seed;
 		playGame();
+	}
+	
+	public void playSavedGame(int seed, 
+			String freeSlotsSavedString, String homeSlotsSavedString, String fieldColumnsSavedString) {
+		this.seed = seed;
+		state = State.Playing;
+		shuffle();
+		freeSlotsLoadFromString(freeSlotsSavedString);
+		homeSlotsLoadFromString(homeSlotsSavedString);
+		fieldColumnsFromString(fieldColumnsSavedString);
+		invalidate();		
 	}
 	
 	
@@ -810,7 +822,7 @@ public class MyView extends View{
 		if(src instanceof FieldColumn) {
 			FieldColumn srcCol = (FieldColumn)src;
 			if(srcCol == dst) {
-				Log.i(LOG_TAG, "select same field column");
+				log.i("select same field column");
 				emptySelectedCard();
 				return true;//not alert user
 			}
@@ -908,13 +920,13 @@ public class MyView extends View{
 	    //   b. card in field ==> card in free, just switch highlight
 		if(!hasSelectedCard()) {
 			if(clickedSlot.empty()) 
-				Log.i(LOG_TAG, "clicked the empty free slot");				
+				log.i("clicked the empty free slot");				
 			else 
 				selectCard(clickedSlot.getCard());
 		} else {
 			if(!clickedSlot.empty()) {
 				if(selectedCard == clickedSlot.getCard()) {
-					Log.i(LOG_TAG, "select same card in free slot again");
+					log.i("select same card in free slot again");
 					emptySelectedCard();
 				}
 				else {
@@ -966,7 +978,7 @@ public class MyView extends View{
 		if(!hasSelectedCard()) {
 			//1. no select before, just highlight the column's last card	
 			if(clickedColumn.empty()) {
-				Log.i(LOG_TAG, "select empty column");				
+				log.i("select empty column");				
 			} else {
 				Card card = clickedColumn.last();
 				selectCard(card);
@@ -1000,11 +1012,91 @@ public class MyView extends View{
 			//game over
 			if(gameEventListener != null)
 				gameEventListener.onGameOver();
-		}
-			
+		}			
 	}
 	
-	private int getLeftCardCount() {
+	public String freeSlotsSave2String() {
+		String str = "";
+		for(FreeSlot slot:freeSlots) {
+			str += slot.empty() ? "-1" : slot.getCard().getValue();
+			str += ",";
+		}
+		return str;	
+	}
+	
+	public boolean freeSlotsLoadFromString(String savedString) {
+		String[] array = savedString.split(",");		
+		if(array.length != 4) return false;
+		for(int i = 0 ; i < array.length ; i++)
+		{
+			try {
+				int value = Integer.parseInt(array[i]);
+				if(value != -1) 
+					freeSlots[i].setCard(cards[value]);				
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+		return true;			
+	}
+	
+	public String homeSlotsSave2String() {
+		String str = "";
+		for(HomeSlot slot:homeSlots) {
+			str += slot.empty() ? "-1" : slot.getCard().getValue();
+			str += ",";
+		}
+		return str;
+	}
+	
+	public boolean homeSlotsLoadFromString(String savedString) {
+		String[] array = savedString.split(",");		
+		if(array.length != 4) return false;
+		for(int i = 0 ; i < array.length ; i++)
+		{
+			try {
+				int value = Integer.parseInt(array[i]);	
+				if(value!=-1)
+					homeSlots[i].setCard(cards[value]);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public String fieldColumnsSave2String() {
+		String str = "";
+		for(FieldColumn col:fieldColumns) {			
+			for(Card card:col.getCards()) {
+				str += card.getValue();
+				str += ",";
+			}
+			str += 	"#";			
+		}
+		return str;
+	}
+	
+	public boolean fieldColumnsFromString(String savedString) {
+		String[] cols = savedString.split("#");
+		if(cols.length != 8) return false;
+		for(int i = 0 ; i < cols.length ; i++) {
+			if(cols[i].equals("")) 
+				continue;
+			String[] values = cols[i].split(",");
+			for(int j = 0 ; j < cards.length-1 ; j++) {
+				try {
+					int value = Integer.parseInt(values[j]);
+					fieldColumns[i].push(cards[value]);
+				} catch(NumberFormatException e) {
+					return false;
+				}
+			}
+		}		
+		return true;
+	}
+	
+	public int getLeftCardCount() {
 		int count = 0;
 		for(FreeSlot slot:freeSlots) {
 			if(!slot.empty())
@@ -1012,7 +1104,7 @@ public class MyView extends View{
 		}
 		for(FieldColumn col:fieldColumns)
 			count += col.getCards().size();
-		Log.i(LOG_TAG, "getLeftCardCount, left card is "+count);
+		log.i("getLeftCardCount, left card is "+count);
 		return count;
 	}
 	
@@ -1022,17 +1114,17 @@ public class MyView extends View{
 			int x = (int)event.getX();
 			int y = (int)event.getY();			 
 			if(clickHomeSlots(x,y)) {
-				Log.i(LOG_TAG, "onTouchEvent, click home slots");
+				log.i("onTouchEvent, click home slots");
 				
 			}
 			else if(clickFreeSlots(x,y) ) {
-				Log.i(LOG_TAG, "onTouchEvent, click free slots");
+				log.i("onTouchEvent, click free slots");
 				
 			}
 			else if(clickFieldColumns(x,y)) {
-				Log.i(LOG_TAG, "onTouchEvent, click fields");
+				log.i("onTouchEvent, click fields");
 			} else {
-				Log.i(LOG_TAG, "onTouchEvent, click empty field");
+				log.i("onTouchEvent, click empty field");
 			}			
 			invalidate();			
 		}
