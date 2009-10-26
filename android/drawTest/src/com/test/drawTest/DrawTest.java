@@ -18,14 +18,16 @@ import com.test.drawTest.MyView;
 import com.test.drawTest.MyView.State;
 
 
-public class DrawTest extends Activity implements GameInterface.OnGameOverListener {
+public class DrawTest extends Activity implements GameEventListener										
+{
 	
 	private static final int MENU_NEW_GAME = 0;
 	private static final int MENU_RESTART_GAME = 1;
 	private static final int MENU_SELECT_GAME = 2;
 	private static final int MENU_UNDO = 3;
-	private static final int MENU_REDO = 4;
-	private static final int MENU_SETTINGS = 5;	
+	//private static final int MENU_REDO = 4;
+	private static final int MENU_SETTINGS = 5;
+	private static final int MENU_ABOUT = 6;
 	
 	private static final int DIALOG_CHOOSE_GAME = 0;
 	private static final int DIALOG_GAME_OVER = 1;
@@ -39,14 +41,13 @@ public class DrawTest extends Activity implements GameInterface.OnGameOverListen
 	private GameAction gameAction;
 	private Toast toastInvalidGameNumber;
 	
-	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         cardView = (MyView)findViewById(R.id.cardView);
-        cardView.setOnGameOverListener(this);
+        cardView.setGameEventListener(this);        
         showDialog(DIALOG_PICK_ACTION_ON_START);        
     }    
     
@@ -54,13 +55,22 @@ public class DrawTest extends Activity implements GameInterface.OnGameOverListen
     	menu.add(0,MENU_NEW_GAME, 0, getString(R.string.menu_new_game));    	
     	menu.add(0,MENU_SELECT_GAME, 0, getString(R.string.menu_select_game));
     	menu.add(0,MENU_RESTART_GAME, 0, getString(R.string.menu_restart_game));
-    	menu.add(0,MENU_UNDO, 0, getString(R.string.menu_undo));
-    	menu.add(0,MENU_REDO, 0, getString(R.string.menu_redo));
-    	menu.add(0,MENU_SETTINGS, 0, getString(R.string.menu_settings));   
+    	menu.add(0,MENU_UNDO, 0, getString(R.string.menu_undo));    	
+    	menu.add(0,MENU_SETTINGS, 0, getString(R.string.menu_settings));
+    	menu.add(0,MENU_ABOUT, 0, getString(R.string.menu_about));
     	return true;
     }
     
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem menuItemUndo = menu.findItem(MENU_UNDO);
+		if(menuItemUndo!=null) {
+			menuItemUndo.setEnabled(cardView.isUndoEnabled());
+		}
+		return true;	
+	}
+
+	public boolean onOptionsItemSelected(MenuItem item) {
     	switch(item.getItemId()) {
     	case MENU_NEW_GAME:
     		gameAction = GameAction.NewGame;
@@ -78,8 +88,9 @@ public class DrawTest extends Activity implements GameInterface.OnGameOverListen
     			selectGameToPlay(-1,false);    		
 			break;
     	case MENU_UNDO:
+    		undoGame();
 			break;
-    	case MENU_REDO:
+    	case MENU_ABOUT:
 			break;
     	case MENU_SETTINGS:
 			break;	
@@ -95,6 +106,7 @@ public class DrawTest extends Activity implements GameInterface.OnGameOverListen
     		final CharSequence[] items = { getString(R.string.picker_opt_new_game),
     				 getString(R.string.picker_opt_select_game),
     				 getString(R.string.picker_opt_load_game)};
+    		builder.setCancelable(false);
     		builder.setTitle(getString(R.string.picker_title));
     		builder.setItems(items, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int item) {					
@@ -217,6 +229,9 @@ public class DrawTest extends Activity implements GameInterface.OnGameOverListen
     	cardView.replayGame();
     }    
     
+    private void undoGame() {
+    	cardView.undo();
+    }
     
 	protected void onPrepareDialog(int id, Dialog dialog) {		
 		super.onPrepareDialog(id, dialog);
@@ -254,5 +269,6 @@ public class DrawTest extends Activity implements GameInterface.OnGameOverListen
 	public void onGameOver() {
 		showDialog(DIALOG_GAME_OVER);
 		
-	}    
+	}
+	
 }

@@ -8,6 +8,7 @@
 	<string name="menu_undo">撤销</string>
 	<string name="menu_redo">重做</string>
 	<string name="menu_settings">设置</string>
+	<string name="menu_about">关于</string>
 	<string name="picker_opt_new_game">开局</string>
 	<string name="picker_opt_select_game">选局</string>
 	<string name="picker_opt_load_game">加载游戏</string>
