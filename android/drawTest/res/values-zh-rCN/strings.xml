@@ -11,7 +11,7 @@
 	<string name="menu_about">关于</string>
 	<string name="picker_opt_new_game">开局</string>
 	<string name="picker_opt_select_game">选局</string>
-	<string name="picker_opt_load_game">加载游戏</string>
+	<string name="picker_opt_resume_game">继续游戏 #{0}</string>
 	<string name="picker_title">请选择</string>
 	<string name="prompt_end_game">是否结束本局？</string>
 	<string name="dlg_title_game_number">选局</string>

@@ -43,6 +43,7 @@ public class DrawTest extends Activity implements GameEventListener
 	private static final int DIALOG_SUPERMOVE_NOT_ENOUGH_SPACE = 5;
 	private static final int DIALOG_MOVE_TO_EMPTY_COLUMN = 6;
 	private static final int DIALOG_ABOUT = 7;
+	private static final int DIALOG_PICK_ACTION_ON_START_RESUME = 8;
 	
 	private static final int REQUEST_CODE_PREFERENCES = 0;	
 	
@@ -63,14 +64,11 @@ public class DrawTest extends Activity implements GameEventListener
         cardView = (MyView)findViewById(R.id.cardView);
         cardView.setGameEventListener(this);        
         checkIllegalMoveAlertPref();
-        //showDialog(DIALOG_PICK_ACTION_ON_START);
-        
-        
-        if(!load()) {
+        if(playingGameWhenLastClose()) {
+        	showDialog(DIALOG_PICK_ACTION_ON_START_RESUME);
+        } else {
         	showDialog(DIALOG_PICK_ACTION_ON_START);
-        }
-        
-        //showDialog(DIALOG_MOVE_TO_EMPTY_COLUMN);        
+        }        
     }   
     
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -127,13 +125,38 @@ public class DrawTest extends Activity implements GameEventListener
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	LayoutInflater factory = LayoutInflater.from(this);
     	switch(id) {
-    	case DIALOG_PICK_ACTION_ON_START:
-    		final CharSequence[] items = { getString(R.string.picker_opt_new_game),
-    				 getString(R.string.picker_opt_select_game),
-    				 getString(R.string.picker_opt_load_game)};
+    	case DIALOG_PICK_ACTION_ON_START_RESUME:
+    		String resumeGameStr = MessageFormat.format(getString(R.string.picker_opt_resume_game), 
+    												 Integer.toString(getLastPlayedGameNumber()));
+    		final CharSequence[] items = { resumeGameStr, 
+    				getString(R.string.picker_opt_new_game),
+   				 	getString(R.string.picker_opt_select_game)};
     		builder.setCancelable(false);
     		builder.setTitle(R.string.picker_title);
     		builder.setItems(items, new DialogInterface.OnClickListener() {				
+				public void onClick(DialogInterface dialog, int item) {					
+					switch(item) {
+					case 0://resume game
+						load();
+						break;
+					case 1://New game
+						newGame();
+						break;
+					case 2://Select game
+						showDialog(DIALOG_CHOOSE_GAME);
+						break;
+					default:
+						break;
+					}
+				}
+			});
+    		break;    		
+    	case DIALOG_PICK_ACTION_ON_START:
+    		final CharSequence[] items1 = { getString(R.string.picker_opt_new_game),
+    				 getString(R.string.picker_opt_select_game)};
+    		builder.setCancelable(false);
+    		builder.setTitle(R.string.picker_title);
+    		builder.setItems(items1, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int item) {					
 					switch(item) {
 					case 0://New game
@@ -221,11 +244,11 @@ public class DrawTest extends Activity implements GameEventListener
 			});
     		break;
     	case DIALOG_GAME_OVER: 
-    		final CharSequence[] items1 = { getString(R.string.picker_opt_new_game),
+    		final CharSequence[] items2 = { getString(R.string.picker_opt_new_game),
     									getString(R.string.picker_opt_select_game) };
     		builder.setCancelable(false);
     		builder.setTitle(R.string.prompt_you_win);
-    		builder.setItems(items1, new DialogInterface.OnClickListener() {				
+    		builder.setItems(items2, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int item) {					
 					switch(item) {
 					case 0://New game
@@ -344,6 +367,16 @@ public class DrawTest extends Activity implements GameEventListener
 		}
 	}
 	
+	private int getLastPlayedGameNumber() {
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		int gameNumber = pref.getInt("gameNumber", -1);
+		return gameNumber;
+	}
+	
+	private boolean playingGameWhenLastClose() {
+		return getLastPlayedGameNumber() != -1;
+	}
+	
 	private boolean load() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		int gameNumber = pref.getInt("gameNumber", -1);
@@ -353,6 +386,7 @@ public class DrawTest extends Activity implements GameEventListener
 		String fieldColumnsSavedString = pref.getString("fieldColumns", "");
 		if(gameNumber != -1) {
 			cardView.playSavedGame(gameNumber, freeSlotsSavedString, homeSlotsSavedString, fieldColumnsSavedString);
+			setAppTitle(gameNumber);
 			return true;
 		}
 		return false;
@@ -368,7 +402,7 @@ public class DrawTest extends Activity implements GameEventListener
 		SharedPreferences.Editor editor = pref.edit();
 		editor.putInt("gameNumber", cardView.getSeed());
 		editor.putInt("leftCard", cardView.getLeftCardCount());
-		if(cardView.getLeftCardCount() != MyView.DECK_SIZE) {
+		if(true) {
 			editor.putString("freeSlots", cardView.freeSlotsSave2String());
 			editor.putString("homeSlots", cardView.homeSlotsSave2String());
 			editor.putString("fieldColumns", cardView.fieldColumnsSave2String());
