@@ -215,7 +215,6 @@ public class DrawTest extends Activity implements GameEventListener
     		builder.setView(aboutView);
     		  		
     		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {				
-				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					//do nothing					
 				}
@@ -254,7 +253,6 @@ public class DrawTest extends Activity implements GameEventListener
     		builder.setTitle(R.string.dlg_title_illegal_move);
     		builder.setCancelable(false);    		
     		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {				
-				@Override
 				public void onClick(DialogInterface dialog, int which) {					
 					//do nothing
 				}
@@ -265,22 +263,19 @@ public class DrawTest extends Activity implements GameEventListener
     		builder.setView(move2EmptyColumnView);
     		builder.setTitle(R.string.dlg_title_move_to_empty_column);    		
     		builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {				
-				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					//do nothing					
 				}
 			});
     		final Dialog dlg = builder.create();
     		Button btn1 = (Button)move2EmptyColumnView.findViewById(R.id.btn_move_column);
-    		btn1.setOnClickListener(new OnClickListener() {
-				@Override
+    		btn1.setOnClickListener(new OnClickListener() {				
 				public void onClick(View arg0) {
 					dlg.dismiss();					
 				}    			
     		});
     		Button btn2 = (Button)move2EmptyColumnView.findViewById(R.id.btn_move_single_card);
-    		btn2.setOnClickListener(new OnClickListener() {
-				@Override
+    		btn2.setOnClickListener(new OnClickListener() {				
 				public void onClick(View arg0) {
 					dlg.dismiss();					
 				}    			
@@ -462,12 +457,12 @@ public class DrawTest extends Activity implements GameEventListener
 		}			
     }
 
-	@Override
+	
 	public void onGameOver() {
 		showDialog(DIALOG_GAME_OVER);
 		
 	}
-	@Override
+	
 	public void onMoveNotAllowed() {
 		//showDialog(DIALOG_MOVE_NOT_ALLOWED);
 		if(toastMoveNotAllowed == null) {		
@@ -475,8 +470,7 @@ public class DrawTest extends Activity implements GameEventListener
 		}
 		toastMoveNotAllowed.show();
 	}
-
-	@Override
+	
 	public void onSuperMoveNotEnoughSpace(int countToMoved, int freeSpace) {
 		superMoveNotEnoughSpaceMsg = MessageFormat.format(getString(R.string.prompt_supermove_not_enough_space), countToMoved, freeSpace);
 		//showDialog(DIALOG_SUPERMOVE_NOT_ENOUGH_SPACE);		
