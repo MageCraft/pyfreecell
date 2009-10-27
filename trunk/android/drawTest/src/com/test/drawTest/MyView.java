@@ -50,6 +50,10 @@ class Card {
 		area = Area.Field;
 	}
 	
+	public int getId() {
+		return id;
+	}
+	
 	public void setOwner(CardOwner owner) {
 		this.owner = owner;
 	}
@@ -1018,7 +1022,7 @@ public class MyView extends View{
 	public String freeSlotsSave2String() {
 		String str = "";
 		for(FreeSlot slot:freeSlots) {
-			str += slot.empty() ? "-1" : slot.getCard().getValue();
+			str += slot.empty() ? "-1" : slot.getCard().getId();
 			str += ",";
 		}
 		return str;	
@@ -1030,9 +1034,9 @@ public class MyView extends View{
 		for(int i = 0 ; i < array.length ; i++)
 		{
 			try {
-				int value = Integer.parseInt(array[i]);
-				if(value != -1) 
-					freeSlots[i].setCard(cards[value]);				
+				int id = Integer.parseInt(array[i]);
+				if(id != -1) 
+					freeSlots[i].setCard(cards[id]);				
 			} catch (NumberFormatException e) {
 				return false;
 			}
@@ -1043,7 +1047,7 @@ public class MyView extends View{
 	public String homeSlotsSave2String() {
 		String str = "";
 		for(HomeSlot slot:homeSlots) {
-			str += slot.empty() ? "-1" : slot.getCard().getValue();
+			str += slot.empty() ? "-1" : slot.getCard().getId();
 			str += ",";
 		}
 		return str;
@@ -1055,9 +1059,9 @@ public class MyView extends View{
 		for(int i = 0 ; i < array.length ; i++)
 		{
 			try {
-				int value = Integer.parseInt(array[i]);	
-				if(value!=-1)
-					homeSlots[i].setCard(cards[value]);
+				int id = Integer.parseInt(array[i]);	
+				if(id != -1)
+					homeSlots[i].setCard(cards[id]);
 			} catch (NumberFormatException e) {
 				return false;
 			}
@@ -1069,7 +1073,7 @@ public class MyView extends View{
 		String str = "";
 		for(FieldColumn col:fieldColumns) {			
 			for(Card card:col.getCards()) {
-				str += card.getValue();
+				str += card.getId();
 				str += ",";
 			}
 			str += 	"#";			
@@ -1083,11 +1087,11 @@ public class MyView extends View{
 		for(int i = 0 ; i < cols.length ; i++) {
 			if(cols[i].equals("")) 
 				continue;
-			String[] values = cols[i].split(",");
-			for(int j = 0 ; j < cards.length-1 ; j++) {
+			String[] colCards = cols[i].split(",");
+			for(int j = 0 ; j < colCards.length ; j++) {
 				try {
-					int value = Integer.parseInt(values[j]);
-					fieldColumns[i].push(cards[value]);
+					int id = Integer.parseInt(colCards[j]);
+					fieldColumns[i].push(cards[id]);
 				} catch(NumberFormatException e) {
 					return false;
 				}

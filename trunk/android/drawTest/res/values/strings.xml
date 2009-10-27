@@ -11,7 +11,7 @@
 	<string name="menu_about">About</string>
 	<string name="picker_opt_new_game">New Game</string>
 	<string name="picker_opt_select_game">Select Game</string>
-	<string name="picker_opt_load_game">Load Game</string>
+	<string name="picker_opt_resume_game">Resume Game #{0}</string>	
 	<string name="picker_title">Pick a action</string>
 	<string name="prompt_end_game">Do you want to resign this game?</string>
 	<string name="dlg_title_game_number">Game number</string>
