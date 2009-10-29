@@ -25,8 +25,8 @@ class Card {
 	private boolean selected;
 	private Area area;
 	private CardOwner owner;
-	public static final int width = 29;
-	public static final int height = 38;
+	public static final int width = 36;
+	public static final int height = 48;
 	
 	public static final int Club = 3;
 	public static final int Heart = 2;
@@ -329,7 +329,7 @@ public class FreeCellView extends View{
 	
 	private static final int RES_BASE_ID = R.drawable.card00;
 	
-	public static final int HORIZONTAL_GAP = 8;
+	public static final int HORIZONTAL_GAP = 3;
 	public static final int DECK_SIZE = 52;
 	public static final int GAME_MAX_SIZE = 30000;
 	
@@ -603,7 +603,7 @@ public class FreeCellView extends View{
 			slot.draw(canvas);			
 		}
 		
-		flag.draw(canvas);
+		//flag.draw(canvas);
 		
 		for(HomeSlot slot:homeSlots) {
 			slot.draw(canvas);
