@@ -76,8 +76,8 @@ public class FreeCellActivity extends Activity implements GameEventListener
     	menu.add(0,MENU_SELECT_GAME, 0, getString(R.string.menu_select_game));
     	menu.add(0,MENU_RESTART_GAME, 0, getString(R.string.menu_restart_game));
     	menu.add(0,MENU_UNDO, 0, getString(R.string.menu_undo));    	
-    	menu.add(0,MENU_SETTINGS, 0, getString(R.string.menu_settings));
-    	menu.add(0,MENU_ABOUT, 0, getString(R.string.menu_about));
+    	menu.add(0,MENU_SETTINGS, 0, getString(R.string.menu_settings));//.setIcon(android.R.drawable.ic_menu_preferences);
+    	menu.add(0,MENU_ABOUT, 0, getString(R.string.menu_about));//.setIcon(android.R.drawable.ic_menu_info_details);
     	return true;
     }
     
