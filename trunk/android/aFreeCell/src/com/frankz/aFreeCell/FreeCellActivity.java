@@ -19,6 +19,7 @@ import android.widget.Toast;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 
 import java.text.MessageFormat;
 
@@ -48,7 +49,7 @@ public class FreeCellActivity extends Activity implements GameEventListener
 	private static final int REQUEST_CODE_PREFERENCES = 0;	
 	
 	private FreeCellView cardView;
-	private final MyLog log = new MyLog("DrawTest"); 
+	private final MyLog log = new MyLog("FreeCellActivity"); 
 	
 	enum GameAction { NewGame, SelectGame, RestartGame }
 	private GameAction gameAction;
@@ -58,8 +59,9 @@ public class FreeCellActivity extends Activity implements GameEventListener
 	
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {    	
         super.onCreate(savedInstanceState);
+        log.i("onCreate");
         setContentView(R.layout.main);
         cardView = (FreeCellView)findViewById(R.id.cardView);
         cardView.setGameEventListener(this);        
@@ -69,7 +71,7 @@ public class FreeCellActivity extends Activity implements GameEventListener
         } else {
         	showDialog(DIALOG_PICK_ACTION_ON_START);
         }        
-    }   
+    }    
     
     public boolean onCreateOptionsMenu(Menu menu) {
     	menu.add(0,MENU_NEW_GAME, 0, getString(R.string.menu_new_game));    	
@@ -309,20 +311,37 @@ public class FreeCellActivity extends Activity implements GameEventListener
     		break;
     	}    	
     	return builder.create();   	
-    }    
+    } 
     
+    
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		log.i("onPause");		
+	}
+
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		log.i("onStop");
+	}
+
 	@Override
 	protected void onDestroy() {		
 		super.onDestroy();
-		log.i("onDestroy");
-		if(isFinishing()) {
-			log.i("by finish()");
-			save();
-		} else {
-			log.i("by other reason");
-		}
+		log.i("onDestroy");	
+		save();
 	}
 	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {		
+		super.onConfigurationChanged(newConfig);
+		//screen orientation changed
+		//cardView.changeScreenOrientation();
+	}
+
 	private int getLastPlayedGameNumber() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		int gameNumber = pref.getInt("gameNumber", -1);
@@ -335,7 +354,7 @@ public class FreeCellActivity extends Activity implements GameEventListener
 	
 	private boolean load() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-		int gameNumber = pref.getInt("gameNumber", -1);
+		int gameNumber = getLastPlayedGameNumber();
 		//int leftCard = pref.getInt("leftCard", -1);
 		String freeSlotsSavedString = pref.getString("freeSlots", "");
 		String homeSlotsSavedString = pref.getString("homeSlots", "");

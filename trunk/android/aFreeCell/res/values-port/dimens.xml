@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<dimen name="card_width">36dp</dimen>
+<dimen name="card_height">48dp</dimen>
+<dimen name="field_column_vertical_gap">15dp</dimen>
+<dimen name="field_column_horizontal_gap">3dp</dimen>
+<dimen name="top_slots_field_gap">12dp</dimen>
+</resources>

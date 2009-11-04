@@ -1,6 +1,7 @@
 package com.frankz.aFreeCell;
 
 import android.view.View;
+import android.view.WindowManager;
 
 import android.content.Context;
 import android.content.res.*;
@@ -25,8 +26,8 @@ class Card {
 	private boolean selected;
 	private Area area;
 	private CardOwner owner;
-	public static final int width = 36;
-	public static final int height = 48;
+	public static int width;
+	public static int height;
 	
 	public static final int Club = 3;
 	public static final int Heart = 2;
@@ -129,26 +130,28 @@ class Card {
 }
 
 class CardOwner {
+	public static int width;
+	public static int height;
 	
+	protected int x;
+	protected int y;
+	
+	public void setPosition(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	public int getLeft() {
+		return x;
+	}
+	
+	public int getTop() {
+		return y;
+	}
 }
 
 class FreeSlot extends CardOwner {
-	private Card card;
-	private int x;
-	private int y;
-	
-	public static final int width = Card.width;
-	public static final int height = Card.height;
-	
-	public FreeSlot(int x, int y) {
-		this.x = x;
-		this.y = y;
-	}
-	
-	public void setPostion(int x, int y) {
-		this.x = x;
-		this.y = y;
-	}
+	private Card card;		
 	
 	public boolean empty() {
 		return card == null;
@@ -179,21 +182,10 @@ class FreeSlot extends CardOwner {
 }
 
 class HomeSlot extends CardOwner {
-	public static final int width = FreeSlot.width;
-	public static final int height = FreeSlot.height;
 	private Stack<Card> cards;
-	private int x;
-	private int y;
 	
-	
-	public HomeSlot(int x, int y) {
-		this.x = x;
-		this.y = y;
+	public HomeSlot() {		
 		cards = new Stack<Card>();
-	}
-	public void setPosition(int x, int y) {
-		this.x = x;
-		this.y = y;
 	}
 	
 	public boolean contains(int x1, int y1) {
@@ -234,31 +226,21 @@ class HomeSlot extends CardOwner {
 }
 
 class FieldColumn extends CardOwner {
-	public static final int VERTICAL_GAP = 15;
+	public static int verticalGap;
 	
 	private Vector<Card> cards;
-	private int x;
-	private int y;
 	
-	public FieldColumn(int x, int y) {
-		this.x = x;
-		this.y = y;
+	public FieldColumn() {
 		cards = new Vector<Card>();
 	}
 	
 	public void push(Card card) {
 		cards.add(card);
-		int cardY = y + (cards.size()-1) * VERTICAL_GAP;
+		int cardY = y + (cards.size()-1) * verticalGap;
 		card.setPosition(x, cardY);
 		card.setArea(Area.Field);
 		card.setOwner(this);
 	}
-	
-	public void setPostion(int x, int y) {
-		this.x = x;
-		this.y = y;
-	}
-	
 	
 	public void setEmpty() {
 		cards.removeAllElements();
@@ -290,7 +272,7 @@ class FieldColumn extends CardOwner {
 		if(empty()) {
 			return x1 >= x && x1 <= x+Card.width && y1 >= y;
 		}
-		int h = (cards.size()-1) * VERTICAL_GAP + Card.height;
+		int h = (cards.size()-1) * verticalGap + Card.height;
 		Rect r = new Rect(x,y,x+Card.width,y+h);
 		return r.contains(x1,y1);
 	}
@@ -329,9 +311,11 @@ public class FreeCellView extends View{
 	
 	private static final int RES_BASE_ID = R.drawable.card00;
 	
-	public static final int HORIZONTAL_GAP = 3;
+	
 	public static final int DECK_SIZE = 52;
 	public static final int GAME_MAX_SIZE = 30000;
+	
+	private int horizontalGap;
 	
 	private Card[] cards;	
 	private FreeSlot[] freeSlots;
@@ -344,7 +328,7 @@ public class FreeCellView extends View{
 	private Drawable flag;
 	private GameEventListener gameEventListener;	
 	private Vector<MoveStepT> moveSteps;
-	private boolean illegalMoveAlert;
+	private boolean illegalMoveAlert;	
 	
 	private final MyLog log = new MyLog("MyView");
 	
@@ -422,48 +406,83 @@ public class FreeCellView extends View{
 		gameEventListener = listener;
 	}
 	
-	private void init() {
+	public void changeScreenOrientation() {
+		layout();		
+	}
+	
+	private void layout() {
+		Resources res = getContext().getResources();
+		Card.width = res.getDimensionPixelOffset(R.dimen.card_width);
+		Card.height = res.getDimensionPixelOffset(R.dimen.card_height);
+		CardOwner.width = Card.width;
+		CardOwner.height = Card.height;
+		FieldColumn.verticalGap = res.getDimensionPixelOffset(R.dimen.field_column_vertical_gap);
+		horizontalGap = res.getDimensionPixelOffset(R.dimen.field_column_horizontal_gap);
+		
+		Display display = ((WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		int screenWidth = display.getWidth();
+		
+		int left = ( screenWidth - Card.width * 8 - horizontalGap * 7 ) / 2;
+		int startX = left;
+		
+		int freeTop = 5;
+		for(FreeSlot freeSlot:freeSlots) {
+			freeSlot.setPosition(startX, freeTop);
+			startX += FreeSlot.width;
+		}		
+		flag = res.getDrawable(R.drawable.flag);
+		int gap = Card.width * 8 + horizontalGap * 7 - FreeSlot.width * 8;
+		if(gap >= flag.getIntrinsicWidth()+2) {
+			int flagX = startX + (gap-flag.getIntrinsicWidth())/2;
+			int flagY = freeTop + (FreeSlot.height - flag.getIntrinsicHeight())/2;
+			Rect flagR = new Rect(flagX, flagY, flagX+flag.getIntrinsicWidth(), flagY+flag.getIntrinsicHeight());
+			flag.setBounds(flagR);
+		} else {
+			flag = null;
+		}
+		
+		startX += gap;	
+		for(HomeSlot homeSlot:homeSlots) {
+			homeSlot.setPosition(startX, freeTop);
+			startX += HomeSlot.width;
+		}
+		
+		int fieldTop = freeTop + FreeSlot.height + res.getDimensionPixelOffset(R.dimen.top_slots_field_gap);		
+		startX = left;
+		for(FieldColumn col:fieldColumns) {
+			col.setPosition(startX, fieldTop);			
+			startX += Card.width + horizontalGap;
+		}	
+	}
+	
+	private void init() {		
 		cards = new Card[DECK_SIZE];		
-		Resources res = getContext().getResources();	
+		Resources res = getContext().getResources();		
 		Drawable drawable;		
 		for( int i = 0 ; i < DECK_SIZE ; i++) {			
 			drawable = res.getDrawable(RES_BASE_ID+i);
 			Card card = new Card(i,drawable);			
 			cards[i] = card;
 		}
-		flag = res.getDrawable(R.drawable.flag);		
+				
 		
 		freeSlots = new FreeSlot[4];
+		for( int i = 0 ; i < 4 ; i++) {
+			freeSlots[i] = new FreeSlot();			
+		}
 		homeSlots = new HomeSlot[4];
+		for( int i = 0 ; i < 4 ; i++) {
+			homeSlots[i] = new HomeSlot();			
+		}
+		
 		fieldColumns = new FieldColumn[8];
-		deck = new int[DECK_SIZE];			
-		
-		int left = ( 320 - Card.width * 8 - HORIZONTAL_GAP * 7 ) / 2;
-		int startX = left;
-		
-		int freeTop = 5;
-		for( int i = 0 ; i < 4 ; i++) {
-			freeSlots[i] = new FreeSlot(startX,freeTop);
-			startX += FreeSlot.width;
-		}
-		int gap = Card.width * 8 + HORIZONTAL_GAP * 7 - FreeSlot.width * 8;
-		int flagX = startX + (gap-flag.getIntrinsicWidth())/2;
-		int flagY = freeTop + (FreeSlot.height - flag.getIntrinsicHeight())/2;
-		Rect flagR = new Rect(flagX, flagY, flagX+flag.getIntrinsicWidth(), flagY+flag.getIntrinsicHeight());
-		flag.setBounds(flagR);
-		
-		startX += gap;		
-		for( int i = 0 ; i < 4 ; i++) {
-			homeSlots[i] = new HomeSlot(startX,freeTop);
-			startX += HomeSlot.width;
-		}
-		
-		int fieldTop = freeTop + FreeSlot.height + 12;		
-		startX = left;
 		for(int col = 0 ; col < 8 ; col++) {
-			fieldColumns[col] = new FieldColumn(startX,fieldTop);			
-			startX += Card.width + HORIZONTAL_GAP;
+			fieldColumns[col] = new FieldColumn();			
 		}	
+		deck = new int[DECK_SIZE];	
+		
+		layout();
+		
 		seed = -1;
 		state = State.Idle;
 		moveSteps = new Vector<MoveStepT>();
@@ -603,7 +622,9 @@ public class FreeCellView extends View{
 			slot.draw(canvas);			
 		}
 		
-		//flag.draw(canvas);
+		if(flag != null) {
+			flag.draw(canvas);
+		}
 		
 		for(HomeSlot slot:homeSlots) {
 			slot.draw(canvas);
