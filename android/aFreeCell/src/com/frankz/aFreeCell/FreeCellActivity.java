@@ -67,7 +67,8 @@ public class FreeCellActivity extends Activity implements GameEventListener
         cardView.setGameEventListener(this);        
         checkIllegalMoveAlertPref();
         if(playingGameWhenLastClose()) {
-        	showDialog(DIALOG_PICK_ACTION_ON_START_RESUME);
+        	//showDialog(DIALOG_PICK_ACTION_ON_START_RESUME);
+        	load();
         } else {
         	showDialog(DIALOG_PICK_ACTION_ON_START);
         }        
@@ -248,7 +249,7 @@ public class FreeCellActivity extends Activity implements GameEventListener
     	case DIALOG_GAME_OVER: 
     		final CharSequence[] items2 = { getString(R.string.picker_opt_new_game),
     									getString(R.string.picker_opt_select_game) };
-    		builder.setCancelable(false);
+    		builder.setCancelable(true);
     		builder.setTitle(R.string.prompt_you_win);
     		builder.setItems(items2, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int item) {					
@@ -343,8 +344,10 @@ public class FreeCellActivity extends Activity implements GameEventListener
 	}
 
 	private int getLastPlayedGameNumber() {
+		log.i("getLastPlayedGameNumber");
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		int gameNumber = pref.getInt("gameNumber", -1);
+		log.i("the game number is " + gameNumber);
 		return gameNumber;
 	}
 	
@@ -372,9 +375,12 @@ public class FreeCellActivity extends Activity implements GameEventListener
 		//left card - int, 0 means game over
 		//free slots - string, v1,v2,v3,v4, -1 means empty
 		//home slots - string, v1,v2,v3,v4, -1 means empty
-		//field columns - string, v1,v2...#v1,v2...#v1,v2#...		
+		//field columns - string, v1,v2...#v1,v2...#v1,v2#...
+		log.i("save");
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editor = pref.edit();
+		int gameNumber = cardView.getSeed();
+		log.i("gameNumber is " + gameNumber);
 		editor.putInt("gameNumber", cardView.getSeed());
 		editor.putInt("leftCard", cardView.getLeftCardCount());
 		if(true) {

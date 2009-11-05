@@ -136,6 +136,16 @@ class CardOwner {
 	protected int x;
 	protected int y;
 	
+	private final int id;
+	
+	public CardOwner(int id) {
+		this.id = id;
+	}
+	
+	public int getId() {
+		return id;
+	}
+	
 	public void setPosition(int x, int y) {
 		this.x = x;
 		this.y = y;
@@ -153,6 +163,9 @@ class CardOwner {
 class FreeSlot extends CardOwner {
 	private Card card;		
 	
+	public FreeSlot(int id) {
+		super(id);
+	}
 	public boolean empty() {
 		return card == null;
 	}
@@ -184,7 +197,8 @@ class FreeSlot extends CardOwner {
 class HomeSlot extends CardOwner {
 	private Stack<Card> cards;
 	
-	public HomeSlot() {		
+	public HomeSlot(int id) {
+		super(id);
 		cards = new Stack<Card>();
 	}
 	
@@ -230,7 +244,8 @@ class FieldColumn extends CardOwner {
 	
 	private Vector<Card> cards;
 	
-	public FieldColumn() {
+	public FieldColumn(int id) {
+		super(id);
 		cards = new Vector<Card>();
 	}
 	
@@ -330,7 +345,7 @@ public class FreeCellView extends View{
 	private Vector<MoveStepT> moveSteps;
 	private boolean illegalMoveAlert;	
 	
-	private final MyLog log = new MyLog("MyView");
+	private final MyLog log = new MyLog("FreeCellView");
 	
 	public enum State { Idle, Playing }
 	
@@ -464,20 +479,22 @@ public class FreeCellView extends View{
 			Card card = new Card(i,drawable);			
 			cards[i] = card;
 		}
-				
 		
+		//id: 0-3 free slot
+		//id: 4-7 home slot
+		//id: 8-15 field column		
 		freeSlots = new FreeSlot[4];
 		for( int i = 0 ; i < 4 ; i++) {
-			freeSlots[i] = new FreeSlot();			
+			freeSlots[i] = new FreeSlot(i);			
 		}
 		homeSlots = new HomeSlot[4];
 		for( int i = 0 ; i < 4 ; i++) {
-			homeSlots[i] = new HomeSlot();			
+			homeSlots[i] = new HomeSlot(i+freeSlots.length);			
 		}
 		
 		fieldColumns = new FieldColumn[8];
 		for(int col = 0 ; col < 8 ; col++) {
-			fieldColumns[col] = new FieldColumn();			
+			fieldColumns[col] = new FieldColumn(col+freeSlots.length+homeSlots.length);			
 		}	
 		deck = new int[DECK_SIZE];	
 		
@@ -518,6 +535,7 @@ public class FreeCellView extends View{
 	
 	public void playSavedGame(int seed, 
 			String freeSlotsSavedString, String homeSlotsSavedString, String fieldColumnsSavedString) {
+		log.i("playSavedGame, seed is " + seed);
 		this.seed = seed;
 		state = State.Playing;
 		shuffle();
@@ -1034,10 +1052,57 @@ public class FreeCellView extends View{
 	
 	private void checkGameOver() {
 		if(getLeftCardCount() == 0) {
-			//game over
+			seed = -1; // set game number to -1, that if user close the app at this time, can show option dialog next time
+			//game over			
 			if(gameEventListener != null)
 				gameEventListener.onGameOver();
 		}			
+	}
+	
+	public String moveStepsSave2String() {
+		String savedString = "";
+		for(MoveStepT moveStep:moveSteps) {
+			savedString += moveStep.src == null ? -1 : moveStep.src.getId() + ","; 
+			savedString += moveStep.dst == null ? -1 : moveStep.dst.getId() + ","; 
+			savedString += moveStep.moveType;
+			savedString += "#";
+		}		
+		return savedString;
+	}
+	
+	private CardOwner getCardOwnerById(int id) {		
+		if( id >= 0 && id < 4)
+			return freeSlots[id];
+		else if( id >= 4 && id < 8)
+			return homeSlots[id-4];
+		else if( id >= 8 && id < 16) 
+			return fieldColumns[id-8];
+		else 
+			return null;	
+	}
+	
+	private MoveStepT createMoveStepT(MoveType moveType, int srcId, int dstId) {
+		CardOwner src = getCardOwnerById(srcId);
+		CardOwner dst = getCardOwnerById(dstId);
+		return new MoveStepT(moveType,src,dst);
+	}
+	
+	public boolean moveStepsLoadFromString(String savedString) {
+		String[] array = savedString.split("#");
+		for(int i = 0 ; i < array.length ; i++) {
+			String[] stepArray = array[i].split(",");
+			if(stepArray.length != 3) return false;
+			try {
+				int srcId = Integer.parseInt(stepArray[0]);
+				int dstId = Integer.parseInt(stepArray[1]);
+				MoveType moveType = MoveType.valueOf(stepArray[2]);
+				MoveStepT step = createMoveStepT(moveType, srcId, dstId);
+				moveSteps.add(step);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	public String freeSlotsSave2String() {
