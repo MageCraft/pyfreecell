@@ -362,8 +362,10 @@ public class FreeCellActivity extends Activity implements GameEventListener
 		String freeSlotsSavedString = pref.getString("freeSlots", "");
 		String homeSlotsSavedString = pref.getString("homeSlots", "");
 		String fieldColumnsSavedString = pref.getString("fieldColumns", "");
+		String moveStepsSavedString = pref.getString("moveSteps", "");
 		if(gameNumber != -1) {
-			cardView.playSavedGame(gameNumber, freeSlotsSavedString, homeSlotsSavedString, fieldColumnsSavedString);
+			cardView.playSavedGame(gameNumber, freeSlotsSavedString, homeSlotsSavedString, 
+					fieldColumnsSavedString, moveStepsSavedString);
 			setAppTitle(gameNumber);
 			return true;
 		}
@@ -376,6 +378,7 @@ public class FreeCellActivity extends Activity implements GameEventListener
 		//free slots - string, v1,v2,v3,v4, -1 means empty
 		//home slots - string, v1,v2,v3,v4, -1 means empty
 		//field columns - string, v1,v2...#v1,v2...#v1,v2#...
+		//move steps - src,dst,moveType#...
 		log.i("save");
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editor = pref.edit();
@@ -387,6 +390,7 @@ public class FreeCellActivity extends Activity implements GameEventListener
 			editor.putString("freeSlots", cardView.freeSlotsSave2String());
 			editor.putString("homeSlots", cardView.homeSlotsSave2String());
 			editor.putString("fieldColumns", cardView.fieldColumnsSave2String());
+			editor.putString("moveSteps", cardView.moveStepsSave2String());
 		}
 		editor.commit();		
 	}

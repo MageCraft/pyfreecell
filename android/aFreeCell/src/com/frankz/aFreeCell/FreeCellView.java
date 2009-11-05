@@ -534,7 +534,10 @@ public class FreeCellView extends View{
 	}
 	
 	public void playSavedGame(int seed, 
-			String freeSlotsSavedString, String homeSlotsSavedString, String fieldColumnsSavedString) {
+			String freeSlotsSavedString, 
+			String homeSlotsSavedString, 
+			String fieldColumnsSavedString,
+			String moveStepsSavedString) {
 		log.i("playSavedGame, seed is " + seed);
 		this.seed = seed;
 		state = State.Playing;
@@ -542,6 +545,9 @@ public class FreeCellView extends View{
 		freeSlotsLoadFromString(freeSlotsSavedString);
 		homeSlotsLoadFromString(homeSlotsSavedString);
 		fieldColumnsFromString(fieldColumnsSavedString);
+		if(!moveStepsSavedString.equals("")){
+			moveStepsLoadFromString(moveStepsSavedString);
+		}
 		invalidate();		
 	}
 	
@@ -1062,8 +1068,8 @@ public class FreeCellView extends View{
 	public String moveStepsSave2String() {
 		String savedString = "";
 		for(MoveStepT moveStep:moveSteps) {
-			savedString += moveStep.src == null ? -1 : moveStep.src.getId() + ","; 
-			savedString += moveStep.dst == null ? -1 : moveStep.dst.getId() + ","; 
+			savedString += (moveStep.src == null ? -1 : moveStep.src.getId()) + ","; 
+			savedString += (moveStep.dst == null ? -1 : moveStep.dst.getId()) + ","; 
 			savedString += moveStep.moveType;
 			savedString += "#";
 		}		
