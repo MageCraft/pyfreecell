@@ -4,5 +4,13 @@
    <CheckBoxPreference
                 android:key="pref_key_alert_illegal_move"
                 android:title="@string/prompt_display_msg_illegal_move"
-                android:summary="@string/summary_display_msg_illegal_move" />
+                android:summary="@string/summary_display_msg_illegal_move" 
+                android:defaultValue="true"/>
+   <CheckBoxPreference
+                android:key="pref_key_display_game_status"
+                android:title="@string/prompt_display_game_status"
+                android:summary="@string/summary_display_game_status" 
+                android:defaultValue="true"/>
+   
+                
 </PreferenceScreen>

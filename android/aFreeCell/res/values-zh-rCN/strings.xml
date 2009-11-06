@@ -34,4 +34,5 @@
 	<string name="title_settings">设置</string>
 	<string name="dlg_title_about">关于 空当接龙</string>
 	<string name="prompt_about">版本  {0}\n版权所有 2009，保留所有权利\nby Frank Zheng\n\nhustzxq524@gmail.com</string>
+	<string name="prompt_status">赢: {0}\t\t输: {1}\t\t {2}%</string>
 </resources>
