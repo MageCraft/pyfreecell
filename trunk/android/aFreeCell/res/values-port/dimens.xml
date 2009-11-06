@@ -5,4 +5,5 @@
 <dimen name="field_column_vertical_gap">18dp</dimen>
 <dimen name="field_column_horizontal_gap">3dp</dimen>
 <dimen name="top_slots_field_gap">12dp</dimen>
+<dimen name="status_text_size">16dp</dimen>
 </resources>

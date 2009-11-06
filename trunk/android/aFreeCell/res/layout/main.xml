@@ -1,8 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.frankz.aFreeCell.FreeCellView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/cardView"    
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:orientation="vertical"
+  android:background="@color/background_color"
+  >
+<com.frankz.aFreeCell.FreeCellView	 
+	android:id="@+id/cardView"	    
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="#007F00"
+    android:layout_height="0dp"
+    android:layout_weight="1"                         
 />
+<TextView
+	android:id="@+id/text_status"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginTop="5dp"
+	android:layout_marginLeft="10dp"
+	android:layout_marginBottom="5dp"
+	android:textColor="@color/status_text_color"
+	android:textStyle="bold"
+	android:textSize="@dimen/status_text_size"		
+/>
+</LinearLayout>
 

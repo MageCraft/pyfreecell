@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import java.text.MessageFormat;
 
 import com.frankz.aFreeCell.FreeCellView.State;
+import java.text.DecimalFormat;
 
 
 public class FreeCellActivity extends Activity implements GameEventListener										
@@ -56,6 +57,9 @@ public class FreeCellActivity extends Activity implements GameEventListener
 	private Toast toastInvalidGameNumber;
 	private String superMoveNotEnoughSpaceMsg;
 	private Toast toastMoveNotAllowed;
+	private boolean showGameStatus;
+	private int won;
+	private int lost;
 	
     /** Called when the activity is first created. */
     @Override
@@ -64,15 +68,23 @@ public class FreeCellActivity extends Activity implements GameEventListener
         log.i("onCreate");
         setContentView(R.layout.main);
         cardView = (FreeCellView)findViewById(R.id.cardView);
-        cardView.setGameEventListener(this);        
-        checkIllegalMoveAlertPref();
+        cardView.setGameEventListener(this);   
+        
+        checkIllegalMoveAlertPref(); 
+        
+        checkGameStatusDisplayPref();        
+        loadGameStatus();        
+        showGameStatus(showGameStatus);
+        
         if(playingGameWhenLastClose()) {
         	//showDialog(DIALOG_PICK_ACTION_ON_START_RESUME);
         	load();
         } else {
         	showDialog(DIALOG_PICK_ACTION_ON_START);
         }        
-    }    
+    }
+    
+   
     
     public boolean onCreateOptionsMenu(Menu menu) {
     	menu.add(0,MENU_NEW_GAME, 0, getString(R.string.menu_new_game));    	
@@ -179,14 +191,16 @@ public class FreeCellActivity extends Activity implements GameEventListener
     		builder.setCancelable(false);    		
     		builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {				
 				public void onClick(DialogInterface dialog, int which) {
+					lost += 1;
+					updateGameStatus();
 					switch(gameAction) {
-					case NewGame:
+					case NewGame:						
 						FreeCellActivity.this.newGame();
 						break;
-					case RestartGame:
+					case RestartGame:						
 						FreeCellActivity.this.restartGame();
 						break;
-					case SelectGame:
+					case SelectGame:						
 						FreeCellActivity.this.selectGameToPlay(-1,false);
 						break;
 					default:
@@ -355,6 +369,32 @@ public class FreeCellActivity extends Activity implements GameEventListener
 		return getLastPlayedGameNumber() != -1;
 	}
 	
+	private void showGameStatus(boolean show) {
+		TextView status = (TextView)findViewById(R.id.text_status);
+		if(!show) {
+			status.setVisibility(View.GONE);
+			return;
+		}
+		int total = won + lost;
+		float radio = total == 0 ? 0 : (won / total);		
+		DecimalFormat df = new DecimalFormat("#0");		
+		String txt = MessageFormat.format(getString(R.string.prompt_game_status), 
+				Integer.toString(won), Integer.toString(lost), df.format(radio*100));
+		status.setText(txt);
+		status.setVisibility(View.VISIBLE);	
+	}
+	
+	private void updateGameStatus() {
+		showGameStatus(showGameStatus);
+	}
+	
+	
+	private void loadGameStatus() {
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		won = pref.getInt("won", 0);
+		lost = pref.getInt("lost", 0);
+	}
+	
 	private boolean load() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		int gameNumber = getLastPlayedGameNumber();
@@ -379,6 +419,8 @@ public class FreeCellActivity extends Activity implements GameEventListener
 		//home slots - string, v1,v2,v3,v4, -1 means empty
 		//field columns - string, v1,v2...#v1,v2...#v1,v2#...
 		//move steps - src,dst,moveType#...
+		//game won - int
+		//game lost - int
 		log.i("save");
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editor = pref.edit();
@@ -392,6 +434,8 @@ public class FreeCellActivity extends Activity implements GameEventListener
 			editor.putString("fieldColumns", cardView.fieldColumnsSave2String());
 			editor.putString("moveSteps", cardView.moveStepsSave2String());
 		}
+		editor.putInt("won", won);
+		editor.putInt("lost", lost);
 		editor.commit();		
 	}
 
@@ -435,13 +479,20 @@ public class FreeCellActivity extends Activity implements GameEventListener
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode == REQUEST_CODE_PREFERENCES) {
-			checkIllegalMoveAlertPref();			
+			checkIllegalMoveAlertPref();
+			checkGameStatusDisplayPref();
+			showGameStatus(showGameStatus);
 		}
+	}
+	
+	private void checkGameStatusDisplayPref() {
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		showGameStatus = sharedPref.getBoolean(Preferences.KEY_DISPLAY_GAME_STATUS, true);
 	}
 	
 	private void checkIllegalMoveAlertPref() {
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-		final boolean showAlert = sharedPref.getBoolean(Preferences.KEY_ALERT_ILLEGAL_MOVE, false);
+		final boolean showAlert = sharedPref.getBoolean(Preferences.KEY_ALERT_ILLEGAL_MOVE, true);
 		cardView.setIllegalMoveAlert(showAlert);
 	}
 
@@ -478,8 +529,9 @@ public class FreeCellActivity extends Activity implements GameEventListener
 
 	
 	public void onGameOver() {
-		showDialog(DIALOG_GAME_OVER);
-		
+		won += 1;
+		updateGameStatus();
+		showDialog(DIALOG_GAME_OVER);		
 	}
 	
 	public void onMoveNotAllowed() {
