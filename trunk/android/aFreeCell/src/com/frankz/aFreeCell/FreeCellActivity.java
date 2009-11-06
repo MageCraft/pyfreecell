@@ -375,7 +375,7 @@ public class FreeCellActivity extends Activity implements GameEventListener
 			status.setVisibility(View.GONE);
 			return;
 		}
-		int total = won + lost;
+		float total = won + lost;
 		float radio = total == 0 ? 0 : (won / total);		
 		DecimalFormat df = new DecimalFormat("#0");		
 		String txt = MessageFormat.format(getString(R.string.prompt_game_status), 
